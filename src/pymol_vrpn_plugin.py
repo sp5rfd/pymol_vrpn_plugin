@@ -1,5 +1,6 @@
-
-#from trace import threading
+import sys
+sys.path.append("C:\usr\local\lib\pythondist-packages")
+from trace import threading
 from threading import Thread
 from multiprocessing import Process
 import os
@@ -12,12 +13,11 @@ import pymol
 from pymol import *
 from pymol.cgo import *
 from time import *
-#
 import vrpn_Tracker
 import vrpn_Button
 
 def buildPlugin():
-#    gui = GUI()
+    gui = GUI()
     print "elo"
     
 def __init__(self):
@@ -25,7 +25,18 @@ def __init__(self):
                              command = lambda s=self: buildPlugin())
 
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
-#   
+# 
+def handle_tracker(userdata, t):
+    print t
+    
+def handle_button(userdata, b):
+    button_number = b[0]
+    status = b[1]
+    if(status == 1):
+        print "przycisk ", button_number, " zostal wcisniety"
+    else:
+        print "przycisk ", button_number, " zostal puszczony"
+            
 class VRPNClient(Thread):
     tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@localhost")
     button = vrpn_Button.vrpn_Button_Remote("phantom0@localhost")
@@ -34,35 +45,22 @@ class VRPNClient(Thread):
         threading.Thread.__init__(self)
         
         vrpn_Tracker.register_tracker_change_handler(handle_tracker)
-        vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(tracker, None, vrpn_Tracker.get_tracker_change_handler())
+        vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(self.tracker, None, vrpn_Tracker.get_tracker_change_handler())
         
         vrpn_Button.register_button_change_handler(handle_button)
-        vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
+        vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
         
         self.start()
-
-    def hangle_tracker(userdata, t):
-        print t
-        
-    def handle_button(userdata, b):
-        button_number = b[0]
-        status = b[1]
-        if(status == 1):
-            print "przycisk ", button_number, " zostal wcisniety"
-        else:
-            print "przycisk ", button_number, " zostal puszczony"    
             
     def run(self):
         while 1:
-            print "eloelo"
-            tracker.mainloop()
-            button.mainloop()
-    
+            self.tracker.mainloop()
+            self.button.mainloop()
     
     
 #   Klasa GUI jest odpowiedzialna za tworzenie 
 #   graficznego interfejsu uzytkownika
-#   obsluguje tak¿e wszystkie zdarzenia
+#   obsluguje take wszystkie zdarzenia
 class GUI(Tk):
     AXES = 'axes'
     ARROW = 'arrow'
@@ -159,7 +157,7 @@ class GUI(Tk):
         
     def doRunVRPN(self, event=None):
         print "==============VRPN+++++++++++++++++"
-#        vrpn = VRPNClient()
+        vrpn = VRPNClient()
         
     def doDrawAxes(self):
         w = 0.06 # cylinder width
@@ -204,7 +202,3 @@ class GUI(Tk):
     def doExit(self, event = None): 
         print "exit..."
         
-        
-
-                             
-                             
