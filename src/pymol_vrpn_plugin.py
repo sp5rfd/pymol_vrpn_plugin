@@ -21,13 +21,26 @@ def buildPlugin():
     print "elo"
     
 def __init__(self):
+    global scale;
+    global x_curr, y_curr, z_curr, x_prev, y_prev, z_prev;
+    
+    scale = 1000;
+#    x_curr = y_curr = z_curr = x_prev = y_prev = z_prev = 0
+
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
                              command = lambda s=self: buildPlugin())
 
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 # 
 def handle_tracker(userdata, t):
-    print t
+#    x_prev = x_curr;
+#    y_prev = y_curr;
+#    z_prev = z_curr;
+#    
+    x_curr = t[1]
+    y_curr = t[2]
+    z_curr = t[3]
+    print x_curr*scale, y_curr*scale, z_curr*scale
     
 def handle_button(userdata, b):
     button_number = b[0]
@@ -118,7 +131,7 @@ class GUI(Tk):
         self.buttonsRow = Frame(self.firstTab)
         self.buttonsRow.pack(fill=X, side=TOP)
         self.drawButton = Button(self.buttonsRow, text = "Draw cone")
-        self.drawButton.bind("<Button-1>", self.doDraw)
+        self.drawButton.bind("<Button-1>", self.doDrawArrow)
         self.drawButton.pack(side=LEFT)
         self.exitButton = Button(self.buttonsRow, text = "Exit")
         self.exitButton.bind("<Button-1>", self.doExit)
@@ -169,22 +182,20 @@ class GUI(Tk):
             CYLINDER, 0.0, 0.0, 0.0, l, 0.0, 0.0, w, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
             CYLINDER, 0.0, 0.0, 0.0, 0.0, l, 0.0, w, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
             CYLINDER, 0.0, 0.0, 0.0, 0.0, 0.0, l, w, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-            CONE, l, 0.0, 0.0, h+l, 0.0, 0.0, d, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
-            CONE, 0.0, l, 0.0, 0.0, h+l, 0.0, d, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
-            CONE, 0.0, 0.0, l, 0.0, 0.0, h+l, d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-         
+            CONE, l, 0.0, 0.0, (h+l), 0.0, 0.0, d, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+            CONE, 0.0, l, 0.0, 0.0, (h+l), 0.0, d, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+            CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+        
         cmd.load_cgo(axes, self.AXES)
     
-    def doDraw(self, event=None):
-        x = self.xEntry.get()
-        y = self.yEntry.get()
-        z = self.zEntry.get()
+    def doDrawArrow(self, event=None):
+        x = int(self.xEntry.get())
+        y = int(self.yEntry.get())
+        z = int(self.zEntry.get())
         
         cone = [
-            CONE,
-            x, y, z,      # XYZ 1
-            int(x)+0.8, int(y)+0.8, int(z)+0.8,  # XYZ 2
-            0.0, 0.1, # Radius 1, 2
+            CONE, x, y, z, (x+0.8), (y+0.8), (z+0.8), #x1, y1, z1, x2, y2, z2
+            0.0, 0.1,               # Radius 1, 2
             0.0, 0.0, 0.0,          # RGB Color 1
             1.0, 1.0, 1.0,          # RGB Color 2
             1.0, 1.0]               # Caps 1 & 2
@@ -202,3 +213,5 @@ class GUI(Tk):
     def doExit(self, event = None): 
         print "exit..."
         
+def doDrawPointer(event=None):
+    print "elo"
