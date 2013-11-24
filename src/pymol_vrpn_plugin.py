@@ -16,40 +16,64 @@ from time import *
 import vrpn_Tracker
 import vrpn_Button
 
+x = y = z = dx = dy = dz = 0 #wspolrzedne x,y,z i zmiany tych wspolrzednych
+xangle = yangle = zangle = dxangle = dyangle = dzangle = 0  # zmiana wspolrzednych (roznica miedzy wartoscia w kroku n0 i n1)
+scale = 100
+
 def buildPlugin():
     gui = GUI()
-    print "elo"
     
 def __init__(self):
-    global scale;
-    global x_curr, y_curr, z_curr, x_prev, y_prev, z_prev;
-    
-    scale = 1000;
-#    x_curr = y_curr = z_curr = x_prev = y_prev = z_prev = 0
-
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
                              command = lambda s=self: buildPlugin())
 
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
-# 
 def handle_tracker(userdata, t):
-#    x_prev = x_curr;
-#    y_prev = y_curr;
-#    z_prev = z_curr;
-#    
-    x_curr = t[1]
-    y_curr = t[2]
-    z_curr = t[3]
-    print x_curr*scale, y_curr*scale, z_curr*scale
+    global x, y, z, dx, dy, dz
+    dx = x-t[1]*scale
+    dy = y-t[2]*scale
+    dz = z-t[3]*scale
+    x = t[1]*scale
+    y = t[2]*scale
+    z = t[3]*scale
+    cmd.translate([-dx, -dy, -dz], object="arrow")
+    
+    global xangle, yangle, zangle, dxangle, dyangle, dzangle
+    dxangle = xangle-t[4]
+    dyangle = yangle-t[5]
+    dzangle = zangle-t[6]
+    xangle = t[4]
+    yangle = t[5]
+    zangle = t[6]
+    cmd.rotate('x', -dxangle*100, object="arrow")
+    cmd.rotate('y', -dyangle*100, object="arrow")
+    cmd.rotate('z', -dzangle*100, object="arrow")
+    
+#    print dxangle, dyangle, dzangle
+#    sleep(0.1)
     
 def handle_button(userdata, b):
-    button_number = b[0]
+    button = b[0]
     status = b[1]
-    if(status == 1):
-        print "przycisk ", button_number, " zostal wcisniety"
-    else:
-        print "przycisk ", button_number, " zostal puszczony"
+    
+    if(button == 0 and status == 1):
+        print "rysuje strzalkie"
+        doDrawPointer()
+        
+    if(button == 1 and status == 1):
+        print "przekrecam strzalke"
+        cmd.rotate('x', 1, object="arrow")
             
+def doDrawPointer():
+    cone = [
+        CONE, 0, 0, 0, 1, 1, 1, #x1, y1, z1, x2, y2, z2
+        0.0, 0.1,               # Radius 1, 2
+        0.0, 0.0, 0.0,          # RGB Color 1
+        5.0, 6.0, 7.0,          # RGB Color 2
+        1.0, 1.0]               # Caps 1 & 2
+        
+    cmd.load_cgo(cone, "arrow")
+    
 class VRPNClient(Thread):
     tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@localhost")
     button = vrpn_Button.vrpn_Button_Remote("phantom0@localhost")
@@ -62,8 +86,6 @@ class VRPNClient(Thread):
         
         vrpn_Button.register_button_change_handler(handle_button)
         vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
-        
-        self.start()
             
     def run(self):
         while 1:
@@ -89,16 +111,12 @@ class GUI(Tk):
         self.tabs.add(self.firstTab, text = 'First tab')
         self.buildFirstTab()                # builds stuff for first tab
         
-        self.secondTab = Frame(self.tabs)
-        self.tabs.add(self.secondTab, text = 'Second tab')
-        self.buildSecondTab()
-        
         self.thirdTab = Frame(self.tabs)
         self.tabs.add(self.thirdTab, text = 'Third tab')
         self.buildThirdTab()
+        
         self.tabs.pack(fill = BOTH, expand=1)
         self.doDrawAxes()
-        
         self.mainloop()
         
     def buildThirdTab(self):
@@ -107,70 +125,16 @@ class GUI(Tk):
         self.runVRPN.pack()
         
     def buildFirstTab(self):
-        self.xRow = Frame(self.firstTab)
-        self.xRow.pack(fill=X, side=TOP, padx=10)
-        self.xLabel = Label(self.xRow, text = 'X: ')   #creates new label
-        self.xLabel.pack(side=LEFT)                    #and packs it
-        self.xEntry = Entry(self.xRow)
-        self.xEntry.pack(side=LEFT)
-        
-        self.yRow = Frame(self.firstTab)
-        self.yRow.pack(fill=X, side=TOP, padx=10)
-        self.yLabel = Label(self.yRow, text = 'Y: ')
-        self.yLabel.pack(side=LEFT)
-        self.yEntry = Entry(self.yRow)
-        self.yEntry.pack(side=LEFT)
-         
-        self.zRow = Frame(self.firstTab)
-        self.zRow.pack(fill=X, side=TOP, padx=10)
-        self.zLabel = Label(self.zRow, text = "Z: ")
-        self.zLabel.pack(side=LEFT)
-        self.zEntry = Entry(self.zRow)
-        self.zEntry.pack(side=LEFT)
-         
         self.buttonsRow = Frame(self.firstTab)
         self.buttonsRow.pack(fill=X, side=TOP)
-        self.drawButton = Button(self.buttonsRow, text = "Draw cone")
-        self.drawButton.bind("<Button-1>", self.doDrawArrow)
-        self.drawButton.pack(side=LEFT)
         self.exitButton = Button(self.buttonsRow, text = "Exit")
         self.exitButton.bind("<Button-1>", self.doExit)
         self.exitButton.pack(side=LEFT)
         
-    def buildSecondTab(self):
-        self.stepsEntry = Entry(self.secondTab, text=0)
-        self.stepsEntry.pack(side=LEFT)
-        
-        self.upDownButton = Button(self.secondTab, text="Up/Down")
-        self.upDownButton.bind("<Button-1>", self.doMoveUpDown)
-        self.upDownButton.pack()
-        
-        self.backForthButton = Button(self.secondTab, text="Back/Forth")
-        self.backForthButton.bind("<Button-1>", self.doMoveBackForth)
-        self.backForthButton.pack()
-        
-        self.leftRightButton = Button(self.secondTab, text="Left/Right")
-        self.leftRightButton.bind("<Button-1>", self.doMoveLeftRight)
-        self.leftRightButton.pack()
-        
-    def doMoveLeftRight(self, event=None):
-        print "czekamy..."
-        sleep(5)
-        vec = [self.stepsEntry.get(), 0, 0]
-        cmd.translate(vec, object=self.ARROW)
-        print "no i poczekalismy"
-    
-    def doMoveUpDown(self, event=None):
-        vec = [0, self.stepsEntry.get(), 0]
-        cmd.translate(vec, object=self.ARROW)
-        
-    def doMoveBackForth(self, step=0):
-        vec = [0, 0, self.stepsEntry.get()]
-        cmd.translate(vec, object=self.ARROW)
-        
     def doRunVRPN(self, event=None):
-        print "==============VRPN+++++++++++++++++"
-        vrpn = VRPNClient()
+        doDrawPointer()
+        client = VRPNClient()
+        client.start()
         
     def doDrawAxes(self):
         w = 0.06 # cylinder width
@@ -187,31 +151,6 @@ class GUI(Tk):
             CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
         
         cmd.load_cgo(axes, self.AXES)
-    
-    def doDrawArrow(self, event=None):
-        x = int(self.xEntry.get())
-        y = int(self.yEntry.get())
-        z = int(self.zEntry.get())
         
-        cone = [
-            CONE, x, y, z, (x+0.8), (y+0.8), (z+0.8), #x1, y1, z1, x2, y2, z2
-            0.0, 0.1,               # Radius 1, 2
-            0.0, 0.0, 0.0,          # RGB Color 1
-            1.0, 1.0, 1.0,          # RGB Color 2
-            1.0, 1.0]               # Caps 1 & 2
-        
-        cmd.load_cgo(cone, self.ARROW)
-        
-    def doTranslate(self, x = 0, y = 0, z = 0):
-        print "moving object by x=", x, ",y=", y, ",z=", z
-        vec = [x,y,z]
-        cmd.translate(vec, object='strzala')
-        
-    def doRotate(self, axis, angle):
-        print "rotating around axis = ", axis, " angle=", angle
-        
-    def doExit(self, event = None): 
+    def doExit(self):
         print "exit..."
-        
-def doDrawPointer(event=None):
-    print "elo"
