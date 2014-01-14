@@ -1,3 +1,4 @@
+from math import pi
 import sys
 sys.path.append("C:\usr\local\lib\pythondist-packages")
 from trace import threading
@@ -15,8 +16,10 @@ from pymol.cgo import *
 from time import *
 import vrpn_Tracker
 import vrpn_Button
+from math import *
 
 x = y = z = dx = dy = dz = 0 #wspolrzedne x,y,z i zmiany tych wspolrzednych
+ex = ey = ez = dex = dey = dez = 0 # wsp. katowe obrotu wokol danych osi oraz zmiany tych wsp.
 xangle = yangle = zangle = dxangle = dyangle = dzangle = 0  # zmiana wspolrzednych (roznica miedzy wartoscia w kroku n0 i n1)
 scale = 100
 
@@ -27,9 +30,63 @@ def __init__(self):
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
                              command = lambda s=self: buildPlugin())
 
+def quaternion2euler(quat_x, quat_y, quat_z, quat_w):
+    result = []
+    sinThetaOver25q = 1 - quat_w*quat_w
+    if(sinThetaOver25q <= 0):
+        result[0] = result[1] = result[2] = 0
+        return result
+    
+    oneOverSinThetaOver2 = 1.0/sqrt(sinThetaOver25q)
+    result[0] = quat_x*oneOverSinThetaOver2
+    result[1] = quat_y*oneOverSinThetaOver2
+    result[2] = quat_z*oneOverSinThetaOver2
+    return result
+
+def quatconj( Q ):
+    return [-Q[0],-Q[1],-Q[2],Q[3]]
+ 
+def quatmag( Q ):
+    s = 0.0
+    QC = quatconj(Q)
+    for x in range(4):
+        s += Q[x]*Q[x]
+    print s
+    return sqrt(s)
+
+def quatnorm( Q ):
+    m = quatmag( Q )
+    return [q/m for q in Q]
+
+def quat2axisangle( Q ):
+    #returns list where 0..2 are rot axis and 3 is angle
+    qn = quatnorm( Q )
+    cos_a = Q[3]
+    angle = acos( cos_a ) * 2
+    sin_a = sqrt( 1.0 - cos_a * cos_a )
+    if fabs( sin_a ) < 0.000005:
+        sin_a = 1
+    ax_an = [ q/sin_a for q in Q[0:3] ]
+    ax_an.append( angle )
+    return ax_an
+
+def quat_to_angle(quat_x, quat_y, quat_z, quat_w):
+    print "todo"
+
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
+#    global x0, y0, z0
+    if x0 is None and y0 is None and z0 is None:
+        print "wszystko to nic"
+        x0 = t[1]
+        y0 = t[2]
+        z0 = t[3]
+        doDrawPointer(x0, y0, z0)
+        doDrawAxes(x0, y0, z0)
+        
+#    translacje
     global x, y, z, dx, dy, dz
+    
     dx = x-t[1]*scale
     dy = y-t[2]*scale
     dz = z-t[3]*scale
@@ -37,53 +94,76 @@ def handle_tracker(userdata, t):
     y = t[2]*scale
     z = t[3]*scale
     cmd.translate([-dx, -dy, -dz], object="arrow")
+
+#    rotacje
+    global ex, ey, ez, dex, dey, dez
+#   axis_ang = quat_to_angle(t[4], t[5], t[6], t[7])
     
-    global xangle, yangle, zangle, dxangle, dyangle, dzangle
-    dxangle = xangle-t[4]
-    dyangle = yangle-t[5]
-    dzangle = zangle-t[6]
-    xangle = t[4]
-    yangle = t[5]
-    zangle = t[6]
-    cmd.rotate('x', -dxangle*100, object="arrow")
-    cmd.rotate('y', -dyangle*100, object="arrow")
-    cmd.rotate('z', -dzangle*100, object="arrow")
+    axis_ang = quat2axisangle([t[4], t[5], t[6], t[7]])   # przeliczenie kwaternionow na "obroty Eulera"
     
-#    print dxangle, dyangle, dzangle
-#    sleep(0.1)
+    dex = ex-axis_ang[0]
+    dey = ey-axis_ang[1]
+    dez = ez-axis_ang[2]
     
+    ex = axis_ang[0]
+    ey = axis_ang[1]
+    ez = axis_ang[2]
+    
+    print "zmiany katow:", dex, dey, dez
+    
+#    cmd.rotate('x', -dex*2*pi, object="arrow")
+#    cmd.rotate('z', -dey*2*pi, object="arrow")
+#    cmd.rotate('z', -dez*scale, object="arrow")
+
+
+
 def handle_button(userdata, b):
     button = b[0]
     status = b[1]
-    
     if(button == 0 and status == 1):
-        print "rysuje strzalkie"
-        doDrawPointer()
-        
+        cmd.rotate('x', -3, object="arrow")
+        cmd.rotate('y', -2, object="arrow")
+        cmd.rotate('z', -1, object="arrow")
     if(button == 1 and status == 1):
-        print "przekrecam strzalke"
-        cmd.rotate('x', 1, object="arrow")
+        print "przycisk drugi"
+        cmd.rotate('x', 3, object="arrow")
+        cmd.rotate('y', 2, object="arrow")
+        cmd.rotate('z', 1, object="arrow")
+        
             
-def doDrawPointer():
+def doDrawPointer(x0, y0, z0):
     cone = [
         CONE, 0, 0, 0, 1, 1, 1, #x1, y1, z1, x2, y2, z2
-        0.0, 0.1,               # Radius 1, 2
+        0.0, 1.0,               # Radius 1, 2
         0.0, 0.0, 0.0,          # RGB Color 1
         5.0, 6.0, 7.0,          # RGB Color 2
         1.0, 1.0]               # Caps 1 & 2
         
     cmd.load_cgo(cone, "arrow")
     
+def doDrawAxes(x0, y0, z0):
+        w = 0.06 # cylinder width
+        l = 0.75 # cylinder length
+        h = 0.25 # cone hight
+        d = w * 1.618 # cone base diameter
+        axes = [
+            CYLINDER, x0, y0, z0, l, 0.0, 0.0, w, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+            CYLINDER, x0, y0, z0, 0.0, l, 0.0, w, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+            CYLINDER, x0, y0, z0, 0.0, 0.0, l, w, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+            CONE, l, 0.0, 0.0, (h+l), 0.0, 0.0, d, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+            CONE, 0.0, l, 0.0, 0.0, (h+l), 0.0, d, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+            CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+        
+        cmd.load_cgo(axes, "axes")
+        
 class VRPNClient(Thread):
     tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@localhost")
     button = vrpn_Button.vrpn_Button_Remote("phantom0@localhost")
     
     def __init__(self):
         threading.Thread.__init__(self)
-        
         vrpn_Tracker.register_tracker_change_handler(handle_tracker)
         vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(self.tracker, None, vrpn_Tracker.get_tracker_change_handler())
-        
         vrpn_Button.register_button_change_handler(handle_button)
         vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
             
@@ -116,7 +196,7 @@ class GUI(Tk):
         self.buildThirdTab()
         
         self.tabs.pack(fill = BOTH, expand=1)
-        self.doDrawAxes()
+#        self.doDrawAxes()
         self.mainloop()
         
     def buildThirdTab(self):
@@ -132,25 +212,8 @@ class GUI(Tk):
         self.exitButton.pack(side=LEFT)
         
     def doRunVRPN(self, event=None):
-        doDrawPointer()
         client = VRPNClient()
         client.start()
-        
-    def doDrawAxes(self):
-        w = 0.06 # cylinder width
-        l = 0.75 # cylinder length
-        h = 0.25 # cone hight
-        d = w * 1.618 # cone base diameter
-        
-        axes = [
-            CYLINDER, 0.0, 0.0, 0.0, l, 0.0, 0.0, w, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-            CYLINDER, 0.0, 0.0, 0.0, 0.0, l, 0.0, w, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-            CYLINDER, 0.0, 0.0, 0.0, 0.0, 0.0, l, w, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-            CONE, l, 0.0, 0.0, (h+l), 0.0, 0.0, d, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
-            CONE, 0.0, l, 0.0, 0.0, (h+l), 0.0, d, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
-            CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
-        
-        cmd.load_cgo(axes, self.AXES)
         
     def doExit(self):
         print "exit..."
