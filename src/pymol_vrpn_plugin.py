@@ -76,13 +76,13 @@ def quat_to_angle(quat_x, quat_y, quat_z, quat_w):
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
 #    global x0, y0, z0
-    if x0 is None and y0 is None and z0 is None:
-        print "wszystko to nic"
-        x0 = t[1]
-        y0 = t[2]
-        z0 = t[3]
-        doDrawPointer(x0, y0, z0)
-        doDrawAxes(x0, y0, z0)
+#    if x0 is None and y0 is None and z0 is None:
+    print "wszystko to nic"
+    x0 = t[1]
+    y0 = t[2]
+    z0 = t[3]
+    doDrawPointer(x0, y0, z0)
+    doDrawAxes(x0, y0, z0)
         
 #    translacje
     global x, y, z, dx, dy, dz
