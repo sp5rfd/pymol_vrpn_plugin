@@ -81,8 +81,6 @@ def handle_tracker(userdata, t):
     x0 = t[1]
     y0 = t[2]
     z0 = t[3]
-    doDrawPointer(x0, y0, z0)
-    doDrawAxes(x0, y0, z0)
         
 #    translacje
     global x, y, z, dx, dy, dz
@@ -111,12 +109,6 @@ def handle_tracker(userdata, t):
     
     print "zmiany katow:", dex, dey, dez
     
-#    cmd.rotate('x', -dex*2*pi, object="arrow")
-#    cmd.rotate('z', -dey*2*pi, object="arrow")
-#    cmd.rotate('z', -dez*scale, object="arrow")
-
-
-
 def handle_button(userdata, b):
     button = b[0]
     status = b[1]
@@ -168,6 +160,10 @@ class VRPNClient(Thread):
         vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
             
     def run(self):
+        doDrawPointer(0, 0, 0)
+        doDrawAxes(0, 0, 0)
+        sleep(1)
+        
         while 1:
             self.tracker.mainloop()
             self.button.mainloop()
