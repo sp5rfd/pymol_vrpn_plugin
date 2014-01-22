@@ -88,10 +88,13 @@ def handle_tracker(userdata, t):
     dx = x-t[1]*scale
     dy = y-t[2]*scale
     dz = z-t[3]*scale
-    x = t[1]*scale
-    y = t[2]*scale
-    z = t[3]*scale
+    x = x0*scale
+    y = y0*scale
+    z = z0*scale
     cmd.translate([-dx, -dy, -dz], object="arrow")
+    
+    GUI.xCoord.delete(0, END)
+    GUI.xCoord.insert(0, z)
 
 #    rotacje
     global ex, ey, ez, dex, dey, dez
@@ -178,38 +181,28 @@ class GUI(Tk):
     
     def __init__(self):
         Tk.__init__(self)
-        self.geometry('300x150')
+        self.geometry("640x480")
         self.title("VRPN Plugin")           #sets window title
         
-        self.tabs = Notebook(self)
+        Label(self, text="Wspolrzedna X:").grid(row=0)
+        Label(self, text="Wspolrzedna Y:").grid(row=1)
+        Label(self, text="Wspolrzedna Z:").grid(row=2)
         
-        self.firstTab = Frame(self.tabs)
-        self.tabs.add(self.firstTab, text = 'First tab')
-        self.buildFirstTab()                # builds stuff for first tab
+        xCoord = Entry(self).grid(row=0, column=1)
+        yCoord = Entry(self).grid(row=1, column=1)
+        zCoord = Entry(self).grid(row=2, column=1)
         
-        self.thirdTab = Frame(self.tabs)
-        self.tabs.add(self.thirdTab, text = 'Third tab')
-        self.buildThirdTab()
+        runVRPN = Button(self, text="Run VRPN").grid(row=3, column=0)
+        runVRPN.bind("<Button-1>", self.doRunVRPN)
         
-        self.tabs.pack(fill = BOTH, expand=1)
-#        self.doDrawAxes()
+        testButton = Button(self, text="TEST").grid(row=3, column=1)
+        testButton.bind("<Button-1>", self.doTest)
+        
         self.mainloop()
-        
-    def buildThirdTab(self):
-        self.runVRPN = Button(self.thirdTab, text="Run VRPN")
-        self.runVRPN.bind("<Button-1>", self.doRunVRPN)
-        self.runVRPN.pack()
-        
-    def buildFirstTab(self):
-        self.buttonsRow = Frame(self.firstTab)
-        self.buttonsRow.pack(fill=X, side=TOP)
-        self.exitButton = Button(self.buttonsRow, text = "Exit")
-        self.exitButton.bind("<Button-1>", self.doExit)
-        self.exitButton.pack(side=LEFT)
         
     def doRunVRPN(self, event=None):
         client = VRPNClient()
         client.start()
         
-    def doExit(self):
+    def doTest(self):
         print "exit..."
