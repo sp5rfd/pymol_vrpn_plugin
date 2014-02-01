@@ -24,7 +24,9 @@ xangle = yangle = zangle = dxangle = dyangle = dzangle = 0  # zmiana wspolrzedny
 scale = 100
 
 def buildPlugin():
+    global gui
     gui = GUI()
+    gui.mainloop()
     
 def __init__(self):
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
@@ -75,52 +77,53 @@ def quat_to_angle(quat_x, quat_y, quat_z, quat_w):
 
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
-#    global x0, y0, z0
-#    if x0 is None and y0 is None and z0 is None:
-    print "wszystko to nic"
+    global x, y, z, dx, dy, dz, gui
+    
     x0 = t[1]
     y0 = t[2]
     z0 = t[3]
-        
+
 #    translacje
-    global x, y, z, dx, dy, dz
-    
     dx = x-t[1]*scale
     dy = y-t[2]*scale
     dz = z-t[3]*scale
     x = x0*scale
     y = y0*scale
     z = z0*scale
+    
     cmd.translate([-dx, -dy, -dz], object="arrow")
     
-    GUI.xCoord.delete(0, END)
-    GUI.xCoord.insert(0, z)
-
-#    rotacje
-    global ex, ey, ez, dex, dey, dez
-#   axis_ang = quat_to_angle(t[4], t[5], t[6], t[7])
-    
-    axis_ang = quat2axisangle([t[4], t[5], t[6], t[7]])   # przeliczenie kwaternionow na "obroty Eulera"
-    
-    dex = ex-axis_ang[0]
-    dey = ey-axis_ang[1]
-    dez = ez-axis_ang[2]
-    
-    ex = axis_ang[0]
-    ey = axis_ang[1]
-    ez = axis_ang[2]
-    
-    print "zmiany katow:", dex, dey, dez
+    gui.xCoordEntry.delete(0, Tkinter.END)
+    gui.xCoordEntry.insert(0, str(x))
+    gui.yCoordEntry.delete(0, Tkinter.END)
+    gui.yCoordEntry.insert(0, str(y))
+    gui.zCoordEntry.delete(0, Tkinter.END)
+    gui.zCoordEntry.insert(0, str(z))
+##    rotacje
+#    global ex, ey, ez, dex, dey, dez
+##   axis_ang = quat_to_angle(t[4], t[5], t[6], t[7])
+#    
+#    axis_ang = quat2axisangle([t[4], t[5], t[6], t[7]])   # przeliczenie kwaternionow na "obroty Eulera"
+#    
+#    dex = ex-axis_ang[0]
+#    dey = ey-axis_ang[1]
+#    dez = ez-axis_ang[2]
+#    
+#    ex = axis_ang[0]
+#    ey = axis_ang[1]
+#    ez = axis_ang[2]
+#    
+#    print "zmiany katow:", dex, dey, dez
     
 def handle_button(userdata, b):
     button = b[0]
     status = b[1]
-    if(button == 0 and status == 1):
+    
+    if(button == 0 and status == 1):    # wcisnieto przycisk pierwszy
         cmd.rotate('x', -3, object="arrow")
         cmd.rotate('y', -2, object="arrow")
         cmd.rotate('z', -1, object="arrow")
-    if(button == 1 and status == 1):
-        print "przycisk drugi"
+    if(button == 1 and status == 1):    # wcisnieto przycisk drugi
         cmd.rotate('x', 3, object="arrow")
         cmd.rotate('y', 2, object="arrow")
         cmd.rotate('z', 1, object="arrow")
@@ -157,6 +160,7 @@ class VRPNClient(Thread):
     
     def __init__(self):
         threading.Thread.__init__(self)
+        
         vrpn_Tracker.register_tracker_change_handler(handle_tracker)
         vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(self.tracker, None, vrpn_Tracker.get_tracker_change_handler())
         vrpn_Button.register_button_change_handler(handle_button)
@@ -188,21 +192,28 @@ class GUI(Tk):
         Label(self, text="Wspolrzedna Y:").grid(row=1)
         Label(self, text="Wspolrzedna Z:").grid(row=2)
         
-        xCoord = Entry(self).grid(row=0, column=1)
-        yCoord = Entry(self).grid(row=1, column=1)
-        zCoord = Entry(self).grid(row=2, column=1)
+        self.xCoordEntry = Entry(self)
+        self.xCoordEntry.grid(row=0, column=1)
         
-        runVRPN = Button(self, text="Run VRPN").grid(row=3, column=0)
-        runVRPN.bind("<Button-1>", self.doRunVRPN)
+        self.yCoordEntry = Entry(self, text="asda")
+        self.yCoordEntry.grid(row=1, column=1)
         
-        testButton = Button(self, text="TEST").grid(row=3, column=1)
-        testButton.bind("<Button-1>", self.doTest)
+        self.zCoordEntry = Entry(self, text="slkfjaslkdf")
+        self.zCoordEntry.grid(row=2, column=1)
         
-        self.mainloop()
+        runVRPN = Button(self, text="Run VRPN", command=self.doRunVRPN)
+        runVRPN.grid(row=3, column=0)
+        
+        testButton = Button(self, text="TEST", command=self.doTest)
+        testButton.grid(row=3, column=1)
         
     def doRunVRPN(self, event=None):
         client = VRPNClient()
         client.start()
         
-    def doTest(self):
-        print "exit..."
+    def doTest(self, event=None):
+        self.xCoordEntry.delete(0, END)
+        self.xCoordEntry.insert(0, "dupa")
+
+    def setCoordEntries(self, x, y, z):
+        print "test"
