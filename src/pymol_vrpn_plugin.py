@@ -18,7 +18,9 @@ import vrpn_Tracker
 import vrpn_Button
 from math import *
 
+
 x = y = z = dx = dy = dz = 0 #wspolrzedne x,y,z i zmiany tych wspolrzednych
+
 ex = ey = ez = dex = dey = dez = 0 # wsp. katowe obrotu wokol danych osi oraz zmiany tych wsp.
 xangle = yangle = zangle = dxangle = dyangle = dzangle = 0  # zmiana wspolrzednych (roznica miedzy wartoscia w kroku n0 i n1)
 scale = 100
@@ -32,88 +34,30 @@ def __init__(self):
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
                              command = lambda s=self: buildPlugin())
 
-def quaternion2euler(quat_x, quat_y, quat_z, quat_w):
-    result = []
-    sinThetaOver25q = 1 - quat_w*quat_w
-    if(sinThetaOver25q <= 0):
-        result[0] = result[1] = result[2] = 0
-        return result
-    
-    oneOverSinThetaOver2 = 1.0/sqrt(sinThetaOver25q)
-    result[0] = quat_x*oneOverSinThetaOver2
-    result[1] = quat_y*oneOverSinThetaOver2
-    result[2] = quat_z*oneOverSinThetaOver2
-    return result
-
-def quatconj( Q ):
-    return [-Q[0],-Q[1],-Q[2],Q[3]]
- 
-def quatmag( Q ):
-    s = 0.0
-    QC = quatconj(Q)
-    for x in range(4):
-        s += Q[x]*Q[x]
-    print s
-    return sqrt(s)
-
-def quatnorm( Q ):
-    m = quatmag( Q )
-    return [q/m for q in Q]
-
-def quat2axisangle( Q ):
-    #returns list where 0..2 are rot axis and 3 is angle
-    qn = quatnorm( Q )
-    cos_a = Q[3]
-    angle = acos( cos_a ) * 2
-    sin_a = sqrt( 1.0 - cos_a * cos_a )
-    if fabs( sin_a ) < 0.000005:
-        sin_a = 1
-    ax_an = [ q/sin_a for q in Q[0:3] ]
-    ax_an.append( angle )
-    return ax_an
-
-def quat_to_angle(quat_x, quat_y, quat_z, quat_w):
-    print "todo"
-
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
-    global x, y, z, dx, dy, dz, gui
+    global x, y, z, dx, dy, dz
     
-    x0 = t[1]
-    y0 = t[2]
-    z0 = t[3]
-
-#    translacje
-    dx = x-t[1]*scale
-    dy = y-t[2]*scale
-    dz = z-t[3]*scale
-    x = x0*scale
-    y = y0*scale
-    z = z0*scale
+    x0 = t[1]*scale
+    y0 = t[2]*scale
+    z0 = t[3]*scale
     
-    cmd.translate([-dx, -dy, -dz], object="arrow")
+    dx = x-x0
+    dy = y-y0
+    dz = z-z0
     
-    gui.xCoordEntry.delete(0, Tkinter.END)
-    gui.xCoordEntry.insert(0, str(x))
-    gui.yCoordEntry.delete(0, Tkinter.END)
-    gui.yCoordEntry.insert(0, str(y))
-    gui.zCoordEntry.delete(0, Tkinter.END)
-    gui.zCoordEntry.insert(0, str(z))
-##    rotacje
-#    global ex, ey, ez, dex, dey, dez
-##   axis_ang = quat_to_angle(t[4], t[5], t[6], t[7])
+    cmd.translate(vector=[-dx, -dy, -dz], object="arrow", camera=0)
+    
+    x = x0
+    y = y0
+    z = z0
+    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=0)
+    
+#    quaternion = [t[4], t[5], t[6], t[7]]
 #    
-#    axis_ang = quat2axisangle([t[4], t[5], t[6], t[7]])   # przeliczenie kwaternionow na "obroty Eulera"
-#    
-#    dex = ex-axis_ang[0]
-#    dey = ey-axis_ang[1]
-#    dez = ez-axis_ang[2]
-#    
-#    ex = axis_ang[0]
-#    ey = axis_ang[1]
-#    ez = axis_ang[2]
-#    
-#    print "zmiany katow:", dex, dey, dez
+#    result = euler_from_quaternion(quaternion)
+#    print quaternion
+#    cmd.rotate(axis="y", angle=1, origin=[result[0],result[1],result[2]], object="arrow", camera=0)
     
 def handle_button(userdata, b):
     button = b[0]
@@ -163,6 +107,7 @@ class VRPNClient(Thread):
         
         vrpn_Tracker.register_tracker_change_handler(handle_tracker)
         vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(self.tracker, None, vrpn_Tracker.get_tracker_change_handler())
+        
         vrpn_Button.register_button_change_handler(handle_button)
         vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
             
@@ -185,35 +130,23 @@ class GUI(Tk):
     
     def __init__(self):
         Tk.__init__(self)
-        self.geometry("640x480")
+        self.geometry("320x240")
         self.title("VRPN Plugin")           #sets window title
         
         Label(self, text="Wspolrzedna X:").grid(row=0)
         Label(self, text="Wspolrzedna Y:").grid(row=1)
         Label(self, text="Wspolrzedna Z:").grid(row=2)
         
-        self.xCoordEntry = Entry(self)
-        self.xCoordEntry.grid(row=0, column=1)
+        Entry(self).grid(row=0, column=1)
+        Entry(self).grid(row=1, column=1)
+        Entry(self).grid(row=2, column=1)
         
-        self.yCoordEntry = Entry(self, text="asda")
-        self.yCoordEntry.grid(row=1, column=1)
-        
-        self.zCoordEntry = Entry(self, text="slkfjaslkdf")
-        self.zCoordEntry.grid(row=2, column=1)
-        
-        runVRPN = Button(self, text="Run VRPN", command=self.doRunVRPN)
-        runVRPN.grid(row=3, column=0)
-        
-        testButton = Button(self, text="TEST", command=self.doTest)
-        testButton.grid(row=3, column=1)
+        Button(self, text="RUN_VRPN", command=self.doRunVRPN).grid(row=0, column=3)
+        Button(self, text="TEST_123", command=self.doTest).grid(row=1, column=3)
         
     def doRunVRPN(self, event=None):
         client = VRPNClient()
         client.start()
         
     def doTest(self, event=None):
-        self.xCoordEntry.delete(0, END)
-        self.xCoordEntry.insert(0, "dupa")
-
-    def setCoordEntries(self, x, y, z):
-        print "test"
+        print "test123"
