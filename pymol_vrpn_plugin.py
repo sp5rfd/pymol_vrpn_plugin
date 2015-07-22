@@ -1,6 +1,7 @@
 from math import pi
 import sys
-sys.path.append("C:\usr\local\lib\pythondist-packages")
+#sys.path.append("C:\usr\local\lib\pythondist-packages")
+sys.path.append("/vrpn_lib")
 from trace import threading
 from threading import Thread
 from multiprocessing import Process
@@ -36,11 +37,14 @@ def __init__(self):
 
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
+    print t
     global x, y, z, dx, dy, dz
     
     x0 = t[1]*scale
     y0 = t[2]*scale
     z0 = t[3]*scale
+    
+    gui.xEntry.insert(0, "lala")
     
     dx = x-x0
     dy = y-y0
@@ -60,6 +64,7 @@ def handle_tracker(userdata, t):
 #    cmd.rotate(axis="y", angle=1, origin=[result[0],result[1],result[2]], object="arrow", camera=0)
     
 def handle_button(userdata, b):
+    print "wcisnieto przycisk"
     button = b[0]
     status = b[1]
     
@@ -127,26 +132,31 @@ class VRPNClient(Thread):
 class GUI(Tk):
     AXES = 'axes'
     ARROW = 'arrow'
+    client = VRPNClient()
     
     def __init__(self):
         Tk.__init__(self)
-        self.geometry("320x240")
+        self.geometry("420x240")
         self.title("VRPN Plugin")           #sets window title
         
         Label(self, text="Wspolrzedna X:").grid(row=0)
         Label(self, text="Wspolrzedna Y:").grid(row=1)
         Label(self, text="Wspolrzedna Z:").grid(row=2)
         
-        Entry(self).grid(row=0, column=1)
-        Entry(self).grid(row=1, column=1)
-        Entry(self).grid(row=2, column=1)
+        xEntry = Entry(self)
+        xEntry.grid(row=0, column=1)
         
-        Button(self, text="RUN_VRPN", command=self.doRunVRPN).grid(row=0, column=3)
-        Button(self, text="TEST_123", command=self.doTest).grid(row=1, column=3)
+        yEntry = Entry(self)
+        yEntry.grid(row=1, column=1)
+        
+        zEntry = Entry(self)
+        zEntry.grid(row=2, column=1)
+        
+        Button(self, text="START", command=self.doRunVRPN).grid(row=0, column=3)
+        Button(self, text="STOP", command=self.doStop).grid(row=1, column=3)
         
     def doRunVRPN(self, event=None):
-        client = VRPNClient()
-        client.start()
+        self.client.start()
         
-    def doTest(self, event=None):
-        print "test123"
+    def doStop(self, event=None):
+        print "TODO: zatrzymywanie"
