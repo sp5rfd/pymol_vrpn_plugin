@@ -1,7 +1,6 @@
 from math import pi
 import sys
-#sys.path.append("C:\usr\local\lib\pythondist-packages")
-sys.path.append("/vrpn_lib")
+sys.path.append("/home/pawtom/workspace/licencjat/vrpn_lib")
 from trace import threading
 from threading import Thread
 from multiprocessing import Process
@@ -21,10 +20,10 @@ from math import *
 
 
 x = y = z = dx = dy = dz = 0 #wspolrzedne x,y,z i zmiany tych wspolrzednych
-
+xStart = yStart = zStart = 0
 ex = ey = ez = dex = dey = dez = 0 # wsp. katowe obrotu wokol danych osi oraz zmiany tych wsp.
 xangle = yangle = zangle = dxangle = dyangle = dzangle = 0  # zmiana wspolrzednych (roznica miedzy wartoscia w kroku n0 i n1)
-scale = 100
+scale = 10
 
 def buildPlugin():
     global gui
@@ -38,24 +37,28 @@ def __init__(self):
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
     print t
-    global x, y, z, dx, dy, dz
     
-    x0 = t[1]*scale
-    y0 = t[2]*scale
-    z0 = t[3]*scale
+    global x, y, z, dx, dy, dz, xStart, yStart, zStart
     
-    gui.xEntry.insert(0, "lala")
+    if(xStart == 0 and yStart == 0 and zStart == 0): 
+        xStart = t[1]*scale
+        yStart = t[2]*scale
+        zStart = t[3]*scale    
     
-    dx = x-x0
-    dy = y-y0
-    dz = z-z0
+    x0 = t[1]*scale - xStart
+    y0 = t[2]*scale - yStart
+    z0 = t[3]*scale - zStart
     
-    cmd.translate(vector=[-dx, -dy, -dz], object="arrow", camera=0)
+    dx = x-x0   
+    dy = y-y0   
+    dz = z-z0   
+#    cmd.translate(vector=[-dx, -dy, -dz], object="arrow", camera=0)
+    cmd.translate(vector=[-dz, -dy, dx], object="arrow", camera=0)
     
     x = x0
     y = y0
     z = z0
-    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=0)
+#    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=0)
     
 #    quaternion = [t[4], t[5], t[6], t[7]]
 #    
