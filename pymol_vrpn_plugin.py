@@ -1,4 +1,5 @@
 from math import pi
+from math import *
 import sys
 sys.path.append("/home/pawtom/workspace/licencjat/vrpn_lib")
 from trace import threading
@@ -18,12 +19,11 @@ import vrpn_Tracker
 import vrpn_Button
 from math import *
 
-
+scale = 30
 x = y = z = dx = dy = dz = 0 #wspolrzedne x,y,z i zmiany tych wspolrzednych
 xStart = yStart = zStart = 0
-ex = ey = ez = dex = dey = dez = 0 # wsp. katowe obrotu wokol danych osi oraz zmiany tych wsp.
-xangle = yangle = zangle = dxangle = dyangle = dzangle = 0  # zmiana wspolrzednych (roznica miedzy wartoscia w kroku n0 i n1)
-scale = 10
+
+rot_angle = rot_x = rot_y = rot_z = drot_angle = drot_x = drot_y = drot_z = 0
 
 def buildPlugin():
     global gui
@@ -36,7 +36,7 @@ def __init__(self):
 
 #   Klasa VRPNClient jest odpowiedzialna za polaczenie z serwerem VRPN
 def handle_tracker(userdata, t):
-    print t
+#    print t
     
     global x, y, z, dx, dy, dz, xStart, yStart, zStart
     
@@ -44,6 +44,7 @@ def handle_tracker(userdata, t):
         xStart = t[1]*scale
         yStart = t[2]*scale
         zStart = t[3]*scale    
+        print "pozycja startowa: ", xStart, yStart, zStart
     
     x0 = t[1]*scale - xStart
     y0 = t[2]*scale - yStart
@@ -52,19 +53,41 @@ def handle_tracker(userdata, t):
     dx = x-x0   
     dy = y-y0   
     dz = z-z0   
-#    cmd.translate(vector=[-dx, -dy, -dz], object="arrow", camera=0)
-    cmd.translate(vector=[-dz, -dy, dx], object="arrow", camera=0)
+
+    cmd.translate(vector=[-dz, -dy, dx], object="arrow", camera=1)
     
     x = x0
     y = y0
     z = z0
-#    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=0)
     
-#    quaternion = [t[4], t[5], t[6], t[7]]
+    global rot_angle, rot_x, rot_y, rot_z, drot_angle, drot_x, drot_y, drot_z
+#    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=1)
+#    cmd.rotate(axis=[x,y,z], angle=1, origin=[x,y,z], object="arrow", camera=1)
+    
+    qx = t[4]
+    qy = t[5]
+    qz = t[6]
+    qw = t[7]
+    
+    rot_angle0 = 2*acos(qw)
+    rot_x0 = qx/sqrt(1-qw*qw)
+    rot_y0 = qy/sqrt(1-qw*qw)
+    rot_z0 = qz/sqrt(1-qw*qw)
+    
+    drot_angle = rot_angle-rot_angle0
+    drot_x = rot_x-rot_x0
+    drot_y = rot_y-rot_y0
+    drot_z = rot_z-rot_z0
+    
+    print drot_angle, drot_x, drot_y, drot_z
+     
+    cmd.rotate(axis=[1,0,0], angle=drot_angle*scale, origin=[x,y,z], object="arrow", camera=0)
+#    cmd.rotate(axis=[rot_x,rot_y,rot_z], angle=rot_angle, origin=[x,y,z], object="arrow", camera=1)
 #    
-#    result = euler_from_quaternion(quaternion)
-#    print quaternion
-#    cmd.rotate(axis="y", angle=1, origin=[result[0],result[1],result[2]], object="arrow", camera=0)
+    rot_angle = rot_angle0
+    rot_x = rot_x0
+    rot_y = rot_y0
+    rot_z = rot_z0
     
 def handle_button(userdata, b):
     print "wcisnieto przycisk"
