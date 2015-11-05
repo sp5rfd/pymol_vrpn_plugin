@@ -68,10 +68,15 @@ def handle_tracker(userdata, t):
 #    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=1)
 #    cmd.rotate(axis=[x,y,z], angle=1, origin=[x,y,z], object="arrow", camera=1)
     
-    m = quaternion_matrix([t[4], t[5], t[6], t[7]]) #sdfs
+    m = quaternion_matrix([t[4], t[5], t[6], t[7]]) # Return homogeneous rotation matrix from quaternion.
     M = [m[0,0], m[0,1], m[0,2], m[0,3], m[1,0], m[1,1], m[1,2], m[1,3], m[2,0], m[2,1], m[2,2], m[2,3], m[3,0], m[3,1], m[3,2], m[3,3]]
-    cmd.transform_selection(selection="all", matrix=M, homogenous=0)
-    print M
+    
+    angle,direc,point=rotation_from_matrix(m)
+    
+#    cmd.transform_selection(selection="all", matrix=M, homogenous=0)
+    print angle,direc,point
+    
+    cmd.rotate(axis=direc, angle=angle, object="arrow", camera=0)  #origin??
     
 #    rot_angle0 = 2*acos(qw)
 #    rot_x0 = qx/sqrt(1-qw*qw)
