@@ -17,6 +17,7 @@ from pymol.cgo import *
 from time import *
 import vrpn_Tracker
 import vrpn_Button
+import vrpn_ForceDevice
 from math import *
 sys.path.append(".")
 from transformations import *
@@ -24,10 +25,11 @@ from transformations import *
 scale = 30
 x = y = z = dx = dy = dz = 0 #wspolrzedne x,y,z i zmiany tych wspolrzednych
 xStart = yStart = zStart = 0
-
+previous_orientation = 0
 rot_angle = rot_x = rot_y = rot_z = drot_angle = drot_x = drot_y = drot_z = 0
 
 def buildPlugin():
+    print "ZBUDOWlem PLUGIN VRPN"
     global gui
     gui = GUI()
     gui.mainloop()
@@ -41,12 +43,11 @@ def handle_tracker(userdata, t):
 #   TRANSLACJE:
 #   przesuniecia sa obliczane jako roznica pozycji biezacej i poprzedniej
     global x, y, z, dx, dy, dz, xStart, yStart, zStart
-    
+
     if(xStart == 0 and yStart == 0 and zStart == 0): 
         xStart = t[1]*scale
         yStart = t[2]*scale
-        zStart = t[3]*scale    
-        print "pozycja startowa: ", xStart, yStart, zStart
+        zStart = t[3]*scale
     
     x0 = t[1]*scale - xStart
     y0 = t[2]*scale - yStart
@@ -56,69 +57,61 @@ def handle_tracker(userdata, t):
     dy = y-y0   
     dz = z-z0   
 #   funkcja dokonujaca przeksztalcenia - transjacji
-    cmd.translate(vector=[-dz, -dy, dx], object="arrow", camera=1)
+    cmd.translate(vector=[-dx,-dy,-dz],object="arrow",camera=0)
     
     x = x0
     y = y0
     z = z0
     
 #   ROTACJE
+    global previous_orientation
+    # bierzacy stan - orientacja
+    current_orientation=(t[5],t[6],t[7],t[4])   # inny format kwaterniona do transformations.py niz dostaje z VRPN
+    # przy pierwszym uruchomieniu 
+    # gdy nie ma poprzedniej orientacji 
+    if(previous_orientation == 0):
+        previous_orientation=current_orientation
     
-    global rot_angle, rot_x, rot_y, rot_z, drot_angle, drot_x, drot_y, drot_z
-#    cmd.rotate(axis="y", angle=1, origin=[x,y,z], object="arrow", camera=1)
-#    cmd.rotate(axis=[x,y,z], angle=1, origin=[x,y,z], object="arrow", camera=1)
+    rotation_quaternion=quaternion_multiply(quaternion_inverse(current_orientation),previous_orientation)
     
-    m = quaternion_matrix([t[4], t[5], t[6], t[7]]) # Return homogeneous rotation matrix from quaternion.
-    M = [m[0,0], m[0,1], m[0,2], m[0,3], m[1,0], m[1,1], m[1,2], m[1,3], m[2,0], m[2,1], m[2,2], m[2,3], m[3,0], m[3,1], m[3,2], m[3,3]]
+    # konczymy robote wiec musze zapamietac bierzaca 
+    # obecna orientacje. Dalej bedzie ona juz poprzenia.
+    previous_orientation=current_orientation
     
-    angle,direc,point=rotation_from_matrix(m)
-    
-#    cmd.transform_selection(selection="all", matrix=M, homogenous=0)
-    print angle,direc,point
-    
-    cmd.rotate(axis=direc, angle=angle, object="arrow", camera=0)  #origin??
-    
-#    rot_angle0 = 2*acos(qw)
-#    rot_x0 = qx/sqrt(1-qw*qw)
-#    rot_y0 = qy/sqrt(1-qw*qw)
-#    rot_z0 = qz/sqrt(1-qw*qw)
-    
-#    drot_angle = rot_angle-rot_angle0
-#    drot_x = rot_x-rot_x0
-#    drot_y = rot_y-rot_y0
-#    drot_z = rot_z-rot_z0
-    
-     
-#    cmd.rotate(axis=[1,0,0], angle=drot_angle*scale, origin=[x,y,z], object="arrow", camera=0)
-#    cmd.rotate(axis=[rot_x,rot_y,rot_z], angle=rot_angle, origin=[x,y,z], object="arrow", camera=1)
-#    
-#    rot_angle = rot_angle0
-#    rot_x = rot_x0
-#    rot_y = rot_y0
-#    rot_z = rot_z0
-    
+    rotation_matrix = quaternion_matrix(rotation_quaternion) # Return homogeneous rotation matrix from quaternion.
+    (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
+
+#    print rotation_axis
+    cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
+            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="arrow", camera=0)
+
+
 def handle_button(userdata, b):
-    print "wcisnieto przycisk"
     button = b[0]
     status = b[1]
     
     if(button == 0 and status == 1):    # wcisnieto przycisk pierwszy
+        print "wcisnieto przycisk pierwszy"  
         cmd.rotate('x', -3, object="arrow")
         cmd.rotate('y', -2, object="arrow")
         cmd.rotate('z', -1, object="arrow")
     if(button == 1 and status == 1):    # wcisnieto przycisk drugi
+        print "wcisnieto przycisk drugi"
         cmd.rotate('x', 3, object="arrow")
         cmd.rotate('y', 2, object="arrow")
         cmd.rotate('z', 1, object="arrow")
         
+def handle_force():
+    print "lalala force device"
+        
             
-def doDrawPointer(x0, y0, z0):
+def doDrawPointer(x0, y0, z0):    
     cone = [
-        CONE, 0, 0, 0, 1, 1, 1, #x1, y1, z1, x2, y2, z2
-        0.0, 1.0,               # Radius 1, 2
-        0.0, 0.0, 0.0,          # RGB Color 1
-        5.0, 6.0, 7.0,          # RGB Color 2
-        1.0, 1.0]               # Caps 1 & 2
+        CONE, 0, 0, 0, 0, 0, 1, #x1, y1, z1, x2, y2, z2
+        0.0, 0.3,               # Radius 1, 2
+        1,0,1,          # RGB Color 1
+        1,1,0,            # RGB Color 2
+        1.0,1.0]               # Caps 1 & 2
         
     cmd.load_cgo(cone, "arrow")
     
@@ -137,9 +130,10 @@ def doDrawAxes(x0, y0, z0):
         
         cmd.load_cgo(axes, "axes")
         
-class VRPNClient(Thread):
+class VRPNClient(threading.Thread):
     tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@localhost")
     button = vrpn_Button.vrpn_Button_Remote("phantom0@localhost")
+    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote("phantom0@localhost")
     
     def __init__(self):
         threading.Thread.__init__(self)
@@ -150,6 +144,10 @@ class VRPNClient(Thread):
         vrpn_Button.register_button_change_handler(handle_button)
         vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
             
+        vrpn_ForceDevice.register_force_change_handler(forceHandler)
+        vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
+        
+            
     def run(self):
         doDrawPointer(0, 0, 0)
         doDrawAxes(0, 0, 0)
@@ -158,6 +156,7 @@ class VRPNClient(Thread):
         while 1:
             self.tracker.mainloop()
             self.button.mainloop()
+            self.forceDevice.mainloop()
     
     
 #   Klasa GUI jest odpowiedzialna za tworzenie 
@@ -166,7 +165,6 @@ class VRPNClient(Thread):
 class GUI(Tk):
     AXES = 'axes'
     ARROW = 'arrow'
-    client = VRPNClient()
     
     def __init__(self):
         Tk.__init__(self)
@@ -190,6 +188,7 @@ class GUI(Tk):
         Button(self, text="STOP", command=self.doStop).grid(row=1, column=3)
         
     def doRunVRPN(self, event=None):
+        self.client = VRPNClient()
         self.client.start()
         
     def doStop(self, event=None):
