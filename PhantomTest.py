@@ -76,7 +76,7 @@ def tracker_handler(userdata, t):
     
         
         
-def forceHandler(userdata, t):
+def force_handler(userdata, t):
     print "sila",t
     
 #
@@ -89,7 +89,7 @@ vrpn_Button.register_button_change_handler(button_handler)
 #vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
 
 forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote("phantom0@172.21.5.161")
-vrpn_ForceDevice.register_force_change_handler(forceHandler)
+vrpn_ForceDevice.register_force_change_handler(force_handler)
 #vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
 
 forceDevice.set_plane(1.0, 2.0, 3.0, 4.0)
