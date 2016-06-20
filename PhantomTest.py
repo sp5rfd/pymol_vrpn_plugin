@@ -1,6 +1,6 @@
 # VRPN
 import sys
-sys.path.append("/home/pawtom/workspace-edu/LICENCJAT/vrpn_lib")
+sys.path.append("/home/pawtom/workspace-edu/vrpn/build/python_vrpn")
 import vrpn_Tracker
 import vrpn_Button
 import vrpn_ForceDevice
@@ -37,8 +37,6 @@ def button_handler(userdata, t):
         msg += "dolny."
     
     print msg
-
-previous_orientation=0
 
 def tracker_handler(userdata, t):
     global previous_orientation
@@ -81,24 +79,28 @@ def tracker_handler(userdata, t):
 def forceHandler(userdata, t):
     print "sila",t
     
-
+#
 tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@172.21.5.161")
 vrpn_Tracker.register_tracker_change_handler(tracker_handler)
-vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(tracker, None, vrpn_Tracker.get_tracker_change_handler())
+#vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(tracker, None, vrpn_Tracker.get_tracker_change_handler())
 
 button = vrpn_Button.vrpn_Button_Remote("phantom0@172.21.5.161")
 vrpn_Button.register_button_change_handler(button_handler)
-vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
+#vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
 
 forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote("phantom0@172.21.5.161")
 vrpn_ForceDevice.register_force_change_handler(forceHandler)
-vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
+#vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
 
-forceDevice.set_plane(1,2,3,4)
-forceDevice.startSurface()
+forceDevice.set_plane(1.0, 2.0, 3.0, 4.0)
+forceDevice.setSurfaceKspring(0.8)
+forceDevice.setSurfaceKdamping(0.1)
+forceDevice.setSurfaceFstatic(0.7)
+forceDevice.setSurfaceFdynamic(0.3)
+forceDevice.setRecoveryTime(10)
 
 while True:
-#    tracker.mainloop()
-#    button.mainloop()
+    tracker.mainloop()
+    button.mainloop()
     forceDevice.mainloop()
     
