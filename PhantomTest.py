@@ -1,6 +1,6 @@
 # VRPN
 import sys
-sys.path.append("/home/crooveck/workspace/vrpn/build/python_vrpn")
+sys.path.append("/home/crooveck/workspace/vrpn/build_new/python_vrpn")
 import vrpn_Tracker
 import vrpn_Button
 import vrpn_ForceDevice
@@ -79,27 +79,43 @@ def force_handler(userdata, t):
     print "sila",t,userdata
     
 
-tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@172.21.5.161")
+PHANTOM_LOCATION = "phantom0@172.21.5.161"
+
+tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_LOCATION)
 vrpn_Tracker.register_tracker_change_handler(tracker_handler)
 vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(tracker, None, vrpn_Tracker.get_tracker_change_handler())
 
-button = vrpn_Button.vrpn_Button_Remote("phantom0@172.21.5.161")
+button = vrpn_Button.vrpn_Button_Remote(PHANTOM_LOCATION)
 vrpn_Button.register_button_change_handler(button_handler)
 vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
 
-forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote("phantom0@172.21.5.161")
+forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_LOCATION)
 vrpn_ForceDevice.register_force_change_handler(force_handler)
 vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
 
-forceDevice.set_plane(0.0, 1.0, 0.0, 0.0)
-forceDevice.setSurfaceKspring(0.8)
-forceDevice.setSurfaceKdamping(0.1)
-forceDevice.setSurfaceFstatic(0.7)
-forceDevice.setSurfaceFdynamic(0.3)
-forceDevice.setRecoveryTime(10)
-forceDevice.startSurface()
+#forceDevice.set_plane(0.0, 1.0, 0.0, 0.0)
+#forceDevice.setSurfaceKspring(1.0)
+#forceDevice.setSurfaceKdamping(0.1)
+#forceDevice.setSurfaceFstatic(0.7)
+#forceDevice.setSurfaceFdynamic(0.3)
+#forceDevice.setRecoveryTime(3)
+#forceDevice.startSurface()
+
+#forceDevice.setFF_Origin(0.0, 0.0, 0.0)
+#forceDevice.setFF_Radius(1.0)
+#forceDevice.setFF_Force(0.5, 0.5, 0)
+#forceDevice.sendForceField()
+
+forceDevice.setConstraintMode(forceDevice.POINT_CONSTRAINT)
+forceDevice.setConstraintKSpring(100.0)
+forceDevice.setConstraintPoint(0.0, 0.0, 0.0)   # przeciazona metoda, napisana przeze mnie w vrpn_ForceDevice.h/C
+forceDevice.enableConstraint(1);
 
 previous_orientation=0
+
+# czekam na polaczenie z serwerem
+
+print forceDevice.connectionAvailable()
 
 while True:
     tracker.mainloop()
