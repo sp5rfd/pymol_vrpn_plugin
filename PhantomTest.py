@@ -9,6 +9,7 @@ sys.path.append(".")
 from transformations import *
 # inne
 from time import *
+from math import *
 
 print "\t+--------------------------------+"
 print "\t|   SensAble Phantom Omni Test   |"
@@ -39,13 +40,13 @@ def button_handler(userdata, t):
     print msg
 
 def tracker_handler(userdata, t):
-    global previous_orientation
+    global previous_orientation, position
     
     position=(t[1],t[2],t[3])
     current_orientation=(t[5],t[6],t[7],t[4])
     
-    print("\n-------------------")
-    print("POZYCJA: (%f,%f,%f)" % (position[0],position[1],position[2]))
+#    print("\n-------------------")
+#    print("POZYCJA: (%f,%f,%f)" % (position[0],position[1],position[2]))
 
     if(previous_orientation==0): 
         previous_orientation=current_orientation
@@ -71,7 +72,7 @@ def tracker_handler(userdata, t):
 
     print("\tangle=%f\taxis: (x=%f,y=%f,z=%f)" % (rotation_angle,rotation_axis[0],rotation_axis[1],rotation_axis[2]))
 
-#    # zapamietuje dane z obecnej orientacji
+    # zapamietuje dane z obecnej orientacji
     previous_orientation=current_orientation
     
         
@@ -79,7 +80,9 @@ def force_handler(userdata, t):
     print "sila",t,userdata
     
 
-PHANTOM_LOCATION = "phantom0@172.21.5.161"
+PHANTOM_LOCATION = "phantom0@172.21.5.156"
+previous_orientation=0
+position=(0.0, 0.0, 0.0)
 
 tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_LOCATION)
 vrpn_Tracker.register_tracker_change_handler(tracker_handler)
@@ -93,34 +96,20 @@ forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_LOCATION)
 vrpn_ForceDevice.register_force_change_handler(force_handler)
 vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
 
-#forceDevice.set_plane(0.0, 1.0, 0.0, 0.0)
-#forceDevice.setSurfaceKspring(1.0)
-#forceDevice.setSurfaceKdamping(0.1)
-#forceDevice.setSurfaceFstatic(0.7)
-#forceDevice.setSurfaceFdynamic(0.3)
-#forceDevice.setRecoveryTime(3)
-#forceDevice.startSurface()
-
-#forceDevice.setFF_Origin(0.0, 0.0, 0.0)
-#forceDevice.setFF_Radius(1.0)
-#forceDevice.setFF_Force(0.5, 0.5, 0)
-#forceDevice.sendForceField()
-
-forceDevice.setConstraintMode(forceDevice.POINT_CONSTRAINT)
-forceDevice.setConstraintKSpring(100.0)
-forceDevice.setConstraintPoint(0.0, 0.0, 0.0)   # przeciazona metoda, napisana przeze mnie w vrpn_ForceDevice.h/C
-forceDevice.enableConstraint(1);
-
-previous_orientation=0
-
-# czekam na polaczenie z serwerem
-
-print forceDevice.connectionAvailable()
+point=[0.05,0.05,0.05]
 
 while True:
     tracker.mainloop()
     button.mainloop()
     forceDevice.mainloop()
 
-forceDevice.stopSurface()
-    
+    if True:
+	wsp=50
+        forceDevice.setFF_Origin(position[0], position[1], position[2])
+        forceDevice.setFF_Force(wsp*(point[0]-position[0]), wsp*(point[1]-position[1]), wsp*(point[2]-position[2]))
+        forceDevice.setFF_Jacobian(wsp,0,0, 0,wsp,0, 0,0,wsp)
+        
+        forceDevice.setFF_Radius(0.05)
+        forceDevice.sendForceField()
+            
+
