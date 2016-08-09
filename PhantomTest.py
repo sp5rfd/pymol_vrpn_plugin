@@ -20,9 +20,9 @@ def quat_to_ogl_matrix(qx,qy,qz,qw):
     return (1,2,3,4,11,22,33,44,111,222,333,444,1111,2222,3333,4444)
     
 
-def button_handler(userdata, t):
-    button = t[0]
-    state = t[1]
+def button_handler(userdata, b):
+    button = b[0]
+    state = b[1]
     
     msg = ""
     if(state==1):
@@ -39,11 +39,11 @@ def button_handler(userdata, t):
     
     print msg
 
-def tracker_handler(userdata, t):
+def tracker_handler(userdata, tracker):
     global previous_orientation, position
     
-    position=(t[1],t[2],t[3])
-    current_orientation=(t[5],t[6],t[7],t[4])
+    position=(tracker[1],tracker[2],tracker[3])
+    current_orientation=(tracker[5],tracker[6],tracker[7],tracker[4])
     
 #    print("\n-------------------")
 #    print("POZYCJA: (%f,%f,%f)" % (position[0],position[1],position[2]))
@@ -70,14 +70,14 @@ def tracker_handler(userdata, t):
     rotation_matrix = quaternion_matrix(rotation_quaternion)                             
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
 
-    print("\tangle=%f\taxis: (x=%f,y=%f,z=%f)" % (rotation_angle,rotation_axis[0],rotation_axis[1],rotation_axis[2]))
+    print("\tangle=%f\taxis: (x=%f,y=%f,z=%f)\tpoint:" % (rotation_angle,rotation_axis[0],rotation_axis[1],rotation_axis[2]))
 
     # zapamietuje dane z obecnej orientacji
     previous_orientation=current_orientation
     
         
-def force_handler(userdata, t):
-    print "sila",t,userdata
+def force_handler(userdata, force):
+    print "sila",force
     
 
 PHANTOM_LOCATION = "phantom0@172.21.5.156"
@@ -96,7 +96,7 @@ forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_LOCATION)
 vrpn_ForceDevice.register_force_change_handler(force_handler)
 vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
 
-point=[0.05,0.05,0.05]
+point=[0,0,0]
 
 while True:
     tracker.mainloop()
@@ -104,12 +104,11 @@ while True:
     forceDevice.mainloop()
 
     if True:
-	wsp=50
+	force=50	# sila (skalar)
         forceDevice.setFF_Origin(position[0], position[1], position[2])
-        forceDevice.setFF_Force(wsp*(point[0]-position[0]), wsp*(point[1]-position[1]), wsp*(point[2]-position[2]))
-        forceDevice.setFF_Jacobian(wsp,0,0, 0,wsp,0, 0,0,wsp)
-        
-        forceDevice.setFF_Radius(0.05)
+        forceDevice.setFF_Force(force*(point[0]-position[0]), force*(point[1]-position[1]), force*(point[2]-position[2]))
+        forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
+        forceDevice.setFF_Radius(0.1)
         forceDevice.sendForceField()
             
 

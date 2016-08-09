@@ -1,7 +1,7 @@
 from math import pi
 from math import *
 import sys
-sys.path.append("/home/pawtom/workspace/licencjat/vrpn_lib")
+sys.path.append("/home/crooveck/workspace/pymol_vrpn_plugin/python_vrpn")
 from trace import threading
 from threading import Thread
 from multiprocessing import Process
@@ -101,8 +101,9 @@ def handle_button(userdata, b):
         cmd.rotate('y', 2, object="arrow")
         cmd.rotate('z', 1, object="arrow")
         
-def handle_force():
-    print "lalala force device"
+def force_handler(userdata, t):
+    s="lala"
+#    print "sila",t,userdata
         
             
 def doDrawPointer(x0, y0, z0):    
@@ -131,9 +132,10 @@ def doDrawAxes(x0, y0, z0):
         cmd.load_cgo(axes, "axes")
         
 class VRPNClient(threading.Thread):
-    tracker = vrpn_Tracker.vrpn_Tracker_Remote("phantom0@localhost")
-    button = vrpn_Button.vrpn_Button_Remote("phantom0@localhost")
-    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote("phantom0@localhost")
+    PHANTOM_URL = "phantom0@172.21.5.156"
+    tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_URL)
+    button = vrpn_Button.vrpn_Button_Remote(PHANTOM_URL)
+    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_URL)
     
     def __init__(self):
         threading.Thread.__init__(self)
@@ -144,16 +146,15 @@ class VRPNClient(threading.Thread):
         vrpn_Button.register_button_change_handler(handle_button)
         vrpn_Button.vrpn_Button_Remote.register_change_handler(self.button, None, vrpn_Button.get_button_change_handler())
             
-        vrpn_ForceDevice.register_force_change_handler(forceHandler)
-        vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
-        
+        vrpn_ForceDevice.register_force_change_handler(force_handler)
+        vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(self.forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
             
     def run(self):
         doDrawPointer(0, 0, 0)
         doDrawAxes(0, 0, 0)
         sleep(1)
         
-        while 1:
+        while True:
             self.tracker.mainloop()
             self.button.mainloop()
             self.forceDevice.mainloop()
