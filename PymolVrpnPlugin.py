@@ -1,36 +1,14 @@
-## VRPN
-#import sys
-#sys.path.append("/home/crooveck/workspace/vrpn/build_new/python_vrpn")
-#import vrpn_Tracker
-#import vrpn_Button
-#import vrpn_ForceDevice
-## TK
-#from Tkinter import *
-#import thread
-## PyMol
-#import pymol
-#from pymol import *
-#from pymol.cgo import *
-## misc
-#from time import *
+"""
+    This program was created in 2015-16 by Pawel Tomaszewski
+    In cooperation with Biophysics Laboratory of Warsaw University
+"""
 
-from math import pi
-from math import *
 import sys
 sys.path.append("/home/crooveck/workspace/pymol_vrpn_plugin/python_vrpn")
-sys.path.append("/home/crooveck/workspace/vrpn/build_new/python_vrpn")
 sys.path.append(".")
 from transformations import *
-from trace import threading
-from threading import Thread
-from multiprocessing import Process
-import os
-import Tkinter 
-import tkMessageBox
 from Tkinter import *
-import ttk
 from ttk import *
-import pymol
 from pymol import *
 from pymol.cgo import *
 from time import *
@@ -50,19 +28,14 @@ IS_RUNNING = False
 PHANTOM_URL = "phantom0@172.21.5.156"
 
 """
-    Global variables
-"""
-#forceDevice=0
-
-"""
     Global variables for translations. 
-    xStart,yStart,zStart stores relative start position of a tracker
-    x,y,z stores position of a tracker from previous iteration
-    scale stores a scaling factor for a translations. 
+    trackerX,trackerY,trackerZ - Phantom native coordinates
+    x,y,z - Pymol coordinates
+    scale - ratio between PYMOL and PHANTOM coordinate
 """
 trackerX = trackerY = trackerZ = 0
 x = y = z = 0 
-scale=30
+scale=1000
 
 """
     Global variables for rotations
@@ -90,17 +63,14 @@ def tracker_handler(u, tracker):
 #   ROTACJE
     global previous_orientation
     # bierzacy stan - orientacja
-    current_orientation=(tracker[5],tracker[6],tracker[7],tracker[4])   # inny format kwaterniona do transformations.py niz dostaje z VRPN
+    orientation=(tracker[5],tracker[6],tracker[7],tracker[4])   # inny format kwaterniona do transformations.py niz dostaje z VRPN
     # przy pierwszym uruchomieniu 
     # gdy nie ma poprzedniej orientacji 
     if(previous_orientation == 0):
-        previous_orientation=current_orientation
+        previous_orientation=orientation
     
-    rotation_quaternion=quaternion_multiply(quaternion_inverse(current_orientation),previous_orientation)
-    
-    # konczymy robote wiec musze zapamietac bierzaca 
-    # obecna orientacje. Dalej bedzie ona juz poprzenia.
-    previous_orientation=current_orientation
+    rotation_quaternion=quaternion_multiply(quaternion_inverse(orientation),previous_orientation)
+    previous_orientation=orientation
     
     rotation_matrix = quaternion_matrix(rotation_quaternion) # Return homogeneous rotation matrix from quaternion.
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
@@ -119,10 +89,12 @@ def button_handler(u, button):
         msg += "Puszczono "
         
     msg += "przycisk "
-    
+    global scale
     if(button[0]):
+        scale += 1
         msg += "gorny."
     else:
+        scale -= 1
         msg += "dolny."
     
     print msg
@@ -133,8 +105,8 @@ def force_handler(u, force):
     
 def draw_pointer():
     pointer = [
-        CONE, 0,0,0, 0,0,1,   #x1, y1, z1, x2, y2, z2
-        0.0, 0.3,                                   # Radius 1, 2
+        CONE, 0,0,0, 0,0,10,   #x1, y1, z1, x2, y2, z2
+        0.0, 1,                                   # Radius 1, 2
         1, 0, 1,                                    # RGB Color 1
         1, 1, 0,                                    # RGB Color 2
         1.0, 1.0 ]                                  # Caps 1 & 2
@@ -142,9 +114,9 @@ def draw_pointer():
     cmd.load_cgo(pointer, "arrow")
     
 def draw_axes(x0, y0, z0):
-    w = 0.06 # cylinder width
-    l = 0.75 # cylinder length
-    h = 0.25 # cone hight
+    w = 0.5 # cylinder width
+    l = 10 # cylinder length
+    h = 2 # cone hight
     d = w * 1.618 # cone base diameter
     
     axes = [
@@ -168,7 +140,6 @@ def vrpn_client():
     vrpn_Button.register_button_change_handler(button_handler)
     vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
 
-#    global forceDevice  # changing global variable
     forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_URL)
     vrpn_ForceDevice.register_force_change_handler(force_handler)
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
@@ -184,15 +155,19 @@ def vrpn_client():
         
         if True:
             point=[0,0,0]
+            
             force=30   # wielkosc silny |F|
+            forceX = (point[0]-trackerX)
+            forceY = (point[1]-trackerY)
+            forceZ = (point[2]-trackerZ)
+                
             forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
-            forceDevice.setFF_Force(force*(point[0]-trackerX), force*(point[1]-trackerY), force*(point[2]-trackerZ))
+            forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
             forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
             forceDevice.setFF_Radius(0.1)
             forceDevice.sendForceField()
 
     print "Finishing work..."
-    # rozlaczam sie z serwerem i koncze prace
 
 def run():
     global IS_RUNNING
