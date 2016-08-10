@@ -35,7 +35,7 @@ PHANTOM_URL = "phantom0@172.21.5.156"
 """
 trackerX = trackerY = trackerZ = 0
 x = y = z = 0 
-scale=1000
+scale=750
 
 """
     Global variables for rotations
@@ -89,12 +89,10 @@ def button_handler(u, button):
         msg += "Puszczono "
         
     msg += "przycisk "
-    global scale
+    
     if(button[0]):
-        scale += 1
         msg += "gorny."
     else:
-        scale -= 1
         msg += "dolny."
     
     print msg
@@ -128,6 +126,26 @@ def draw_axes(x0, y0, z0):
         CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
 
     cmd.load_cgo(axes, "axes")
+
+def find_closest(x0,y0,z0):
+    stored.pos = []                                                                                                                
+    cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z))')
+    
+    minDistance=sys.float_info.max     # poczatkowa wartosc minimalna powinna byc duza
+    minNumber=0                     # index najmniejszej wartosci
+    # liczymy najblizszy atom 
+    for atomNumber in xrange(0,len(stored.pos)):
+        xDistance = stored.pos[atomNumber][0]-x0
+        yDistance = stored.pos[atomNumber][1]-y0
+        zDistance = stored.pos[atomNumber][2]-z0
+        distance=sqrt(math.pow(xDistance,2)+math.pow(yDistance,2)+math.pow(zDistance,2))
+        
+        if(distance<minDistance):
+            minDistance=distance
+            minNumber=atomNumber
+    
+    return (stored.pos[minNumber][0]/scale, stored.pos[minNumber][1]/scale, stored.pos[minNumber][2]/scale)
+    
     
 def vrpn_client():
     print "Starting VRPN client..."
@@ -154,12 +172,13 @@ def vrpn_client():
         forceDevice.mainloop()
         
         if True:
-            point=[0,0,0]
+            # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
+            point = find_closest(x,y,z)
             
-            force=30   # wielkosc silny |F|
-            forceX = (point[0]-trackerX)
-            forceY = (point[1]-trackerY)
-            forceZ = (point[2]-trackerZ)
+            force=100   # wielkosc sily |F|
+            forceX = (point[0]-trackerX)    # wektor sily X
+            forceY = (point[1]-trackerY)    # j.w. Y
+            forceZ = (point[2]-trackerZ)    # j.w. Z
                 
             forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
             forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
@@ -174,7 +193,15 @@ def run():
     IS_RUNNING = True
     
     thread.start_new_thread(vrpn_client, ())
+    
+    # listuje wspolrzedne atomow
+#    stored.pos = [] 
+#    cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z))')
+#    
+#    for pos in stored.pos:
+#        print pos[0],pos[1],pos[2]
 
+    
 def stop():
     global IS_RUNNING
     IS_RUNNING = False
