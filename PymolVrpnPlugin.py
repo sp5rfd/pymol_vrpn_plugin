@@ -21,6 +21,7 @@ from math import *
     Mainloop running flag. This indicates if threads and mainloops are running.
 """
 IS_RUNNING = False
+AUTO_ZOOMING = False
 
 """
     Phantom VRPN URL.
@@ -80,22 +81,21 @@ def tracker_handler(u, tracker):
 
 
 def button_handler(u, button):
-    status = button[1]
+    # button[0] - numer przycisku (0-gorny,1-dolny)
+    # button[1] - status przycisku (0-puszczony,1-wcisniety)
     
-    msg = ""
-    if(status):
-        msg += "Wcisnieto "
-    else:
-        msg += "Puszczono "
+    global AUTO_ZOOMING, scale
+    if(button[0]==0 and button[1]==0):
+        AUTO_ZOOMING = False
+    elif(button[0]==0 and button[1]==1):
+        AUTO_ZOOMING = True
         
-    msg += "przycisk "
+    if(button[0]==1 and button[1]==0):
+        print "przycisk drugi puszczony"
+        
+    elif(button[0]==1 and button[1]==1):
+        print "przycisk drugi wcisniety"
     
-    if(button[0]):
-        msg += "gorny."
-    else:
-        msg += "dolny."
-    
-    print msg
     
 def force_handler(u, force):
 #    print "force",force
@@ -127,7 +127,7 @@ def draw_axes(x0, y0, z0):
 
     cmd.load_cgo(axes, "axes")
 
-def find_closest(x0,y0,z0):
+def find_closest_atom(x0,y0,z0):
     stored.pos = []                                                                                                                
     cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z))')
     
@@ -173,7 +173,7 @@ def vrpn_client():
         
         if True:
             # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
-            point = find_closest(x,y,z)
+            point = find_closest_atom(x,y,z)
             
             force=100   # wielkosc sily |F|
             forceX = (point[0]-trackerX)    # wektor sily X
@@ -185,22 +185,20 @@ def vrpn_client():
             forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
             forceDevice.setFF_Radius(0.1)
             forceDevice.sendForceField()
+            
+            # rysuje linie laczaco wskaznik z najblizszym atomem
+            cmd.delete('link')
+            cmd.load_cgo([CYLINDER, x, y, z, point[0]*scale, point[1]*scale, point[2]*scale, 0.1, 255, 255, 255, 255, 255, 255], 'link')
+            
+            if(not AUTO_ZOOMING):
+                cmd.zoom('all')
 
     print "Finishing work..."
 
 def run():
     global IS_RUNNING
     IS_RUNNING = True
-    
     thread.start_new_thread(vrpn_client, ())
-    
-    # listuje wspolrzedne atomow
-#    stored.pos = [] 
-#    cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z))')
-#    
-#    for pos in stored.pos:
-#        print pos[0],pos[1],pos[2]
-
     
 def stop():
     global IS_RUNNING
@@ -210,7 +208,8 @@ def build_gui():
     window = Tk()
     window.title("PyMol VRPN Plugin v1.0")
     window.geometry("200x200")
-    
+    window.lift()
+    window.call('wm', 'attributes', '.', '-topmost', '1')
     startButton = Button(window, text="START", command=run).grid(row=0, column=0)
     stopButton = Button(window, text="STOP", command=stop).grid(row=0, column=1)
     
