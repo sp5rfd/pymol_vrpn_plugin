@@ -26,7 +26,7 @@ AUTO_ZOOMING = False
 """
     Phantom VRPN URL.
 """
-PHANTOM_URL = "phantom0@172.21.5.156"
+PHANTOM_URL="phantom0@172.21.5.156"
 
 """
     Global variables for translations. 
@@ -43,6 +43,12 @@ scale=750
     previous_orientation stores a quaternion that represent previous orientation
 """
 previous_orientation=0
+
+"""
+    Global variables for atom info UI
+"""
+startButton = stopButton = urlEntry = 0
+atomSymbol = atomX = atomY = atomZ = 0
 
 def tracker_handler(u, tracker):
     global trackerX, trackerY, trackerZ
@@ -84,16 +90,23 @@ def button_handler(u, button):
     # button[0] - numer przycisku (0-gorny,1-dolny)
     # button[1] - status przycisku (0-puszczony,1-wcisniety)
     
-    global AUTO_ZOOMING, scale
+    global AUTO_ZOOMING
     if(button[0]==0 and button[1]==0):
         AUTO_ZOOMING = False
     elif(button[0]==0 and button[1]==1):
         AUTO_ZOOMING = True
         
+    global atomX, atomY, atomZ
     if(button[0]==1 and button[1]==0):
+        atomX += 1
+        atomY *= 2
+        atomZ += 8
         print "przycisk drugi puszczony"
         
     elif(button[0]==1 and button[1]==1):
+        atomX -= 1
+        atomY /= 2
+        atomZ -= 8
         print "przycisk drugi wcisniety"
     
     
@@ -128,8 +141,23 @@ def draw_axes(x0, y0, z0):
     cmd.load_cgo(axes, "axes")
 
 def find_closest_atom(x0,y0,z0):
+    # pobieram liste pozycji 3D atomow w czasteczce
     stored.pos = []                                                                                                                
-    cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z))')
+    cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z,elem))')
+    # pobieram liste symboli atomow w czasteczce
+    
+    
+    if(len(stored.pos)==0):
+        zero=[0,0,0]
+        
+        atomX.delete(0,'end')
+        atomX.insert(0, zero[0])
+        atomY.delete(0,'end')
+        atomY.insert(0, zero[1])
+        atomZ.delete(0,'end')
+        atomZ.insert(0, zero[2])
+        
+        return zero
     
     minDistance=sys.float_info.max     # poczatkowa wartosc minimalna powinna byc duza
     minNumber=0                     # index najmniejszej wartosci
@@ -143,6 +171,16 @@ def find_closest_atom(x0,y0,z0):
         if(distance<minDistance):
             minDistance=distance
             minNumber=atomNumber
+    
+    # aktualizacja interfejsu
+    atomX.delete(0,'end')
+    atomX.insert(0, round(stored.pos[minNumber][0],3))
+    atomY.delete(0,'end')
+    atomY.insert(0, round(stored.pos[minNumber][1],3))
+    atomZ.delete(0,'end')
+    atomZ.insert(0, round(stored.pos[minNumber][2],3))
+    atomSymbol.delete(0, 'end')
+    atomSymbol.insert(0, stored.pos[minNumber][3])
     
     return (stored.pos[minNumber][0]/scale, stored.pos[minNumber][1]/scale, stored.pos[minNumber][2]/scale)
     
@@ -164,6 +202,9 @@ def vrpn_client():
     
     draw_axes(0,0,0)
     draw_pointer()
+    startButton['state']=DISABLED
+    stopButton['state']=NORMAL
+    urlEntry['state']=DISABLED
     sleep(1)
     
     while IS_RUNNING:
@@ -171,33 +212,37 @@ def vrpn_client():
         button.mainloop()
         forceDevice.mainloop()
         
-        if True:
-            # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
-            point = find_closest_atom(x,y,z)
-            
-            force=100   # wielkosc sily |F|
-            forceX = (point[0]-trackerX)    # wektor sily X
-            forceY = (point[1]-trackerY)    # j.w. Y
-            forceZ = (point[2]-trackerZ)    # j.w. Z
-                
-            forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
-            forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
-            forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
-            forceDevice.setFF_Radius(0.1)
-            forceDevice.sendForceField()
-            
-            # rysuje linie laczaco wskaznik z najblizszym atomem
-            cmd.delete('link')
-            cmd.load_cgo([CYLINDER, x, y, z, point[0]*scale, point[1]*scale, point[2]*scale, 0.1, 255, 255, 255, 255, 255, 255], 'link')
-            
-            if(not AUTO_ZOOMING):
-                cmd.zoom('all')
+        # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
+        point = find_closest_atom(x,y,z)
+
+        force=100   # wielkosc sily |F|
+        forceX = (point[0]-trackerX)    # wektor sily X
+        forceY = (point[1]-trackerY)    # j.w. Y
+        forceZ = (point[2]-trackerZ)    # j.w. Z
+
+        forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
+        forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
+        forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
+        forceDevice.setFF_Radius(0.1)
+        forceDevice.sendForceField()
+
+        # rysuje linie laczaco wskaznik z najblizszym atomem
+        cmd.delete('link')
+        cmd.load_cgo([CYLINDER, x, y, z, point[0]*scale, point[1]*scale, point[2]*scale, 0.1, 255, 255, 255, 255, 255, 255], 'link')
+
+        if(not AUTO_ZOOMING):
+            cmd.zoom('all')
 
     print "Finishing work..."
+    startButton['state']=NORMAL
+    stopButton['state']=DISABLED
+    urlEntry['state']=NORMAL
 
 def run():
     global IS_RUNNING
     IS_RUNNING = True
+    PHANTOM_URL=urlEntry.get()
+    
     thread.start_new_thread(vrpn_client, ())
     
 def stop():
@@ -206,12 +251,41 @@ def stop():
     
 def build_gui():
     window = Tk()
-    window.title("PyMol VRPN Plugin v1.0")
-    window.geometry("200x200")
-    window.lift()
+    window.title("PyMOL VRPN Plugin v1.0")
+    window.geometry("370x280+200+100")
+    window.resizable(False, False)
     window.call('wm', 'attributes', '.', '-topmost', '1')
-    startButton = Button(window, text="START", command=run).grid(row=0, column=0)
-    stopButton = Button(window, text="STOP", command=stop).grid(row=0, column=1)
+    
+    vrpnGroup = LabelFrame(window, text=" VRPN CFG. ", width=350, height=90)
+    vrpnGroup.grid(row=0, padx=10, pady=10)
+    vrpnGroup.grid_propagate(False)
+
+    Label(vrpnGroup, text="PHANTOM URL: ").grid(row=0, padx=10, pady=10)
+    global startButton, stopButton, urlEntry
+    urlEntry=Entry(vrpnGroup, width=25, justify=CENTER)
+    urlEntry.insert(0,PHANTOM_URL)
+    urlEntry.grid(row=0, column=1, columnspan=2)
+    startButton=Button(vrpnGroup, text="START", command=run)
+    startButton.grid(row=1, column=1, columnspan=2, sticky=W)
+    stopButton=Button(vrpnGroup, text="STOP", command=stop, state=DISABLED)
+    stopButton.grid(row=1, column=1, columnspan=2, sticky=E)
+    
+    atomGroup = LabelFrame(window, text=" ATOM INFO ", width=350, height=150)
+    atomGroup.grid(row=1, padx=10, pady=10)
+    atomGroup.grid_propagate(False)
+    Label(atomGroup, text="Symbol chemiczny:").grid(row=0, padx=10, pady=5)
+    global atomSymbol, atomX, atomY, atomZ
+    atomSymbol=Entry(atomGroup, width=15, justify=CENTER)
+    atomSymbol.grid(row=0, column=1)
+    Label(atomGroup, text="Pozycja X=").grid(row=1, sticky=E, padx=10, pady=5)
+    atomX=Entry(atomGroup, width=15, justify=CENTER)
+    atomX.grid(row=1, column=1)
+    Label(atomGroup, text="Pozycja Y=").grid(row=2, sticky=E, padx=10, pady=5)
+    atomY=Entry(atomGroup, width=15, justify=CENTER)
+    atomY.grid(row=2, column=1)
+    Label(atomGroup, text="Pozycja Z=").grid(row=3, sticky=E, padx=10, pady=5)
+    atomZ=Entry(atomGroup, width=15, justify=CENTER)
+    atomZ.grid(row=3, column=1)
     
     window.mainloop()
     
