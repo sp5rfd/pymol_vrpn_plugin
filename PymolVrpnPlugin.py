@@ -67,16 +67,16 @@ def tracker_handler(u, tracker):
     y = y0
     z = z0
     
-#   ROTACJE
+#   ROTACJE 
     global previous_orientation
     # bierzacy stan - orientacja
-    orientation=(tracker[5],tracker[6],tracker[7],tracker[4])   # inny format kwaterniona do transformations.py niz dostaje z VRPN
+    orientation=(tracker[7],tracker[4],tracker[5],tracker[6])   # inny format kwaterniona do transformations.py niz dostaje z VRPN
     # przy pierwszym uruchomieniu 
     # gdy nie ma poprzedniej orientacji 
     if(previous_orientation == 0):
         previous_orientation=orientation
-    
-    rotation_quaternion=quaternion_multiply(quaternion_inverse(orientation),previous_orientation)
+
+    rotation_quaternion=quaternion_multiply(quaternion_inverse(previous_orientation),orientation)
     previous_orientation=orientation
     
     rotation_matrix = quaternion_matrix(rotation_quaternion) # Return homogeneous rotation matrix from quaternion.
@@ -96,17 +96,10 @@ def button_handler(u, button):
     elif(button[0]==0 and button[1]==1):
         AUTO_ZOOMING = True
         
-    global atomX, atomY, atomZ
     if(button[0]==1 and button[1]==0):
-        atomX += 1
-        atomY *= 2
-        atomZ += 8
         print "przycisk drugi puszczony"
         
     elif(button[0]==1 and button[1]==1):
-        atomX -= 1
-        atomY /= 2
-        atomZ -= 8
         print "przycisk drugi wcisniety"
     
     
@@ -239,7 +232,7 @@ def vrpn_client():
     urlEntry['state']=NORMAL
 
 def run():
-    global IS_RUNNING
+    global IS_RUNNING, PHANTOM_URL
     IS_RUNNING = True
     PHANTOM_URL=urlEntry.get()
     
