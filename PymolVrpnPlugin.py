@@ -4,7 +4,7 @@
 """
 
 import sys
-sys.path.append("/home/crooveck/workspace/pymol_vrpn_plugin/python_vrpn")
+sys.path.append("/home/crooveck/workspace/LICENCJAT/python_vrpn")
 sys.path.append(".")
 from transformations import *
 from Tkinter import *
@@ -108,14 +108,16 @@ def force_handler(u, force):
     abc='test'
     
 def draw_pointer():
-    pointer = [
-        CONE, 0,0,0, 0,0,10,   #x1, y1, z1, x2, y2, z2
-        0.0, 1,                                   # Radius 1, 2
-        1, 0, 1,                                    # RGB Color 1
-        1, 1, 0,                                    # RGB Color 2
-        1.0, 1.0 ]                                  # Caps 1 & 2
-        
-    cmd.load_cgo(pointer, "arrow")
+#    pointer = [
+#        CONE, 0,0,0, 0,0,10,   #x1, y1, z1, x2, y2, z2
+#        0.0, 1,                                   # Radius 1, 2
+#        1, 0, 1,                                    # RGB Color 1
+#        1, 1, 0,                                    # RGB Color 2
+#        1.0, 1.0 ]                                  # Caps 1 & 2
+#        
+#    cmd.load_cgo(pointer, "arrow")
+    cmd.load("helix.pdb","arrow")
+    cmd.translate(vector=[-17.644, -15.275, -4.905], object="arrow", camera=0)
     
 def draw_axes(x0, y0, z0):
     w = 0.5 # cylinder width
