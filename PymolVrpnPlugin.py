@@ -45,6 +45,11 @@ scale=750
 previous_orientation=0
 
 """
+    center of mass of a loaded molecule
+"""
+molecule_com=[0,0,0]    
+
+"""
     Global variables for atom info UI
 """
 startButton = stopButton = urlEntry = 0
@@ -62,7 +67,7 @@ def tracker_handler(u, tracker):
     z0 = trackerZ*scale
 #   funkcja dokonujaca przeksztalcenia - transjacji
     global x, y, z
-    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="arrow", camera=0)
+    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="pointer", camera=0)
     x = x0
     y = y0
     z = z0
@@ -83,7 +88,7 @@ def tracker_handler(u, tracker):
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
 
     cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
-            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="arrow", camera=0)
+            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="pointer", camera=0)
 
 
 def button_handler(u, button):
@@ -107,7 +112,7 @@ def force_handler(u, force):
 #    print "force",force
     abc='test'
     
-def draw_pointer():
+def draw_pointer(pointer_pdb_file):
 #    pointer = [
 #        CONE, 0,0,0, 0,0,10,   #x1, y1, z1, x2, y2, z2
 #        0.0, 1,                                   # Radius 1, 2
@@ -115,9 +120,11 @@ def draw_pointer():
 #        1, 1, 0,                                    # RGB Color 2
 #        1.0, 1.0 ]                                  # Caps 1 & 2
 #        
-#    cmd.load_cgo(pointer, "arrow")
-    cmd.load("helix.pdb","arrow")
-    cmd.translate(vector=[-17.644, -15.275, -4.905], object="arrow", camera=0)
+#    cmd.load_cgo(pointer, "pointer")
+    cmd.load(pointer_pdb_file,"pointer")   # laduje wskaxnik
+    helix_com=cmd.centerofmass("pointer") # licze COM wskaxnika
+    # centruje wskaxnik (przenosze go do zera)
+    cmd.translate(vector=[-helix_com[0], -helix_com[1], -helix_com[2]], object="pointer", camera=0)
     
 def draw_axes(x0, y0, z0):
     w = 0.5 # cylinder width
@@ -134,50 +141,66 @@ def draw_axes(x0, y0, z0):
         CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
 
     cmd.load_cgo(axes, "axes")
+    
+def draw_molecule(molecule_pdb_file):
+    # laduje czasteczke
+    cmd.load(molecule_pdb_file,"molecule")
+    # licze jej centrum masy
+    global molecule_com
+    molecule_com=cmd.centerofmass("molecule")
+    # przesuwam ja na srodek ekranu, srodek ciezkosci na (x,y,z)=(0,0,0)
+    cmd.translate(vector=[-molecule_com[0], -molecule_com[1], -molecule_com[2]], object="molecule", camera=0)
+
 
 def find_closest_atom(x0,y0,z0):
     # pobieram liste pozycji 3D atomow w czasteczce
     stored.pos = []                                                                                                                
-    cmd.iterate_state(1, 'all', 'stored.pos.append((x,y,z,elem))')
-    # pobieram liste symboli atomow w czasteczce
-    
+    cmd.iterate_state(1, "molecule", "stored.pos.append((x,y,z,elem))")
     
     if(len(stored.pos)==0):
         zero=[0,0,0]
-        
+        # zeruje interfejs - atomX,Y i Z to pola w GUI
         atomX.delete(0,'end')
         atomX.insert(0, zero[0])
         atomY.delete(0,'end')
         atomY.insert(0, zero[1])
         atomZ.delete(0,'end')
         atomZ.insert(0, zero[2])
-        
         return zero
     
     minDistance=sys.float_info.max     # poczatkowa wartosc minimalna powinna byc duza
-    minNumber=0                     # index najmniejszej wartosci
+    minNumber=0                        # index najblizszego atomu
     # liczymy najblizszy atom 
     for atomNumber in xrange(0,len(stored.pos)):
-        xDistance = stored.pos[atomNumber][0]-x0
-        yDistance = stored.pos[atomNumber][1]-y0
-        zDistance = stored.pos[atomNumber][2]-z0
+        xDistance = (stored.pos[atomNumber][0]-molecule_com[0])-x0
+        yDistance = (stored.pos[atomNumber][1]-molecule_com[1])-y0
+        zDistance = (stored.pos[atomNumber][2]-molecule_com[2])-z0
         distance=sqrt(math.pow(xDistance,2)+math.pow(yDistance,2)+math.pow(zDistance,2))
         
         if(distance<minDistance):
             minDistance=distance
             minNumber=atomNumber
     
+    # zapamietuje wsp. nablizszego atomu
+    closestAtomX=stored.pos[minNumber][0]-molecule_com[0]
+    closestAtomY=stored.pos[minNumber][1]-molecule_com[1]
+    closestAtomZ=stored.pos[minNumber][2]-molecule_com[2]
+    
     # aktualizacja interfejsu
     atomX.delete(0,'end')
-    atomX.insert(0, round(stored.pos[minNumber][0],3))
+    atomX.insert(0, round(closestAtomX,3))
+#    atomX.insert(0, round(stored.pos[minNumber][0],3))
     atomY.delete(0,'end')
-    atomY.insert(0, round(stored.pos[minNumber][1],3))
+    atomY.insert(0, round(closestAtomY,3))
+#    atomY.insert(0, round(stored.pos[minNumber][1],3))
     atomZ.delete(0,'end')
-    atomZ.insert(0, round(stored.pos[minNumber][2],3))
+    atomZ.insert(0, round(closestAtomZ,3))
+#    atomZ.insert(0, round(stored.pos[minNumber][2],3))
     atomSymbol.delete(0, 'end')
     atomSymbol.insert(0, stored.pos[minNumber][3])
     
-    return (stored.pos[minNumber][0]/scale, stored.pos[minNumber][1]/scale, stored.pos[minNumber][2]/scale)
+#    return (stored.pos[minNumber][0]/scale, stored.pos[minNumber][1]/scale, stored.pos[minNumber][2]/scale)
+    return (closestAtomX/scale, closestAtomY/scale, closestAtomZ/scale)
     
     
 def vrpn_client():
@@ -196,7 +219,10 @@ def vrpn_client():
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
     
     draw_axes(0,0,0)
-    draw_pointer()
+    draw_pointer("helix.pdb")
+    draw_molecule("1fg0.pdb")
+#    cmd.fetch('1abw',"molecule")
+    
     startButton['state']=DISABLED
     stopButton['state']=NORMAL
     urlEntry['state']=DISABLED
@@ -209,6 +235,9 @@ def vrpn_client():
         
         # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
         point = find_closest_atom(x,y,z)
+        
+        # znajduje nablizszy region do w czasteczce do ktorego przyciagam wzorzec
+#        point =  find_closest_region(x,y,z) # TODO
 
         force=100   # wielkosc sily |F|
         forceX = (point[0]-trackerX)    # wektor sily X
