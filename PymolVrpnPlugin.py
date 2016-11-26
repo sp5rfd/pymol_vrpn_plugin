@@ -48,12 +48,25 @@ previous_orientation=0
     center of mass of a loaded molecule
 """
 molecule_com=[0,0,0]    
+mapping=[]
 
 """
     Global variables for atom info UI
 """
 startButton = stopButton = urlEntry = 0
 atomSymbol = atomX = atomY = atomZ = 0
+
+def region_com(region_coordinates):
+    # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
+    x, y, z = 0,0,0
+    size = len(region_coordinates)
+    
+    for coordinate in region_coordinates:
+        x += coordinate[0]
+        y += coordinate[1]
+        z += coordinate[2]
+        
+    return (x/size, y/size, z/size)
 
 def tracker_handler(u, tracker):
     global trackerX, trackerY, trackerZ
@@ -67,7 +80,7 @@ def tracker_handler(u, tracker):
     z0 = trackerZ*scale
 #   funkcja dokonujaca przeksztalcenia - transjacji
     global x, y, z
-    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="pointer", camera=0)
+    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="helix", camera=0)
     x = x0
     y = y0
     z = z0
@@ -88,7 +101,7 @@ def tracker_handler(u, tracker):
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
 
     cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
-            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="pointer", camera=0)
+            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="helix", camera=0)
 
 
 def button_handler(u, button):
@@ -120,11 +133,11 @@ def draw_pointer(pointer_pdb_file):
 #        1, 1, 0,                                    # RGB Color 2
 #        1.0, 1.0 ]                                  # Caps 1 & 2
 #        
-#    cmd.load_cgo(pointer, "pointer")
-    cmd.load(pointer_pdb_file,"pointer")   # laduje wskaxnik
-    helix_com=cmd.centerofmass("pointer") # licze COM wskaxnika
+#    cmd.load_cgo(pointer, "helix")
+    cmd.load(pointer_pdb_file,"helix")   # laduje wskaxnik
+    helix_com=cmd.centerofmass("helix") # licze COM wskaxnika
     # centruje wskaxnik (przenosze go do zera)
-    cmd.translate(vector=[-helix_com[0], -helix_com[1], -helix_com[2]], object="pointer", camera=0)
+    cmd.translate(vector=[-helix_com[0], -helix_com[1], -helix_com[2]], object="helix", camera=0)
     
 def draw_axes(x0, y0, z0):
     w = 0.5 # cylinder width
@@ -150,13 +163,27 @@ def draw_molecule(molecule_pdb_file):
     molecule_com=cmd.centerofmass("molecule")
     # przesuwam ja na srodek ekranu, srodek ciezkosci na (x,y,z)=(0,0,0)
     cmd.translate(vector=[-molecule_com[0], -molecule_com[1], -molecule_com[2]], object="molecule", camera=0)
-
-
-def find_closest_atom(x0,y0,z0):
+    
     # pobieram liste pozycji 3D atomow w czasteczce
     stored.pos = []                                                                                                                
-    cmd.iterate_state(1, "molecule", "stored.pos.append((x,y,z,elem))")
+    cmd.iterate_state(1, "molecule", "stored.pos.append((x,y,z,elem,chain+resi))")
     
+
+def load_mapping_file(mapping_file):
+    file=open(mapping_file,"r")
+    
+    global mapping
+    for line in file:
+        mapping.append([line.split()[0],line.split()[1],0])
+    file.close()
+    
+    # na ostatnie pole w mapping wstawiam COM obliczony dla kazdego nukleotydu
+    for line in mapping:  # iteruje po wszystkich liniach z pliku mapujacego
+        results = [[nucl[0],nucl[1],nucl[2]] for nucl in stored.pos if (nucl[4]==line[1])]
+        line[2]=region_com(results)
+        print line
+
+def find_closest_atom(x0,y0,z0):
     if(len(stored.pos)==0):
         zero=[0,0,0]
         # zeruje interfejs - atomX,Y i Z to pola w GUI
@@ -203,6 +230,12 @@ def find_closest_atom(x0,y0,z0):
     return (closestAtomX/scale, closestAtomY/scale, closestAtomZ/scale)
     
     
+def find_closest_region(x0,y0,z0):
+    
+    
+    
+    return (0,0,0)
+    
 def vrpn_client():
     print "Starting VRPN client..."
     
@@ -221,7 +254,7 @@ def vrpn_client():
     draw_axes(0,0,0)
     draw_pointer("helix.pdb")
     draw_molecule("1fg0.pdb")
-#    cmd.fetch('1abw',"molecule")
+    load_mapping_file("1fg0_helix.txt")
     
     startButton['state']=DISABLED
     stopButton['state']=NORMAL
