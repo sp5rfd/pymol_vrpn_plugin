@@ -49,6 +49,7 @@ previous_orientation=0
 """
 molecule_com=[0,0,0]    
 mapping=[]
+regions={}
 
 """
     Global variables for atom info UI
@@ -56,7 +57,7 @@ mapping=[]
 startButton = stopButton = urlEntry = 0
 atomSymbol = atomX = atomY = atomZ = 0
 
-def region_com(region_coordinates):
+def simple_com(region_coordinates):
     # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
     x, y, z = 0,0,0
     size = len(region_coordinates)
@@ -134,12 +135,13 @@ def draw_pointer(pointer_pdb_file):
 #        1.0, 1.0 ]                                  # Caps 1 & 2
 #        
 #    cmd.load_cgo(pointer, "helix")
+
     cmd.load(pointer_pdb_file,"helix")   # laduje wskaxnik
     helix_com=cmd.centerofmass("helix") # licze COM wskaxnika
     # centruje wskaxnik (przenosze go do zera)
     cmd.translate(vector=[-helix_com[0], -helix_com[1], -helix_com[2]], object="helix", camera=0)
     
-def draw_axes(x0, y0, z0):
+def draw_xyz_axes(x0, y0, z0):
     w = 0.5 # cylinder width
     l = 10 # cylinder length
     h = 2 # cone hight
@@ -178,10 +180,42 @@ def load_mapping_file(mapping_file):
     file.close()
     
     # na ostatnie pole w mapping wstawiam COM obliczony dla kazdego nukleotydu
-    for line in mapping:  # iteruje po wszystkich liniach z pliku mapujacego
-        results = [[nucl[0],nucl[1],nucl[2]] for nucl in stored.pos if (nucl[4]==line[1])]
-        line[2]=region_com(results)
-        print line
+    for nucleotyde in mapping:  # iteruje po wszystkich liniach z pliku mapujacego
+        # pobieram atomy nalezace do poszczegolnych nukleotydow
+        nucl_atoms = [[atom[0],atom[1],atom[2]] for atom in stored.pos if (atom[4]==nucleotyde[1])]
+        nucleotyde[2]=simple_com(nucl_atoms) # srodek masy dla nukleotydu
+        
+    print mapping
+    
+def calculate_regions_com():
+    # zliczam ilosc nukleotydow w helisie wzorcowej
+    # UWAGA: tutaj zakladam, ze wzorcowa helisa sklada sie z dwoch lancuchow o 
+    # tej samej dlugosci (ilosci nukleotydow). To oznacza, ze szukam regionow 
+    # o dlugosci jednego lancucha helisy, czyli polowy wszystkich nukleotydow
+    # z tej helisy.
+    
+    unique_nucl=set()
+    cmd.iterate_state(1,"helix","unique_nucl.add(chain+resi)",space={'unique_nucl':unique_nucl})
+    M=len(mapping)        # ilosc nukleotydow w BADANEJ czasteczce
+    N=len(unique_nucl)/2  # polowa wszystkich nukleotydow z WZORCOWEJ czasteczki
+    
+    # wyszukiwanie regionow
+    for m in range(0,M-N+1): # -1 jesli blad
+        region=()   # inicjuje pusty tuple
+        region_coords=[]
+        for n in range(0,N): # -1 jesli blad
+            if mapping[m+n][0]=='0':
+                break
+            region=region+(mapping[m+n][1],)
+            region_coords.append(mapping[m+n][2])
+            if n==(N-1):
+                #znaleziono region w badanej czasteczke pasujacy do czasteczki wzorcowej
+#                print "JEST REGION: ", m, region, region_coords
+                # dodaje znaleziony region do tablicy regions
+                regions[region]=simple_com(region_coords)
+#                regions.append(region)
+            
+#    print regions
 
 def find_closest_atom(x0,y0,z0):
     if(len(stored.pos)==0):
@@ -195,8 +229,8 @@ def find_closest_atom(x0,y0,z0):
         atomZ.insert(0, zero[2])
         return zero
     
-    minDistance=sys.float_info.max     # poczatkowa wartosc minimalna powinna byc duza
-    minNumber=0                        # index najblizszego atomu
+    minimumDistance=sys.float_info.max     # poczatkowa wartosc minimalna powinna byc duza
+    closestAtomDistance=0                        # index najblizszego atomu
     # liczymy najblizszy atom 
     for atomNumber in xrange(0,len(stored.pos)):
         xDistance = (stored.pos[atomNumber][0]-molecule_com[0])-x0
@@ -204,14 +238,14 @@ def find_closest_atom(x0,y0,z0):
         zDistance = (stored.pos[atomNumber][2]-molecule_com[2])-z0
         distance=sqrt(math.pow(xDistance,2)+math.pow(yDistance,2)+math.pow(zDistance,2))
         
-        if(distance<minDistance):
-            minDistance=distance
-            minNumber=atomNumber
+        if(distance<minimumDistance):
+            minimumDistance=distance
+            closestAtomDistance=atomNumber
     
     # zapamietuje wsp. nablizszego atomu
-    closestAtomX=stored.pos[minNumber][0]-molecule_com[0]
-    closestAtomY=stored.pos[minNumber][1]-molecule_com[1]
-    closestAtomZ=stored.pos[minNumber][2]-molecule_com[2]
+    closestAtomX=stored.pos[closestAtomDistance][0]-molecule_com[0]
+    closestAtomY=stored.pos[closestAtomDistance][1]-molecule_com[1]
+    closestAtomZ=stored.pos[closestAtomDistance][2]-molecule_com[2]
     
     # aktualizacja interfejsu
     atomX.delete(0,'end')
@@ -224,17 +258,34 @@ def find_closest_atom(x0,y0,z0):
     atomZ.insert(0, round(closestAtomZ,3))
 #    atomZ.insert(0, round(stored.pos[minNumber][2],3))
     atomSymbol.delete(0, 'end')
-    atomSymbol.insert(0, stored.pos[minNumber][3])
+    atomSymbol.insert(0, stored.pos[closestAtomDistance][3])
     
 #    return (stored.pos[minNumber][0]/scale, stored.pos[minNumber][1]/scale, stored.pos[minNumber][2]/scale)
     return (closestAtomX/scale, closestAtomY/scale, closestAtomZ/scale)
     
     
 def find_closest_region(x0,y0,z0):
+    # jesli nie ma regionow, to zwroc najblizszy atom
+    if len(regions)==0:
+        return find_closest_atom(x0, y0, z0)
     
+    min_distance=sys.float_info.max  # startujemy od najwiekszej mozliwej wielkosci
+    closest_region_x,closest_region_y,closest_region_z = 0,0,0
     
+    for region in regions:      # iteruje po regionach
+        coords=regions[region]  # pobieram z mapy regionow wspolrzedne
+        x_dist = (coords[0]-molecule_com[0])-x0
+        y_dist = (coords[1]-molecule_com[1])-y0
+        z_dist = (coords[2]-molecule_com[2])-z0
+        distance=sqrt(math.pow(x_dist,2)+math.pow(y_dist,2)+math.pow(z_dist,2))
+        
+        if(distance<min_distance):
+            min_distance=distance
+            closest_region_x = coords[0]-molecule_com[0]
+            closest_region_y = coords[1]-molecule_com[1]
+            closest_region_z = coords[2]-molecule_com[2]
     
-    return (0,0,0)
+    return (closest_region_x/scale,closest_region_y/scale,closest_region_z/scale)
     
 def vrpn_client():
     print "Starting VRPN client..."
@@ -251,10 +302,11 @@ def vrpn_client():
     vrpn_ForceDevice.register_force_change_handler(force_handler)
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
     
-    draw_axes(0,0,0)
+    draw_xyz_axes(0,0,0)
     draw_pointer("helix.pdb")
     draw_molecule("1fg0.pdb")
     load_mapping_file("1fg0_helix.txt")
+    calculate_regions_com()
     
     startButton['state']=DISABLED
     stopButton['state']=NORMAL
@@ -267,10 +319,10 @@ def vrpn_client():
         forceDevice.mainloop()
         
         # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
-        point = find_closest_atom(x,y,z)
+#        point = find_closest_atom(x,y,z)
         
         # znajduje nablizszy region do w czasteczce do ktorego przyciagam wzorzec
-#        point =  find_closest_region(x,y,z) # TODO
+        point =  find_closest_region(x,y,z) # TODO
 
         force=100   # wielkosc sily |F|
         forceX = (point[0]-trackerX)    # wektor sily X
