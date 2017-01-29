@@ -322,7 +322,7 @@ def vrpn_client():
 #        point = find_closest_atom(x,y,z)
         
         # znajduje nablizszy region do w czasteczce do ktorego przyciagam wzorzec
-        point =  find_closest_region(x,y,z) # TODO
+        point =  find_closest_region(x,y,z)
 
         force=100   # wielkosc sily |F|
         forceX = (point[0]-trackerX)    # wektor sily X
@@ -398,8 +398,45 @@ def build_gui():
     
     window.mainloop()
     
+def nextStep():
+    print "Nastepny krok"
+    
+def hello_window():
+#    global helloWindow
+    
+    window=Tk()
+    h=480
+    w=640
+    x=(window.winfo_screenwidth()/2)-w/2
+    y=(window.winfo_screenheight()/2)-h/2
+    window.geometry('%dx%d+%d+%d' % (w,h,x,y))
+    window.title("PyMOL VRPN Plugin v1.0 - Pawel Tomaszewski")
+    window.call('wm', 'attributes', '.', '-topmost', '1')
+
+    
+    helloGroup = LabelFrame(window, text="Witaj uzytkowniku", width=300, height=300)
+    helloGroup.grid(row=0, padx=10, pady=10)
+    
+    helloMessage=" Niniejsze narzedzie umozliwia interaktywna eksploracje lokalnych podobienstw \n \
+strukturalnych bialek i kwasow nukleinowych. Program w swoim dzialaniu wykorzystuje \n \
+urzadzenie haptyczne SensAble Phantom Omni. \n\n \
+Podstawowa funkcja programu jest edytowanie nalozenia przestrzennego fragmentow \n \
+czasteczek przy pomocy manipulatora o szesciu stopniach swobody ze zwrotna projekcja sil. \n \
+Uzytkownik jest informowany o jakosci nalozenia poprzez zwrotna projekcje sil \n \
+sciagajacych fragment wzorcowej struktury do najblizszego lokalnie optymalnego dopasowania\n\n \
+W kolejnych krokach wybierzesz dwie czasteczki oraz plik mapujacy. \n \
+Zapraszam do pracy."
+                  
+    Label(helloGroup,text=helloMessage).grid(row=0)
+    
+    nextStepButton=Button(window, text="DALEJ", command=nextStep)
+    nextStepButton.grid(row=1,column=0)
+    window.mainloop()
+    
 def __init__(self):
     print "__init__"
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
-                             command = lambda s=self: build_gui())
+                             command = lambda s=self: hello_window())
+#    self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
+#                             command = lambda s=self: build_gui())
                              
