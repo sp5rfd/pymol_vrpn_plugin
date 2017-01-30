@@ -25,7 +25,8 @@ def filesWindow():
     group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     
-    message="Wzorzec jest strukturą, którą będziemy próbowali dopasować do cząsteczki bazowej."
+    message="Wzorzec jest strukturą, którą będziemy próbowali dopasować do cząsteczki bazowej.\
+    \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
     
     label=Label(group,text=message,bg="green",anchor=W)
     label.pack(fill=BOTH)
