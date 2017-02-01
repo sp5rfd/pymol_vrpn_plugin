@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from Tkinter import *
+from tkFileDialog import *
 
 helloMsg="\
 Witaj użytkowniku.\
@@ -10,6 +11,9 @@ Witaj użytkowniku.\
 \nlklklk"
 
 currentWindow=0
+
+def chooseFile():
+    askopenfile(0)
 
 def filesWindow():
     global currentWindow
@@ -46,7 +50,7 @@ def filesWindow():
     fileName=Entry(group)
     fileName.pack(pady=5,side=LEFT)
     
-    fileChooser=Button(group,text="Wybierz plik")
+    fileChooser=Button(group,text="Wybierz plik",command=chooseFile)
     fileChooser.pack(side=LEFT)
     
     group=LabelFrame(currentWindow,text="Plik bazowy",padx=5,pady=5)
