@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import os
 from Tkinter import *
 from tkFileDialog import *
 
@@ -11,15 +12,27 @@ Witaj użytkowniku.\
 \nlklklk"
 
 currentWindow=0
+mappingFile=""
+templateFile=""
+structurePdb=0
 
-def chooseFile():
-    askopenfile(0)
+def chooseTemplateFile():
+    global templateFile
+    templateFile.set(askopenfilename())
+
+def chooseMappingFile():
+    global mappingFile
+    mappingFile.set(askopenfilename())
 
 def filesWindow():
-    global currentWindow
+    global currentWindow,templateFile,mappingFile
+    
     currentWindow = Tk()
     currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
 
+    templateFile=StringVar(value=os.getcwd()+"/")
+    mappingFile=StringVar(value=os.getcwd()+"/")
+    
     w=640
     h=480
     x=currentWindow.winfo_screenwidth()/2 - w/2
@@ -35,10 +48,10 @@ def filesWindow():
     label=Label(group,text=message,bg="green",anchor=W)
     label.pack(fill=BOTH)
     
-    fileName=Entry(group)
+    fileName=Entry(group,textvariable=templateFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
     
-    fileChooser=Button(group,text="Wybierz plik")
+    fileChooser=Button(group,text="Wybierz plik",command=chooseTemplateFile)
     fileChooser.pack(side=LEFT)
     
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
@@ -47,13 +60,13 @@ def filesWindow():
     label=Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W)
     label.pack(fill=BOTH)
     
-    fileName=Entry(group)
+    fileName=Entry(group,textvariable=mappingFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
     
-    fileChooser=Button(group,text="Wybierz plik",command=chooseFile)
+    fileChooser=Button(group,text="Wybierz plik",command=chooseMappingFile)
     fileChooser.pack(side=LEFT)
     
-    group=LabelFrame(currentWindow,text="Plik bazowy",padx=5,pady=5)
+    group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     
     label=Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W)
