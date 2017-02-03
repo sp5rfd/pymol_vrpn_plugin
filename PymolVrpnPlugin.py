@@ -1,14 +1,18 @@
+# -*- coding: utf-8 -*-
+
 """
     This program was created in 2015-16 by Pawel Tomaszewski
     In cooperation with Biophysics Laboratory of Warsaw University
 """
 
+import os
 import sys
 sys.path.append("/home/crooveck/workspace/LICENCJAT/python_vrpn")
 sys.path.append(".")
 from transformations import *
 from Tkinter import *
-from ttk import *
+from tkFileDialog import *
+#from ttk import *
 from pymol import *
 from pymol.cgo import *
 from time import *
@@ -56,6 +60,20 @@ regions={}
 """
 startButton = stopButton = urlEntry = 0
 atomSymbol = atomX = atomY = atomZ = 0
+
+"""
+    GUI
+"""
+helloMsg="\
+Witaj użytkowniku.\
+\nW tej aplikacji masz możliwość dopasowania lokalnie optymalnych struktur\
+\ncząsteczek chemicznych takich jak białka czy kwasy nukleinowe\
+\nlklklk"
+
+currentWindow=0
+mappingFile=0
+templateFile=0
+structurePdb=0
 
 def simple_com(region_coordinates):
     # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
@@ -126,7 +144,7 @@ def force_handler(u, force):
 #    print "force",force
     abc='test'
     
-def draw_pointer(pointer_pdb_file):
+def draw_template_structure(template_pdb_file):
 #    pointer = [
 #        CONE, 0,0,0, 0,0,10,   #x1, y1, z1, x2, y2, z2
 #        0.0, 1,                                   # Radius 1, 2
@@ -136,7 +154,7 @@ def draw_pointer(pointer_pdb_file):
 #        
 #    cmd.load_cgo(pointer, "helix")
 
-    cmd.load(pointer_pdb_file,"helix")   # laduje wskaxnik
+    cmd.load(template_pdb_file,"helix")   # laduje wskaxnik
     helix_com=cmd.centerofmass("helix") # licze COM wskaxnika
     # centruje wskaxnik (przenosze go do zera)
     cmd.translate(vector=[-helix_com[0], -helix_com[1], -helix_com[2]], object="helix", camera=0)
@@ -288,7 +306,7 @@ def find_closest_region(x0,y0,z0):
     return (closest_region_x/scale,closest_region_y/scale,closest_region_z/scale)
     
 def vrpn_client():
-    print "Starting VRPN client..."
+    global mappingFile,templateFile
     
     tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_URL)
     vrpn_Tracker.register_tracker_change_handler(tracker_handler)
@@ -303,14 +321,14 @@ def vrpn_client():
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
     
     draw_xyz_axes(0,0,0)
-    draw_pointer("helix.pdb")
+    draw_template_structure(templateFile.get())
     draw_molecule("1fg0.pdb")
-    load_mapping_file("1fg0_helix.txt")
+    load_mapping_file(mappingFile.get())
     calculate_regions_com()
     
-    startButton['state']=DISABLED
-    stopButton['state']=NORMAL
-    urlEntry['state']=DISABLED
+    startButton['state']="disabled"
+    stopButton['state']="normal"
+    urlEntry['state']="disabled"
     sleep(1)
     
     while IS_RUNNING:
@@ -343,9 +361,9 @@ def vrpn_client():
             cmd.zoom('all')
 
     print "Finishing work..."
-    startButton['state']=NORMAL
-    stopButton['state']=DISABLED
-    urlEntry['state']=NORMAL
+    startButton['state']="normal"
+    stopButton['state']="disabled"
+    urlEntry['state']="normal"
 
 def run():
     global IS_RUNNING, PHANTOM_URL
@@ -358,14 +376,14 @@ def stop():
     global IS_RUNNING
     IS_RUNNING = False
     
-def build_gui():
-    window = Tk()
-    window.title("PyMOL VRPN Plugin v1.0")
-    window.geometry("370x280+200+100")
-    window.resizable(False, False)
-    window.call('wm', 'attributes', '.', '-topmost', '1')
+def atomWindow():
+    currentWindow = Tk()
+    currentWindow.title("PyMOL VRPN Plugin v1.0")
+    currentWindow.geometry("370x280+200+100")
+    currentWindow.resizable(False, False)
+    currentWindow.call('wm', 'attributes', '.', '-topmost', '1')
     
-    vrpnGroup = LabelFrame(window, text=" VRPN CFG. ", width=350, height=90)
+    vrpnGroup = LabelFrame(currentWindow, text=" VRPN CFG. ", width=350, height=90)
     vrpnGroup.grid(row=0, padx=10, pady=10)
     vrpnGroup.grid_propagate(False)
 
@@ -379,7 +397,7 @@ def build_gui():
     stopButton=Button(vrpnGroup, text="STOP", command=stop, state=DISABLED)
     stopButton.grid(row=1, column=1, columnspan=2, sticky=E)
     
-    atomGroup = LabelFrame(window, text=" ATOM INFO ", width=350, height=150)
+    atomGroup = LabelFrame(currentWindow, text=" ATOM INFO ", width=350, height=150)
     atomGroup.grid(row=1, padx=10, pady=10)
     atomGroup.grid_propagate(False)
     Label(atomGroup, text="Symbol chemiczny:").grid(row=0, padx=10, pady=5)
@@ -396,47 +414,135 @@ def build_gui():
     atomZ=Entry(atomGroup, width=15, justify=CENTER)
     atomZ.grid(row=3, column=1)
     
-    window.mainloop()
+    currentWindow.mainloop()
     
-def nextStep():
-    print "Nastepny krok"
-    
-def hello_window():
-#    global helloWindow
-    
-    window=Tk()
-    h=480
-    w=640
-    x=(window.winfo_screenwidth()/2)-w/2
-    y=(window.winfo_screenheight()/2)-h/2
-    window.geometry('%dx%d+%d+%d' % (w,h,x,y))
-    window.title("PyMOL VRPN Plugin v1.0 - Pawel Tomaszewski")
-    window.call('wm', 'attributes', '.', '-topmost', '1')
 
+def chooseTemplateFile():
+    global templateFile
+    templateFile.set(askopenfilename())
+    print templateFile.get()
+
+def chooseMappingFile():
+    global mappingFile
+    mappingFile.set(askopenfilename())
+    print mappingFile.get()
+
+def openAtomWindow():
+    global currentWindow
+    currentWindow.destroy()
+    atomWindow()
     
-    helloGroup = LabelFrame(window, text="Witaj uzytkowniku", width=300, height=300)
-    helloGroup.grid(row=0, padx=10, pady=10)
+def openFilesWindow():
+    global currentWindow
+    currentWindow.destroy()
+    filesWindow()
     
-    helloMessage=" Niniejsze narzedzie umozliwia interaktywna eksploracje lokalnych podobienstw \n \
-strukturalnych bialek i kwasow nukleinowych. Program w swoim dzialaniu wykorzystuje \n \
-urzadzenie haptyczne SensAble Phantom Omni. \n\n \
-Podstawowa funkcja programu jest edytowanie nalozenia przestrzennego fragmentow \n \
-czasteczek przy pomocy manipulatora o szesciu stopniach swobody ze zwrotna projekcja sil. \n \
-Uzytkownik jest informowany o jakosci nalozenia poprzez zwrotna projekcje sil \n \
-sciagajacych fragment wzorcowej struktury do najblizszego lokalnie optymalnego dopasowania\n\n \
-W kolejnych krokach wybierzesz dwie czasteczki oraz plik mapujacy. \n \
-Zapraszam do pracy."
-                  
-    Label(helloGroup,text=helloMessage).grid(row=0)
+def filesWindow():
+    global currentWindow,templateFile,mappingFile
     
-    nextStepButton=Button(window, text="DALEJ", command=nextStep)
-    nextStepButton.grid(row=1,column=0)
-    window.mainloop()
+    currentWindow = Toplevel()
+    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    
+    templateFile=StringVar(value=os.getcwd()+"/")
+    mappingFile=StringVar(value=os.getcwd()+"/")
+    
+    w=640
+    h=480
+    x=currentWindow.winfo_screenwidth()/2 - w/2
+    y=currentWindow.winfo_screenheight()/2 - h/2
+    currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
+    
+    group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5)
+    
+    message="Wzorzec jest strukturą, którą będziemy próbowali dopasować do cząsteczki bazowej.\
+    \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
+    
+    label=Label(group,text=message,bg="green",anchor=W)
+    label.pack(fill=BOTH)
+    
+    fileName=Entry(group,textvariable=templateFile,width=50,state="readonly")
+    fileName.pack(pady=5,side=LEFT)
+    
+    fileChooser=Button(group,text="Wybierz plik",command=chooseTemplateFile)
+    fileChooser.pack(side=LEFT)
+    
+    group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5)
+    
+    label=Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W)
+    label.pack(fill=BOTH)
+    
+    fileName=Entry(group,textvariable=mappingFile,width=50,state="readonly")
+    fileName.pack(pady=5,side=LEFT)
+    
+    fileChooser=Button(group,text="Wybierz plik",command=chooseMappingFile)
+    fileChooser.pack(side=LEFT)
+    
+    group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5)
+    
+    label=Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W)
+    label.pack(fill=BOTH)
+        
+    fileName=Entry(group)
+    fileName.pack(pady=5,side=LEFT)
+    
+    fileChooser=Button(group,text="Wybierz plik")
+    fileChooser.pack(side=LEFT)
+    
+    group=Frame(currentWindow)
+    group.pack(padx=5,expand=TRUE)
+    
+    group=Frame(currentWindow)
+    group.pack(padx=5,pady=5)
+    
+    closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
+    closeButton.pack(side=RIGHT)
+    
+    nextButton=Button(group,text="Dalej",command=openAtomWindow)
+    nextButton.pack()
+    
+    currentWindow.mainloop();
+    
+def helloWindow():
+    global currentWindow
+    currentWindow = Toplevel()
+    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    
+    w=640
+    h=480
+    x=currentWindow.winfo_screenwidth()/2 - w/2
+    y=currentWindow.winfo_screenheight()/2 - h/2
+    currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
+    
+    group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5,expand=True)
+    
+    label=Label(group,text=helloMsg,bg="green")
+    label.pack(fill=BOTH,side=LEFT)
+    
+    dnaImage=PhotoImage(file="dna.gif")
+    
+    label=Label(group,image=dnaImage)
+    label.pack(fill=BOTH)
+    
+    group=Frame(currentWindow)
+    group.pack(padx=5,pady=5)
+    
+    closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
+    closeButton.pack(side=RIGHT)
+    
+    nextButton=Button(group,text="Dalej",command=openFilesWindow)
+    nextButton.pack()
+    
+    currentWindow.mainloop();
+    
     
 def __init__(self):
     print "__init__"
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
-                             command = lambda s=self: hello_window())
+                             command = lambda s=self: helloWindow())
 #    self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
 #                             command = lambda s=self: build_gui())
                              

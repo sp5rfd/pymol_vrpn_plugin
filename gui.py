@@ -12,17 +12,19 @@ Witaj użytkowniku.\
 \nlklklk"
 
 currentWindow=0
-mappingFile=""
-templateFile=""
+mappingFile=0
+templateFile=0
 structurePdb=0
 
 def chooseTemplateFile():
     global templateFile
     templateFile.set(askopenfilename())
+    print "abc"
 
 def chooseMappingFile():
     global mappingFile
     mappingFile.set(askopenfilename())
+    print "def"
 
 def filesWindow():
     global currentWindow,templateFile,mappingFile
@@ -122,7 +124,7 @@ def startWindow():
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
     
-    closeButton=Button(group,text="Anuluj",command=sys.exit)
+    closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
     
     nextButton=Button(group,text="Dalej",command=nextWindow)
