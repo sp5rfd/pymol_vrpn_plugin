@@ -72,6 +72,8 @@ Witaj użytkowniku.\
 
 currentWindow=0
 mappingFile=0
+phantomIp=0
+mainPdbStructure=0
 templateFile=0
 structurePdb=0
 
@@ -306,17 +308,20 @@ def find_closest_region(x0,y0,z0):
     return (closest_region_x/scale,closest_region_y/scale,closest_region_z/scale)
     
 def vrpn_client():
-    global mappingFile,templateFile
+    global mappingFile,templateFile,phantomIp
     
-    tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_URL)
+#    tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_URL)
+    tracker = vrpn_Tracker.vrpn_Tracker_Remote(phantomIp.get())
     vrpn_Tracker.register_tracker_change_handler(tracker_handler)
     vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(tracker, None, vrpn_Tracker.get_tracker_change_handler())
 
-    button = vrpn_Button.vrpn_Button_Remote(PHANTOM_URL)
+#    button = vrpn_Button.vrpn_Button_Remote(PHANTOM_URL)
+    button = vrpn_Button.vrpn_Button_Remote(phantomIp.get())
     vrpn_Button.register_button_change_handler(button_handler)
     vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
 
-    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_URL)
+#    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_URL)
+    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(phantomIp.get())
     vrpn_ForceDevice.register_force_change_handler(force_handler)
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
     
@@ -376,7 +381,7 @@ def stop():
     global IS_RUNNING
     IS_RUNNING = False
     
-def atomWindow():
+def statsWindow():
     currentWindow = Tk()
     currentWindow.title("PyMOL VRPN Plugin v1.0")
     currentWindow.geometry("370x280+200+100")
@@ -427,24 +432,28 @@ def chooseMappingFile():
     mappingFile.set(askopenfilename())
     print mappingFile.get()
 
-def openAtomWindow():
+def openStatsWindow():
     global currentWindow
     currentWindow.destroy()
-    atomWindow()
+    statsWindow()
     
-def openFilesWindow():
+def openConfigWindow():
     global currentWindow
     currentWindow.destroy()
-    filesWindow()
+    configWindow()
     
-def filesWindow():
-    global currentWindow,templateFile,mappingFile
+def chooseMainStructure():
+    //todo
+def configWindow():
+    global currentWindow,templateFile,mappingFile,phantomIp,mainPdbStructure
     
     currentWindow = Toplevel()
     currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
     
     templateFile=StringVar(value=os.getcwd()+"/")
     mappingFile=StringVar(value=os.getcwd()+"/")
+    mainPdbStructure=StringVat(value=os.getcwd()+"/")
+    phantomIp=StringVar(value=PHANTOM_URL)
     
     w=640
     h=480
@@ -452,6 +461,7 @@ def filesWindow():
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
     
+#    Wybór wzorca
     group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     
@@ -467,6 +477,7 @@ def filesWindow():
     fileChooser=Button(group,text="Wybierz plik",command=chooseTemplateFile)
     fileChooser.pack(side=LEFT)
     
+#    Wybór pliku mapowania
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     
@@ -479,17 +490,24 @@ def filesWindow():
     fileChooser=Button(group,text="Wybierz plik",command=chooseMappingFile)
     fileChooser.pack(side=LEFT)
     
+#    Wybór identyfikatora PDB
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     
     label=Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W)
     label.pack(fill=BOTH)
         
-    fileName=Entry(group)
+    fileName=Entry(group,textvariable=mainPdbStructure,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
     
-    fileChooser=Button(group,text="Wybierz plik")
+    fileChooser=Button(group,text="Wybierz plik",command=chooseMainStructure)
     fileChooser.pack(side=LEFT)
+    
+    #    ustawianie adresu IP serwera VRPN
+    group=LabelFrame(currentWindow,text="Adres IP serwera VRPN",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5)
+    vrpnIp=Entry(group,justify=CENTER,textvariable=phantomIp)
+    vrpnIp.pack(pady=5,side=LEFT)
     
     group=Frame(currentWindow)
     group.pack(padx=5,expand=TRUE)
@@ -500,7 +518,7 @@ def filesWindow():
     closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
     
-    nextButton=Button(group,text="Dalej",command=openAtomWindow)
+    nextButton=Button(group,text="Dalej",command=openStatsWindow)
     nextButton.pack()
     
     currentWindow.mainloop();
@@ -533,7 +551,7 @@ def helloWindow():
     closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
     
-    nextButton=Button(group,text="Dalej",command=openFilesWindow)
+    nextButton=Button(group,text="Dalej",command=openConfigWindow)
     nextButton.pack()
     
     currentWindow.mainloop();
