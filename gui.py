@@ -33,42 +33,60 @@ def stop():
     print "stój!"
 
 def statsWindow():
-    currentWindow = Tk()
-    currentWindow.title("PyMOL VRPN Plugin v1.0")
-    currentWindow.geometry("370x280+200+100")
+    global currentWindow,IS_RUNNING
+    
+    IS_RUNNING = True
+#    thread.start_new_thread(vrpn_client, ())
+    
+    currentWindow.destroy()
+    
+    w=640
+    h=480
+    currentWindow=Tk()
+    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    x=currentWindow.winfo_screenwidth()/2 - w/2
+    y=currentWindow.winfo_screenheight()/2 - h/2
+    currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
+    currentWindow.attributes('-topmost', 1)
     currentWindow.resizable(False, False)
-    currentWindow.call('wm', 'attributes', '.', '-topmost', '1')
+    currentWindow.grid_columnconfigure(0, weight=1)
+    currentWindow.grid_columnconfigure(1, weight=1)
     
-    vrpnGroup = LabelFrame(currentWindow, text=" VRPN CFG. ", width=350, height=90)
-    vrpnGroup.grid(row=0, padx=10, pady=10)
-    vrpnGroup.grid_propagate(False)
-
-    Label(vrpnGroup, text="PHANTOM URL: ").grid(row=0, padx=10, pady=10)
-    global startButton, stopButton, urlEntry
-    urlEntry=Entry(vrpnGroup, width=25, justify=CENTER)
-    urlEntry.insert(0,"PHANTOM_URL")
-    urlEntry.grid(row=0, column=1, columnspan=2)
-    startButton=Button(vrpnGroup, text="START", command=run)
-    startButton.grid(row=1, column=1, columnspan=2, sticky=W)
-    stopButton=Button(vrpnGroup, text="STOP", command=stop, state=DISABLED)
-    stopButton.grid(row=1, column=1, columnspan=2, sticky=E)
-    
-    atomGroup = LabelFrame(currentWindow, text=" ATOM INFO ", width=350, height=150)
-    atomGroup.grid(row=1, padx=10, pady=10)
-    atomGroup.grid_propagate(False)
-    Label(atomGroup, text="Symbol chemiczny:").grid(row=0, padx=10, pady=5)
     global atomSymbol, atomX, atomY, atomZ
-    atomSymbol=Entry(atomGroup, width=15, justify=CENTER)
-    atomSymbol.grid(row=0, column=1)
-    Label(atomGroup, text="Pozycja X=").grid(row=1, sticky=E, padx=10, pady=5)
-    atomX=Entry(atomGroup, width=15, justify=CENTER)
-    atomX.grid(row=1, column=1)
-    Label(atomGroup, text="Pozycja Y=").grid(row=2, sticky=E, padx=10, pady=5)
-    atomY=Entry(atomGroup, width=15, justify=CENTER)
-    atomY.grid(row=2, column=1)
-    Label(atomGroup, text="Pozycja Z=").grid(row=3, sticky=E, padx=10, pady=5)
-    atomZ=Entry(atomGroup, width=15, justify=CENTER)
-    atomZ.grid(row=3, column=1)
+    group=LabelFrame(currentWindow, text="ATOM INFO")
+    group.grid(column=0,padx=5,pady=5,sticky='WE')
+    Label(group, text="Symbol chemiczny:",bg="green").grid(row=0)
+    Entry(group, width=15, justify=CENTER).grid(row=1)
+    Label(group, text="Pozycja X=",bg="green",anchor=W).grid(row=2,sticky='WE')
+    atomX=Entry(group, width=15, justify=CENTER)
+    atomX.grid(row=3)
+    Label(group, text="Pozycja Y=",bg="green",anchor=W).grid(row=4,sticky='WE')
+    atomY=Entry(group, width=15, justify=CENTER)
+    atomY.grid(row=5)
+    Label(group, text="Pozycja Z=",bg="green",anchor=W).grid(row=6,sticky='WE')
+    atomZ=Entry(group, width=15, justify=CENTER)
+    atomZ.grid(row=7)
+    
+    global forceType
+    forceType=IntVar()
+    forceType.set(1)
+    group=LabelFrame(currentWindow,text="Typ siły")
+    group.grid(column=1,row=0,sticky='NSWE',pady=5,padx=5)
+    Radiobutton(group,text="Force Field",variable=forceType,value=0).grid(row=0,sticky="W")
+    Radiobutton(group,text="lala",variable=forceType,value=1).grid(row=1,sticky="W")
+    Radiobutton(group,text="blabla",variable=forceType,value=2).grid(row=2,sticky="W")
+    
+#    spacer
+#    Frame(currentWindow).pack(padx=5,expand=TRUE)
+    Frame(currentWindow).grid(sticky='NS')
+    
+#    przycisk stop
+    group=Frame(currentWindow)
+#    group.pack(padx=5,pady=5)
+    group.grid()
+    stopButton=Button(group, text="STOP", command=stop)
+#    stopButton.pack()
+    stopButton.grid()
     
     currentWindow.mainloop()
 
@@ -93,45 +111,35 @@ def filesWindow():
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
     
-    group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
-    group.pack(fill=BOTH,padx=5,pady=5)
-    
     message="Wzorzec jest strukturą, którą będziemy próbowali dopasować do cząsteczki bazowej.\
     \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
     
+    group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5)
     label=Label(group,text=message,bg="green",anchor=W)
     label.pack(fill=BOTH)
-    
     fileName=Entry(group,textvariable=templateFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
-    
     fileChooser=Button(group,text="Wybierz plik",command=chooseTemplateFile)
     fileChooser.pack(side=LEFT)
     
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    
     label=Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W)
     label.pack(fill=BOTH)
-    
     fileName=Entry(group,textvariable=mappingFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
-    
     fileChooser=Button(group,text="Wybierz plik",command=chooseMappingFile)
     fileChooser.pack(side=LEFT)
     
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    
     label=Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W)
     label.pack(fill=BOTH)
-        
     fileName=Entry(group)
     fileName.pack(pady=5,side=LEFT)
-    
     fileChooser=Button(group,text="Wybierz plik")
     fileChooser.pack(side=LEFT)
-    
     
     #    ustawianie adresu IP serwera VRPN
     group=LabelFrame(currentWindow,text="Adres IP serwera VRPN",padx=5,pady=5)
@@ -145,11 +153,9 @@ def filesWindow():
     
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    
     closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
-    
-    nextButton=Button(group,text="Dalej",command=openStatsWindow)
+    nextButton=Button(group,text="Dalej",command=statsWindow)
     nextButton.pack()
     
     currentWindow.mainloop();
@@ -172,21 +178,16 @@ def startWindow():
     
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
-    
     label=Label(group,text=helloMsg,bg="green")
     label.pack(fill=BOTH,side=LEFT)
-    
     dnaImage=PhotoImage(file="dna.gif")
-    
     label=Label(group,image=dnaImage)
     label.pack(fill=BOTH)
     
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    
     closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
-    
     nextButton=Button(group,text="Dalej",command=openFilesWindow)
     nextButton.pack()
     

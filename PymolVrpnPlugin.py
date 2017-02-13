@@ -28,11 +28,6 @@ IS_RUNNING = False
 AUTO_ZOOMING = False
 
 """
-    Phantom VRPN URL.
-"""
-PHANTOM_URL="phantom0@172.21.5.156"
-
-"""
     Global variables for translations. 
     trackerX,trackerY,trackerZ - Phantom native coordinates
     x,y,z - Pymol coordinates
@@ -58,7 +53,6 @@ regions={}
 """
     Global variables for atom info UI
 """
-startButton = stopButton = urlEntry = 0
 atomSymbol = atomX = atomY = atomZ = 0
 
 """
@@ -73,9 +67,9 @@ Witaj użytkowniku.\
 currentWindow=0
 mappingFile=0
 phantomIp=0
-mainPdbStructure=0
+structureFile=0
 templateFile=0
-structurePdb=0
+forceType=0
 
 def simple_com(region_coordinates):
     # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
@@ -310,31 +304,25 @@ def find_closest_region(x0,y0,z0):
 def vrpn_client():
     global mappingFile,templateFile,phantomIp
     
-#    tracker = vrpn_Tracker.vrpn_Tracker_Remote(PHANTOM_URL)
     tracker = vrpn_Tracker.vrpn_Tracker_Remote(phantomIp.get())
     vrpn_Tracker.register_tracker_change_handler(tracker_handler)
     vrpn_Tracker.vrpn_Tracker_Remote.register_change_handler(tracker, None, vrpn_Tracker.get_tracker_change_handler())
 
-#    button = vrpn_Button.vrpn_Button_Remote(PHANTOM_URL)
     button = vrpn_Button.vrpn_Button_Remote(phantomIp.get())
     vrpn_Button.register_button_change_handler(button_handler)
     vrpn_Button.vrpn_Button_Remote.register_change_handler(button, None, vrpn_Button.get_button_change_handler())
 
-#    forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(PHANTOM_URL)
     forceDevice = vrpn_ForceDevice.vrpn_ForceDevice_Remote(phantomIp.get())
     vrpn_ForceDevice.register_force_change_handler(force_handler)
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
     
     draw_xyz_axes(0,0,0)
     draw_template_structure(templateFile.get())
-    draw_molecule("1fg0.pdb")
+    draw_molecule(structureFile.get())
     load_mapping_file(mappingFile.get())
     calculate_regions_com()
     
-    startButton['state']="disabled"
-    stopButton['state']="normal"
-    urlEntry['state']="disabled"
-    sleep(1)
+    sleep(1)    # czekam aż się wszystko połączy i narysuje
     
     while IS_RUNNING:
         tracker.mainloop()
@@ -365,62 +353,70 @@ def vrpn_client():
         if(not AUTO_ZOOMING):
             cmd.zoom('all')
 
-    print "Finishing work..."
-    startButton['state']="normal"
-    stopButton['state']="disabled"
-    urlEntry['state']="normal"
-
-def run():
-    global IS_RUNNING, PHANTOM_URL
-    IS_RUNNING = True
-    PHANTOM_URL=urlEntry.get()
-    
-    thread.start_new_thread(vrpn_client, ())
     
 def stop():
     global IS_RUNNING
     IS_RUNNING = False
     
+    openConfigWindow()
+    
 def statsWindow():
-    currentWindow = Tk()
-    currentWindow.title("PyMOL VRPN Plugin v1.0")
-    currentWindow.geometry("370x280+200+100")
+    global currentWindow,IS_RUNNING
+    
+    IS_RUNNING = True
+#    thread.start_new_thread(vrpn_client, ())
+    
+    currentWindow.destroy()
+    
+    w=640
+    h=480
+    currentWindow=Tk()
+    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    x=currentWindow.winfo_screenwidth()/2 - w/2
+    y=currentWindow.winfo_screenheight()/2 - h/2
+    currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
+    currentWindow.attributes('-topmost', 1)
     currentWindow.resizable(False, False)
-    currentWindow.call('wm', 'attributes', '.', '-topmost', '1')
+    currentWindow.grid_columnconfigure(0, weight=1)
+    currentWindow.grid_columnconfigure(1, weight=1)
     
-    vrpnGroup = LabelFrame(currentWindow, text=" VRPN CFG. ", width=350, height=90)
-    vrpnGroup.grid(row=0, padx=10, pady=10)
-    vrpnGroup.grid_propagate(False)
-
-    Label(vrpnGroup, text="PHANTOM URL: ").grid(row=0, padx=10, pady=10)
-    global startButton, stopButton, urlEntry
-    urlEntry=Entry(vrpnGroup, width=25, justify=CENTER)
-    urlEntry.insert(0,PHANTOM_URL)
-    urlEntry.grid(row=0, column=1, columnspan=2)
-    startButton=Button(vrpnGroup, text="START", command=run)
-    startButton.grid(row=1, column=1, columnspan=2, sticky=W)
-    stopButton=Button(vrpnGroup, text="STOP", command=stop, state=DISABLED)
-    stopButton.grid(row=1, column=1, columnspan=2, sticky=E)
-    
-    atomGroup = LabelFrame(currentWindow, text=" ATOM INFO ", width=350, height=150)
-    atomGroup.grid(row=1, padx=10, pady=10)
-    atomGroup.grid_propagate(False)
-    Label(atomGroup, text="Symbol chemiczny:").grid(row=0, padx=10, pady=5)
     global atomSymbol, atomX, atomY, atomZ
-    atomSymbol=Entry(atomGroup, width=15, justify=CENTER)
-    atomSymbol.grid(row=0, column=1)
-    Label(atomGroup, text="Pozycja X=").grid(row=1, sticky=E, padx=10, pady=5)
-    atomX=Entry(atomGroup, width=15, justify=CENTER)
-    atomX.grid(row=1, column=1)
-    Label(atomGroup, text="Pozycja Y=").grid(row=2, sticky=E, padx=10, pady=5)
-    atomY=Entry(atomGroup, width=15, justify=CENTER)
-    atomY.grid(row=2, column=1)
-    Label(atomGroup, text="Pozycja Z=").grid(row=3, sticky=E, padx=10, pady=5)
-    atomZ=Entry(atomGroup, width=15, justify=CENTER)
-    atomZ.grid(row=3, column=1)
+    group=LabelFrame(currentWindow, text="ATOM INFO")
+    group.grid(column=0,padx=5,pady=5,sticky='WE')
+    Label(group, text="Symbol chemiczny:",bg="green").grid(row=0)
+    Entry(group, width=15, justify=CENTER).grid(row=1)
+    Label(group, text="Pozycja X=",bg="green",anchor=W).grid(row=2,sticky='WE')
+    atomX=Entry(group, width=15, justify=CENTER)
+    atomX.grid(row=3)
+    Label(group, text="Pozycja Y=",bg="green",anchor=W).grid(row=4,sticky='WE')
+    atomY=Entry(group, width=15, justify=CENTER)
+    atomY.grid(row=5)
+    Label(group, text="Pozycja Z=",bg="green",anchor=W).grid(row=6,sticky='WE')
+    atomZ=Entry(group, width=15, justify=CENTER)
+    atomZ.grid(row=7)
+    
+    global forceType
+    forceType=IntVar()
+    forceType.set(0)
+    group=LabelFrame(currentWindow,text="Typ siły")
+    group.grid(column=1,row=0,sticky='NSWE',pady=5,padx=5)
+    Radiobutton(group,text="Force Field",variable=forceType,value=0).grid(row=0,sticky="W")
+    Radiobutton(group,text="lala",variable=forceType,value=1).grid(row=1,sticky="W")
+    Radiobutton(group,text="blabla",variable=forceType,value=2).grid(row=2,sticky="W")
+    
+#    spacer
+#    Frame(currentWindow).pack(padx=5,expand=TRUE)
+    Frame(currentWindow).grid(sticky='NS')
+    
+#    przycisk stop
+    group=Frame(currentWindow)
+#    group.pack(padx=5,pady=5)
+    group.grid()
+    stopButton=Button(group, text="STOP", command=stop)
+#    stopButton.pack()
+    stopButton.grid()
     
     currentWindow.mainloop()
-    
 
 def chooseTemplateFile():
     global templateFile
@@ -431,128 +427,112 @@ def chooseMappingFile():
     global mappingFile
     mappingFile.set(askopenfilename())
     print mappingFile.get()
-
-def openStatsWindow():
-    global currentWindow
-    currentWindow.destroy()
-    statsWindow()
+    
+def chooseStructureFile():
+    global structureFile
+    structureFile.set(askopenfilename())
+    print structureFile.get()
     
 def openConfigWindow():
-    global currentWindow
+    global currentWindow,templateFile,mappingFile,phantomIp,structureFile
+
     currentWindow.destroy()
-    configWindow()
-    
-def chooseMainStructure():
-    //todo
-def configWindow():
-    global currentWindow,templateFile,mappingFile,phantomIp,mainPdbStructure
-    
-    currentWindow = Toplevel()
-    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
-    
-    templateFile=StringVar(value=os.getcwd()+"/")
-    mappingFile=StringVar(value=os.getcwd()+"/")
-    mainPdbStructure=StringVat(value=os.getcwd()+"/")
-    phantomIp=StringVar(value=PHANTOM_URL)
-    
+
     w=640
     h=480
+    currentWindow=Toplevel()
+    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
-    
+    currentWindow.attributes('-topmost', 1)
+    currentWindow.resizable(False, False)
+
 #    Wybór wzorca
-    group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
-    group.pack(fill=BOTH,padx=5,pady=5)
-    
     message="Wzorzec jest strukturą, którą będziemy próbowali dopasować do cząsteczki bazowej.\
     \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
-    
+    group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
+    group.pack(fill=BOTH,padx=5,pady=5)
     label=Label(group,text=message,bg="green",anchor=W)
     label.pack(fill=BOTH)
-    
     fileName=Entry(group,textvariable=templateFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
-    
     fileChooser=Button(group,text="Wybierz plik",command=chooseTemplateFile)
     fileChooser.pack(side=LEFT)
     
 #    Wybór pliku mapowania
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
-    group.pack(fill=BOTH,padx=5,pady=5)
-    
+    group.pack(fill=BOTH)
     label=Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W)
     label.pack(fill=BOTH)
-    
     fileName=Entry(group,textvariable=mappingFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
-    
     fileChooser=Button(group,text="Wybierz plik",command=chooseMappingFile)
     fileChooser.pack(side=LEFT)
     
 #    Wybór identyfikatora PDB
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    
     label=Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W)
     label.pack(fill=BOTH)
-        
-    fileName=Entry(group,textvariable=mainPdbStructure,width=50,state="readonly")
+    fileName=Entry(group,textvariable=structureFile,width=50,state="readonly")
     fileName.pack(pady=5,side=LEFT)
-    
-    fileChooser=Button(group,text="Wybierz plik",command=chooseMainStructure)
+    fileChooser=Button(group,text="Wybierz plik",command=chooseStructureFile)
     fileChooser.pack(side=LEFT)
     
     #    ustawianie adresu IP serwera VRPN
     group=LabelFrame(currentWindow,text="Adres IP serwera VRPN",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    vrpnIp=Entry(group,justify=CENTER,textvariable=phantomIp)
+    vrpnIp=Entry(group,justify=CENTER,textvariable=phantomIp,width=30)
     vrpnIp.pack(pady=5,side=LEFT)
-    
+
+#   spacer
     group=Frame(currentWindow)
     group.pack(padx=5,expand=TRUE)
     
+#    przyciski
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    
     closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
-    
-    nextButton=Button(group,text="Dalej",command=openStatsWindow)
+    nextButton=Button(group,text="Dalej",command=statsWindow)
     nextButton.pack()
     
     currentWindow.mainloop();
     
 def helloWindow():
-    global currentWindow
-    currentWindow = Toplevel()
-    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    global currentWindow,templateFile,mappingFile,phantomIp,structureFile
     
     w=640
     h=480
+    currentWindow=Toplevel()
+    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
+    currentWindow.attributes('-topmost',1)
+    currentWindow.resizable(False, False)
     
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
-    
     label=Label(group,text=helloMsg,bg="green")
     label.pack(fill=BOTH,side=LEFT)
-    
     dnaImage=PhotoImage(file="dna.gif")
-    
     label=Label(group,image=dnaImage)
     label.pack(fill=BOTH)
     
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    
     closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
     closeButton.pack(side=RIGHT)
-    
-    nextButton=Button(group,text="Dalej",command=openConfigWindow)
+    nextButton=Button(group,text="Dalej",command=statsWindow)
     nextButton.pack()
+    
+#    inicjalizacja zmiennych globalnych    
+    templateFile=StringVar(value=os.getcwd()+"/")
+    mappingFile=StringVar(value=os.getcwd()+"/")
+    structureFile=StringVar(value=os.getcwd()+"/")
+    phantomIp=StringVar(value="phantom0@172.21.5.156")
     
     currentWindow.mainloop();
     
@@ -561,6 +541,4 @@ def __init__(self):
     print "__init__"
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
                              command = lambda s=self: helloWindow())
-#    self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
-#                             command = lambda s=self: build_gui())
                              
