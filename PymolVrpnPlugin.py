@@ -51,11 +51,6 @@ mapping=[]
 regions={}
 
 """
-    Global variables for atom info UI
-"""
-atomSymbol = atomX = atomY = atomZ = 0
-
-"""
     GUI
 """
 helloMsg="\
@@ -70,6 +65,8 @@ phantomIp=0
 structureFile=0
 templateFile=0
 forceType=0
+# zmienne do wyswietlania danych w UI
+regionId=regionX=regionY=regionZ=regionTemplateDistance=0
 
 def simple_com(region_coordinates):
     # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
@@ -95,7 +92,7 @@ def tracker_handler(u, tracker):
     z0 = trackerZ*scale
 #   funkcja dokonujaca przeksztalcenia - transjacji
     global x, y, z
-    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="helix", camera=0)
+    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="template", camera=0)
     x = x0
     y = y0
     z = z0
@@ -116,7 +113,7 @@ def tracker_handler(u, tracker):
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
 
     cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
-            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="helix", camera=0)
+            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="template", camera=0)
 
 
 def button_handler(u, button):
@@ -141,19 +138,10 @@ def force_handler(u, force):
     abc='test'
     
 def draw_template_structure(template_pdb_file):
-#    pointer = [
-#        CONE, 0,0,0, 0,0,10,   #x1, y1, z1, x2, y2, z2
-#        0.0, 1,                                   # Radius 1, 2
-#        1, 0, 1,                                    # RGB Color 1
-#        1, 1, 0,                                    # RGB Color 2
-#        1.0, 1.0 ]                                  # Caps 1 & 2
-#        
-#    cmd.load_cgo(pointer, "helix")
-
-    cmd.load(template_pdb_file,"helix")   # laduje wskaxnik
-    helix_com=cmd.centerofmass("helix") # licze COM wskaxnika
+    cmd.load(template_pdb_file,"template")
+    template_com=cmd.centerofmass("template")
     # centruje wskaxnik (przenosze go do zera)
-    cmd.translate(vector=[-helix_com[0], -helix_com[1], -helix_com[2]], object="helix", camera=0)
+    cmd.translate(vector=[-template_com[0], -template_com[1], -template_com[2]], object="template", camera=0)
     
 def draw_xyz_axes(x0, y0, z0):
     w = 0.5 # cylinder width
@@ -189,6 +177,8 @@ def load_mapping_file(mapping_file):
     file=open(mapping_file,"r")
     
     global mapping
+    mapping=[]
+
     for line in file:
         mapping.append([line.split()[0],line.split()[1],0])
     file.close()
@@ -199,7 +189,7 @@ def load_mapping_file(mapping_file):
         nucl_atoms = [[atom[0],atom[1],atom[2]] for atom in stored.pos if (atom[4]==nucleotyde[1])]
         nucleotyde[2]=simple_com(nucl_atoms) # srodek masy dla nukleotydu
         
-    print mapping
+#    print mapping
     
 def calculate_regions_com():
     # zliczam ilosc nukleotydow w helisie wzorcowej
@@ -209,7 +199,7 @@ def calculate_regions_com():
     # z tej helisy.
     
     unique_nucl=set()
-    cmd.iterate_state(1,"helix","unique_nucl.add(chain+resi)",space={'unique_nucl':unique_nucl})
+    cmd.iterate_state(1,"template","unique_nucl.add(chain+resi)",space={'unique_nucl':unique_nucl})
     M=len(mapping)        # ilosc nukleotydow w BADANEJ czasteczce
     N=len(unique_nucl)/2  # polowa wszystkich nukleotydow z WZORCOWEJ czasteczki
     
@@ -227,21 +217,12 @@ def calculate_regions_com():
 #                print "JEST REGION: ", m, region, region_coords
                 # dodaje znaleziony region do tablicy regions
                 regions[region]=simple_com(region_coords)
-#                regions.append(region)
             
 #    print regions
 
 def find_closest_atom(x0,y0,z0):
     if(len(stored.pos)==0):
-        zero=[0,0,0]
-        # zeruje interfejs - atomX,Y i Z to pola w GUI
-        atomX.delete(0,'end')
-        atomX.insert(0, zero[0])
-        atomY.delete(0,'end')
-        atomY.insert(0, zero[1])
-        atomZ.delete(0,'end')
-        atomZ.insert(0, zero[2])
-        return zero
+        return [0,0,0]
     
     minimumDistance=sys.float_info.max     # poczatkowa wartosc minimalna powinna byc duza
     closestAtomDistance=0                        # index najblizszego atomu
@@ -261,20 +242,6 @@ def find_closest_atom(x0,y0,z0):
     closestAtomY=stored.pos[closestAtomDistance][1]-molecule_com[1]
     closestAtomZ=stored.pos[closestAtomDistance][2]-molecule_com[2]
     
-    # aktualizacja interfejsu
-    atomX.delete(0,'end')
-    atomX.insert(0, round(closestAtomX,3))
-#    atomX.insert(0, round(stored.pos[minNumber][0],3))
-    atomY.delete(0,'end')
-    atomY.insert(0, round(closestAtomY,3))
-#    atomY.insert(0, round(stored.pos[minNumber][1],3))
-    atomZ.delete(0,'end')
-    atomZ.insert(0, round(closestAtomZ,3))
-#    atomZ.insert(0, round(stored.pos[minNumber][2],3))
-    atomSymbol.delete(0, 'end')
-    atomSymbol.insert(0, stored.pos[closestAtomDistance][3])
-    
-#    return (stored.pos[minNumber][0]/scale, stored.pos[minNumber][1]/scale, stored.pos[minNumber][2]/scale)
     return (closestAtomX/scale, closestAtomY/scale, closestAtomZ/scale)
     
     
@@ -284,7 +251,8 @@ def find_closest_region(x0,y0,z0):
         return find_closest_atom(x0, y0, z0)
     
     min_distance=sys.float_info.max  # startujemy od najwiekszej mozliwej wielkosci
-    closest_region_x,closest_region_y,closest_region_z = 0,0,0
+    closestX,closestY,closestZ = 0,0,0
+    closestRegionId=0
     
     for region in regions:      # iteruje po regionach
         coords=regions[region]  # pobieram z mapy regionow wspolrzedne
@@ -295,11 +263,12 @@ def find_closest_region(x0,y0,z0):
         
         if(distance<min_distance):
             min_distance=distance
-            closest_region_x = coords[0]-molecule_com[0]
-            closest_region_y = coords[1]-molecule_com[1]
-            closest_region_z = coords[2]-molecule_com[2]
+            closestRegionId=region
+            closestX = coords[0]-molecule_com[0]
+            closestY = coords[1]-molecule_com[1]
+            closestZ = coords[2]-molecule_com[2]
     
-    return (closest_region_x/scale,closest_region_y/scale,closest_region_z/scale)
+    return [closestRegionId,(closestX/scale),(closestY/scale),(closestZ/scale),min_distance]
     
 def vrpn_client():
     global mappingFile,templateFile,phantomIp
@@ -322,6 +291,9 @@ def vrpn_client():
     load_mapping_file(mappingFile.get())
     calculate_regions_com()
     
+    global regionId, regionX, regionY, regionZ
+    global x,y,z
+    
     sleep(1)    # czekam aż się wszystko połączy i narysuje
     
     while IS_RUNNING:
@@ -329,16 +301,26 @@ def vrpn_client():
         button.mainloop()
         forceDevice.mainloop()
         
-        # znajduje najblizszy punkt do aktualnej pozycji wskaxnika PyMol
-#        point = find_closest_atom(x,y,z)
+        # znajduje nablizszy region/atom w czasteczce do ktorego przyciagam wzorzec/wzkaźnik
+#        point = find_closest_atom(x,y,z)   # znajduję najbliższy atom
+        region=find_closest_region(x,y,z)   # znajduję najbliższy region
         
-        # znajduje nablizszy region do w czasteczce do ktorego przyciagam wzorzec
-        point =  find_closest_region(x,y,z)
-
+        # aktualizacja interfejsu
+        regionX.delete(0,'end')
+        regionX.insert(0,region[1])
+        regionY.delete(0,'end')
+        regionY.insert(0,region[2])
+        regionId.delete(0,'end')    #todo: zmienic na zmienna textvariable
+        regionId.insert(0,region[0])
+        regionZ.delete(0,'end')
+        regionZ.insert(0,region[3])
+        regionTemplateDistance.delete(0,'end')
+        regionTemplateDistance.insert(0,region[4])
+        
         force=100   # wielkosc sily |F|
-        forceX = (point[0]-trackerX)    # wektor sily X
-        forceY = (point[1]-trackerY)    # j.w. Y
-        forceZ = (point[2]-trackerZ)    # j.w. Z
+        forceX = (region[1]-trackerX)    # wektor sily X
+        forceY = (region[2]-trackerY)    # j.w. Y
+        forceZ = (region[3]-trackerZ)    # j.w. Z
 
         forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
         forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
@@ -346,32 +328,37 @@ def vrpn_client():
         forceDevice.setFF_Radius(0.1)
         forceDevice.sendForceField()
 
-        # rysuje linie laczaco wskaznik z najblizszym atomem
+        # rysuje linię łączącą wzorzec/wskaźnik z najblizszym regionem/atomem
         cmd.delete('link')
-        cmd.load_cgo([CYLINDER, x, y, z, point[0]*scale, point[1]*scale, point[2]*scale, 0.1, 255, 255, 255, 255, 255, 255], 'link')
+        cmd.load_cgo([CYLINDER, x, y, z, (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
 
         if(not AUTO_ZOOMING):
             cmd.zoom('all')
-
+            
+    cmd.delete("template")
+    cmd.delete("molecule")
+    cmd.delete("link")
+    cmd.delete("axes")
+    x=y=z=0
     
 def stop():
     global IS_RUNNING
     IS_RUNNING = False
     
-    openConfigWindow()
     
-def statsWindow():
+    configWindow()
+    
+def statsWindow():    
     global currentWindow,IS_RUNNING
-    
     IS_RUNNING = True
-#    thread.start_new_thread(vrpn_client, ())
+    thread.start_new_thread(vrpn_client, ())
     
     currentWindow.destroy()
     
     w=640
     h=480
     currentWindow=Tk()
-    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    currentWindow.title("Interaktywny eksplorator lokalnych podobieństw strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -380,40 +367,47 @@ def statsWindow():
     currentWindow.grid_columnconfigure(0, weight=1)
     currentWindow.grid_columnconfigure(1, weight=1)
     
-    global atomSymbol, atomX, atomY, atomZ
-    group=LabelFrame(currentWindow, text="ATOM INFO")
+    global regionId, regionX, regionY, regionZ, regionTemplateDistance
+    group=LabelFrame(currentWindow, text="Współrzędne")
     group.grid(column=0,padx=5,pady=5,sticky='WE')
-    Label(group, text="Symbol chemiczny:",bg="green").grid(row=0)
-    Entry(group, width=15, justify=CENTER).grid(row=1)
-    Label(group, text="Pozycja X=",bg="green",anchor=W).grid(row=2,sticky='WE')
-    atomX=Entry(group, width=15, justify=CENTER)
-    atomX.grid(row=3)
-    Label(group, text="Pozycja Y=",bg="green",anchor=W).grid(row=4,sticky='WE')
-    atomY=Entry(group, width=15, justify=CENTER)
-    atomY.grid(row=5)
-    Label(group, text="Pozycja Z=",bg="green",anchor=W).grid(row=6,sticky='WE')
-    atomZ=Entry(group, width=15, justify=CENTER)
-    atomZ.grid(row=7)
+    Label(group, text="ID regionu:",bg="green",anchor=W).grid(row=0,column=0,sticky='WE')
+    regionId=Entry(group, width=30, justify=CENTER)
+    regionId.grid(row=0,column=1,sticky='W')
+    Label(group, text="COM X regionu:",bg="green",anchor=W).grid(row=1,column=0,sticky='WE')
+    regionX=Entry(group, width=20, justify=CENTER)  # todo: odswiezac te pola po textvariable zamiast tego co jest
+    regionX.grid(row=1,column=1,sticky='W')
+    Label(group, text="COM Y regionu:",bg="green",anchor=W).grid(row=2,column=0,sticky='WE')
+    regionY=Entry(group, width=20, justify=CENTER)  # todo: jw.
+    regionY.grid(row=2,column=1,sticky='W')
+    Label(group, text="COM Z regionu:",bg="green",anchor=W).grid(row=3,column=0,sticky='WE')
+    regionZ=Entry(group, width=20, justify=CENTER)  # todo: jw.
+    regionZ.grid(row=3,column=1,sticky='W')
+    Label(group,text="Odległość wzorca i regionu:",bg="green",anchor=W).grid(row=4,column=0,sticky="WE")
+    regionTemplateDistance=Entry(group, width=20, justify=CENTER)  # todo: jw.
+    regionTemplateDistance.grid(row=4,column=1,sticky='W')
     
     global forceType
     forceType=IntVar()
-    forceType.set(0)
     group=LabelFrame(currentWindow,text="Typ siły")
     group.grid(column=1,row=0,sticky='NSWE',pady=5,padx=5)
-    Radiobutton(group,text="Force Field",variable=forceType,value=0).grid(row=0,sticky="W")
+    ffRadio=Radiobutton(group,text="Force field",variable=forceType,value=0)
+    ffRadio.grid(row=0,sticky="W")
+    ffRadio.select()
     Radiobutton(group,text="lala",variable=forceType,value=1).grid(row=1,sticky="W")
     Radiobutton(group,text="blabla",variable=forceType,value=2).grid(row=2,sticky="W")
     
+    # RMSD
+    group=LabelFrame(currentWindow,text="Wykres RMSD (Root-mean-square diviation)")
+    group.grid(row=1,columnspan=2,sticky="NSWE",padx=5,pady=5)
+    Label(group,text="\n\ntu bedzie wykres...\n\n").grid(sticky="WE")
+    
 #    spacer
-#    Frame(currentWindow).pack(padx=5,expand=TRUE)
     Frame(currentWindow).grid(sticky='NS')
     
-#    przycisk stop
+#    przyciski
     group=Frame(currentWindow)
-#    group.pack(padx=5,pady=5)
-    group.grid()
+    group.grid(row=3,columnspan=2)
     stopButton=Button(group, text="STOP", command=stop)
-#    stopButton.pack()
     stopButton.grid()
     
     currentWindow.mainloop()
@@ -433,7 +427,7 @@ def chooseStructureFile():
     structureFile.set(askopenfilename())
     print structureFile.get()
     
-def openConfigWindow():
+def configWindow():
     global currentWindow,templateFile,mappingFile,phantomIp,structureFile
 
     currentWindow.destroy()
@@ -441,7 +435,7 @@ def openConfigWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    currentWindow.title("Interaktywny eksplorator lokalnych podobieństw strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -453,50 +447,37 @@ def openConfigWindow():
     \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
     group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    label=Label(group,text=message,bg="green",anchor=W)
-    label.pack(fill=BOTH)
-    fileName=Entry(group,textvariable=templateFile,width=50,state="readonly")
-    fileName.pack(pady=5,side=LEFT)
-    fileChooser=Button(group,text="Wybierz plik",command=chooseTemplateFile)
-    fileChooser.pack(side=LEFT)
+    Label(group,text=message,bg="green",anchor=W).pack(fill=BOTH)
+    Entry(group,textvariable=templateFile,width=50,state="readonly").pack(pady=5,side=LEFT)
+    Button(group,text="Wybierz plik",command=chooseTemplateFile).pack(side=LEFT)
     
 #    Wybór pliku mapowania
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
     group.pack(fill=BOTH)
-    label=Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W)
-    label.pack(fill=BOTH)
-    fileName=Entry(group,textvariable=mappingFile,width=50,state="readonly")
-    fileName.pack(pady=5,side=LEFT)
-    fileChooser=Button(group,text="Wybierz plik",command=chooseMappingFile)
-    fileChooser.pack(side=LEFT)
+    Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W).pack(fill=BOTH)
+    Entry(group,textvariable=mappingFile,width=50,state="readonly").pack(pady=5,side=LEFT)
+    Button(group,text="Wybierz plik",command=chooseMappingFile).pack(side=LEFT)
     
 #    Wybór identyfikatora PDB
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    label=Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W)
-    label.pack(fill=BOTH)
-    fileName=Entry(group,textvariable=structureFile,width=50,state="readonly")
-    fileName.pack(pady=5,side=LEFT)
-    fileChooser=Button(group,text="Wybierz plik",command=chooseStructureFile)
-    fileChooser.pack(side=LEFT)
+    Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W).pack(fill=BOTH)
+    Entry(group,textvariable=structureFile,width=50,state="readonly").pack(pady=5,side=LEFT)
+    Button(group,text="Wybierz plik",command=chooseStructureFile).pack(side=LEFT)
     
     #    ustawianie adresu IP serwera VRPN
     group=LabelFrame(currentWindow,text="Adres IP serwera VRPN",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    vrpnIp=Entry(group,justify=CENTER,textvariable=phantomIp,width=30)
-    vrpnIp.pack(pady=5,side=LEFT)
+    Entry(group,justify=CENTER,textvariable=phantomIp,width=30).pack(pady=5,side=LEFT)
 
 #   spacer
-    group=Frame(currentWindow)
-    group.pack(padx=5,expand=TRUE)
+    Frame(currentWindow).pack(padx=5,expand=TRUE)
     
 #    przyciski
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
-    closeButton.pack(side=RIGHT)
-    nextButton=Button(group,text="Dalej",command=statsWindow)
-    nextButton.pack()
+    Button(group,text="Anuluj",command=currentWindow.destroy).pack(side=RIGHT)
+    Button(group,text="Dalej",command=statsWindow).pack()
     
     currentWindow.mainloop();
     
@@ -506,7 +487,7 @@ def helloWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Eksplorator lokalnych podobieństw struktur przestrzennych")
+    currentWindow.title("Interaktywny eksplorator lokalnych podobieństw strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -515,24 +496,20 @@ def helloWindow():
     
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
-    label=Label(group,text=helloMsg,bg="green")
-    label.pack(fill=BOTH,side=LEFT)
+    Label(group,text=helloMsg,bg="green").pack(fill=BOTH,side=LEFT)
     dnaImage=PhotoImage(file="dna.gif")
-    label=Label(group,image=dnaImage)
-    label.pack(fill=BOTH)
+    Label(group,image=dnaImage).pack(fill=BOTH)
     
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    closeButton=Button(group,text="Anuluj",command=currentWindow.destroy)
-    closeButton.pack(side=RIGHT)
-    nextButton=Button(group,text="Dalej",command=statsWindow)
-    nextButton.pack()
+    Button(group,text="Anuluj",command=currentWindow.destroy).pack(side=RIGHT)
+    Button(group,text="Dalej",command=configWindow).pack()
     
 #    inicjalizacja zmiennych globalnych    
-    templateFile=StringVar(value=os.getcwd()+"/")
-    mappingFile=StringVar(value=os.getcwd()+"/")
-    structureFile=StringVar(value=os.getcwd()+"/")
-    phantomIp=StringVar(value="phantom0@172.21.5.156")
+    templateFile=StringVar(value=os.getcwd()+"/helix.pdb")
+    mappingFile=StringVar(value=os.getcwd()+"/1fg0_helix.txt")
+    structureFile=StringVar(value=os.getcwd()+"/1fg0.pdb")
+    phantomIp=StringVar(value="phantom0@10.21.2.136")
     
     currentWindow.mainloop();
     
