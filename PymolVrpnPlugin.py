@@ -50,15 +50,6 @@ molecule_com=[0,0,0]
 mapping=[]
 regions={}
 
-"""
-    GUI
-"""
-helloMsg="\
-Witaj użytkowniku.\
-\nW tej aplikacji masz możliwość dopasowania lokalnie optymalnych struktur\
-\ncząsteczek chemicznych takich jak białka czy kwasy nukleinowe\
-\nlklklk"
-
 currentWindow=0
 mappingFile=0
 phantomIp=0
@@ -393,8 +384,7 @@ def statsWindow():
     ffRadio=Radiobutton(group,text="Force field",variable=forceType,value=0)
     ffRadio.grid(row=0,sticky="W")
     ffRadio.select()
-    Radiobutton(group,text="lala",variable=forceType,value=1).grid(row=1,sticky="W")
-    Radiobutton(group,text="blabla",variable=forceType,value=2).grid(row=2,sticky="W")
+    Radiobutton(group,text="Spring",variable=forceType,value=1).grid(row=1,sticky="W")
     
     # RMSD
     group=LabelFrame(currentWindow,text="Wykres RMSD (Root-mean-square diviation)")
@@ -494,6 +484,10 @@ def helloWindow():
     currentWindow.attributes('-topmost',1)
     currentWindow.resizable(False, False)
     
+    helloMsg="\
+Witaj użytkowniku.\
+\nW tej aplikacji masz możliwość dopasowania lokalnie optymalnych struktur\
+\ncząsteczek chemicznych takich jak kwasy nukleinowe"
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
     Label(group,text=helloMsg).pack(fill=BOTH,side=LEFT)
