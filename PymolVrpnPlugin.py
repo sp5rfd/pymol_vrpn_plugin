@@ -370,19 +370,19 @@ def statsWindow():
     global regionId, regionX, regionY, regionZ, regionTemplateDistance
     group=LabelFrame(currentWindow, text="Współrzędne")
     group.grid(column=0,padx=5,pady=5,sticky='WE')
-    Label(group, text="ID regionu:",bg="green",anchor=W).grid(row=0,column=0,sticky='WE')
+    Label(group, text="ID regionu:",anchor=W).grid(row=0,column=0,sticky='WE')
     regionId=Entry(group, width=30, justify=CENTER)
     regionId.grid(row=0,column=1,sticky='W')
-    Label(group, text="COM X regionu:",bg="green",anchor=W).grid(row=1,column=0,sticky='WE')
+    Label(group, text="COM X regionu:",anchor=W).grid(row=1,column=0,sticky='WE')
     regionX=Entry(group, width=20, justify=CENTER)  # todo: odswiezac te pola po textvariable zamiast tego co jest
     regionX.grid(row=1,column=1,sticky='W')
-    Label(group, text="COM Y regionu:",bg="green",anchor=W).grid(row=2,column=0,sticky='WE')
+    Label(group, text="COM Y regionu:",anchor=W).grid(row=2,column=0,sticky='WE')
     regionY=Entry(group, width=20, justify=CENTER)  # todo: jw.
     regionY.grid(row=2,column=1,sticky='W')
-    Label(group, text="COM Z regionu:",bg="green",anchor=W).grid(row=3,column=0,sticky='WE')
+    Label(group, text="COM Z regionu:",anchor=W).grid(row=3,column=0,sticky='WE')
     regionZ=Entry(group, width=20, justify=CENTER)  # todo: jw.
     regionZ.grid(row=3,column=1,sticky='W')
-    Label(group,text="Odległość wzorca i regionu:",bg="green",anchor=W).grid(row=4,column=0,sticky="WE")
+    Label(group,text="Odległość wzorca i regionu:",anchor=W).grid(row=4,column=0,sticky="WE")
     regionTemplateDistance=Entry(group, width=20, justify=CENTER)  # todo: jw.
     regionTemplateDistance.grid(row=4,column=1,sticky='W')
     
@@ -414,17 +414,17 @@ def statsWindow():
 
 def chooseTemplateFile():
     global templateFile
-    templateFile.set(askopenfilename())
+    templateFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
     print templateFile.get()
 
 def chooseMappingFile():
     global mappingFile
-    mappingFile.set(askopenfilename())
+    mappingFile.set(askopenfilename( filetypes=(("MAP", "*.map"), ("All files", "*.*")) ))
     print mappingFile.get()
     
 def chooseStructureFile():
     global structureFile
-    structureFile.set(askopenfilename())
+    structureFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
     print structureFile.get()
     
 def configWindow():
@@ -447,21 +447,21 @@ def configWindow():
     \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
     group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    Label(group,text=message,bg="green",anchor=W).pack(fill=BOTH)
+    Label(group,text=message,anchor=W).pack(fill=BOTH)
     Entry(group,textvariable=templateFile,width=50,state="readonly").pack(pady=5,side=LEFT)
     Button(group,text="Wybierz plik",command=chooseTemplateFile).pack(side=LEFT)
     
 #    Wybór pliku mapowania
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
-    group.pack(fill=BOTH)
-    Label(group,text="Tutaj wybierz plik mapowania",bg="green",anchor=W).pack(fill=BOTH)
+    group.pack(fill=BOTH,padx=5,pady=5)
+    Label(group,text="Tutaj wybierz plik mapowania",anchor=W).pack(fill=BOTH)
     Entry(group,textvariable=mappingFile,width=50,state="readonly").pack(pady=5,side=LEFT)
     Button(group,text="Wybierz plik",command=chooseMappingFile).pack(side=LEFT)
     
 #    Wybór identyfikatora PDB
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
-    Label(group,text="Tutaj wybierz plik ",bg="green",anchor=W).pack(fill=BOTH)
+    Label(group,text="Tutaj wybierz plik ",anchor=W).pack(fill=BOTH)
     Entry(group,textvariable=structureFile,width=50,state="readonly").pack(pady=5,side=LEFT)
     Button(group,text="Wybierz plik",command=chooseStructureFile).pack(side=LEFT)
     
@@ -496,7 +496,7 @@ def helloWindow():
     
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
-    Label(group,text=helloMsg,bg="green").pack(fill=BOTH,side=LEFT)
+    Label(group,text=helloMsg).pack(fill=BOTH,side=LEFT)
     dnaImage=PhotoImage(file="dna.gif")
     Label(group,image=dnaImage).pack(fill=BOTH)
     
