@@ -26,6 +26,8 @@ from math import *
 """
 IS_RUNNING = False
 AUTO_ZOOMING = False
+AUTO_DOCK=False
+REGION_COLOR=False
 
 """
     Global variables for translations. 
@@ -36,6 +38,7 @@ AUTO_ZOOMING = False
 trackerX = trackerY = trackerZ = 0
 x = y = z = 0 
 scale=750
+templeCOM=(0,0,0)
 
 """
     Global variables for rotations
@@ -55,9 +58,8 @@ mappingFile=0
 phantomIp=0
 structureFile=0
 templateFile=0
-forceType=0
 # zmienne do wyswietlania danych w UI
-regionId=regionX=regionY=regionZ=regionTemplateDistance=0
+regionId=regionX=regionY=regionZ=regionTemplateDistance=rmsdEntry=0
 
 def simple_com(region_coordinates):
     # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
@@ -83,7 +85,7 @@ def tracker_handler(u, tracker):
     z0 = trackerZ*scale
 #   funkcja dokonujaca przeksztalcenia - transjacji
     global x, y, z
-    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="template", camera=0)
+    cmd.translate(vector=[(x0-x), (y0-y), (z0-z)], object="template", camera=1)
     x = x0
     y = y0
     z = z0
@@ -103,33 +105,44 @@ def tracker_handler(u, tracker):
     rotation_matrix = quaternion_matrix(rotation_quaternion) # Return homogeneous rotation matrix from quaternion.
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
 
+
     cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
-            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="template", camera=0)
+            angle=(rotation_angle*180/math.pi), origin=[templeCOM[0],templeCOM[1],templeCOM[2]], object="template", camera=1)
+
+
+#    cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
+#            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="template", camera=1)
 
 
 def button_handler(u, button):
     # button[0] - numer przycisku (0-gorny,1-dolny)
     # button[1] - status przycisku (0-puszczony,1-wcisniety)
     
-    global AUTO_ZOOMING
+    global AUTO_ZOOMING, AUTO_DOCK
     if(button[0]==0 and button[1]==0):
         AUTO_ZOOMING = False
     elif(button[0]==0 and button[1]==1):
         AUTO_ZOOMING = True
         
     if(button[0]==1 and button[1]==0):
-        print "przycisk drugi puszczony"
+        print "<< Puszczony przycisk 2 >>"
         
     elif(button[0]==1 and button[1]==1):
-        print "przycisk drugi wcisniety"
-    
-    
+        print "ALIGN: ",cmd.align("template","region")
+        com=cmd.centerofmass("template")
+        cmd.translate(object="template",vector=[x-com[0],y-com[1],z-com[2]],camera=0)
+#        print "COM TEMPLATE:", cmd.centerofmass("template"), x, y, z
+        
 def force_handler(u, force):
 #    print "force",force
     abc='test'
     
 def draw_template_structure(template_pdb_file):
     cmd.load(template_pdb_file,"template")
+    cmd.hide("lines","template")
+    cmd.show("cartoon","template")
+    cmd.color("green","template")
+    
     template_com=cmd.centerofmass("template")
     # centruje wskaxnik (przenosze go do zera)
     cmd.translate(vector=[-template_com[0], -template_com[1], -template_com[2]], object="template", camera=0)
@@ -153,6 +166,10 @@ def draw_xyz_axes(x0, y0, z0):
 def draw_molecule(molecule_pdb_file):
     # laduje czasteczke
     cmd.load(molecule_pdb_file,"molecule")
+    cmd.hide("lines","molecule")
+    cmd.show("cartoon","molecule")
+    cmd.color("red","molecule")
+    
     # licze jej centrum masy
     global molecule_com
     molecule_com=cmd.centerofmass("molecule")
@@ -161,8 +178,20 @@ def draw_molecule(molecule_pdb_file):
     
     # pobieram liste pozycji 3D atomow w czasteczce
     stored.pos = []                                                                                                                
-    cmd.iterate_state(1, "molecule", "stored.pos.append((x,y,z,elem,chain+resi))")
+    cmd.iterate_state(1, "molecule", "stored.pos.append((x,y,z,elem,chain,resi))")
     
+
+"""
+    Funkcja oblicza wartość RMSD.
+    Na wejściu dostaje wektor (listę) współrzędnych struktury wzorcowej oraz
+    wektor/listę (tego samego rozmiaru) współrzędnych regionu optymalnego dopasowania,
+    zwraca wartość RMDS
+"""
+def rmsd_compute():
+    
+    
+    
+    return 0.0
 
 def load_mapping_file(mapping_file):
     file=open(mapping_file,"r")
@@ -171,26 +200,29 @@ def load_mapping_file(mapping_file):
     mapping=[]
 
     for line in file:
-        mapping.append([line.split()[0],line.split()[1],0])
+        mapping_symbol=line.split()[0]
+        chain=line.split()[1][0]
+        resi=line.split()[1][1:]
+        mapping.append([mapping_symbol,chain,resi,0])
     file.close()
     
     # na ostatnie pole w mapping wstawiam COM obliczony dla kazdego nukleotydu
     for nucleotyde in mapping:  # iteruje po wszystkich liniach z pliku mapujacego
         # pobieram atomy nalezace do poszczegolnych nukleotydow
-        nucl_atoms = [[atom[0],atom[1],atom[2]] for atom in stored.pos if (atom[4]==nucleotyde[1])]
-        nucleotyde[2]=simple_com(nucl_atoms) # srodek masy dla nukleotydu
+        nucl_coords = [[atom[0],atom[1],atom[2]] for atom in stored.pos if (atom[5]==nucleotyde[2])]
+        nucleotyde[3]=simple_com(nucl_coords) # srodek masy dla nukleotydu
         
-#    print mapping
+    print "SKONCZYLEM LADOWANIE MAPOWANIA"
     
 def calculate_regions_com():
     # zliczam ilosc nukleotydow w helisie wzorcowej
-    # UWAGA: tutaj zakladam, ze wzorcowa helisa sklada sie z dwoch lancuchow o 
+    # UWAGA: tutaj zakladam, ze wzorcowa helisa (czy struktura) sklada sie z dwoch lancuchow o 
     # tej samej dlugosci (ilosci nukleotydow). To oznacza, ze szukam regionow 
     # o dlugosci jednego lancucha helisy, czyli polowy wszystkich nukleotydow
     # z tej helisy.
     
     unique_nucl=set()
-    cmd.iterate_state(1,"template","unique_nucl.add(chain+resi)",space={'unique_nucl':unique_nucl})
+    cmd.iterate_state(1,"template","unique_nucl.add((chain,resi))",space={'unique_nucl':unique_nucl})
     M=len(mapping)        # ilosc nukleotydow w BADANEJ czasteczce
     N=len(unique_nucl)/2  # polowa wszystkich nukleotydow z WZORCOWEJ czasteczki
     
@@ -201,8 +233,8 @@ def calculate_regions_com():
         for n in range(0,N): # -1 jesli blad
             if mapping[m+n][0]=='0':
                 break
-            region=region+(mapping[m+n][1],)
-            region_coords.append(mapping[m+n][2])
+            region=region+(mapping[m+n][2],)
+            region_coords.append(mapping[m+n][3])
             if n==(N-1):
                 #znaleziono region w badanej czasteczke pasujacy do czasteczki wzorcowej
 #                print "JEST REGION: ", m, region, region_coords
@@ -259,6 +291,24 @@ def find_closest_region(x0,y0,z0):
             closestY = coords[1]-molecule_com[1]
             closestZ = coords[2]-molecule_com[2]
     
+    # tworze nowy selection do najblizszego regionu
+    selectCommand="resi "
+    for resi in closestRegionId: 
+        selectCommand+=resi+","    
+    cmd.select("region",selectCommand)
+    
+    # robie alter dla funkcji rms_cur
+#    resiList=set()
+#    cmd.iterate("template","resiList.add(resi)",space={'resiList':resiList})
+#    resiList=sorted(resiList)
+#
+#    for i in range(0,len(closestRegionId)):
+#        selection="template and resi "+str(resiList[i])
+#        expression="resi="+str(closestRegionId[i])
+#        cmd.alter(selection,expression)
+##        print "sel= "+ selection + "exp= "+ expression
+#    print "RMSD: ", cmd.rms_cur("template","region")
+    
     return [closestRegionId,(closestX/scale),(closestY/scale),(closestZ/scale),min_distance]
     
 def vrpn_client():
@@ -282,19 +332,25 @@ def vrpn_client():
     load_mapping_file(mappingFile.get())
     calculate_regions_com()
     
-    global regionId, regionX, regionY, regionZ
+    global regionId, regionX, regionY, regionZ, AUTO_DOCK
     global x,y,z
+    global templeCOM
     
     sleep(1)    # czekam aż się wszystko połączy i narysuje
     
     while IS_RUNNING:
+        if(not AUTO_ZOOMING):
+            cmd.zoom('all')
+            
         tracker.mainloop()
-        button.mainloop()
         forceDevice.mainloop()
+        button.mainloop()
+        
+        templeCOM=cmd.centerofmass("template")
         
         # znajduje nablizszy region/atom w czasteczce do ktorego przyciagam wzorzec/wzkaźnik
-#        point = find_closest_atom(x,y,z)   # znajduję najbliższy atom
-        region=find_closest_region(x,y,z)   # znajduję najbliższy region
+#        region=find_closest_region(x,y,z)   # znajduję najbliższy region do aktualnej pozycji wskaźnika
+        region=find_closest_region(templeCOM[0],templeCOM[1],templeCOM[2])   # znajduję najbliższy region do aktualnej pozycji wskaźnika
         
         # aktualizacja interfejsu
         regionX.delete(0,'end')
@@ -309,10 +365,14 @@ def vrpn_client():
         regionTemplateDistance.insert(0,region[4])
         
         force=100   # wielkosc sily |F|
+#        forceX = (region[1]*scale-templeCOM[0])    # wektor sily X
+#        forceY = (region[2]*scale-templeCOM[1])    # j.w. Y
+#        forceZ = (region[3]*scale-templeCOM[2])    # j.w. Z
+#        forceDevice.setFF_Origin(templeCOM[0], templeCOM[1], templeCOM[2])
+        
         forceX = (region[1]-trackerX)    # wektor sily X
         forceY = (region[2]-trackerY)    # j.w. Y
         forceZ = (region[3]-trackerZ)    # j.w. Z
-
         forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
         forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
         forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
@@ -321,23 +381,26 @@ def vrpn_client():
 
         # rysuje linię łączącą wzorzec/wskaźnik z najblizszym regionem/atomem
         cmd.delete('link')
-        cmd.load_cgo([CYLINDER, x, y, z, (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
-
-        if(not AUTO_ZOOMING):
-            cmd.zoom('all')
+        cmd.load_cgo([CYLINDER, templeCOM[0],templeCOM[1],templeCOM[2], (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
+         
+#        cmd.load_cgo([CYLINDER, x, y, z, (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
             
-    cmd.delete("template")
-    cmd.delete("molecule")
-    cmd.delete("link")
-    cmd.delete("axes")
+    cmd.delete("*")
     x=y=z=0
     
 def stop():
     global IS_RUNNING
     IS_RUNNING = False
-    
-    
+    sleep(1)
     configWindow()
+    
+def doColorRegion():
+    global REGION_COLOR
+    
+    if REGION_COLOR:
+        REGION_COLOR=0
+    else:
+        REGION_COLOR=1
     
 def statsWindow():    
     global currentWindow,IS_RUNNING
@@ -349,7 +412,7 @@ def statsWindow():
     w=640
     h=480
     currentWindow=Tk()
-    currentWindow.title("Interaktywny eksplorator lokalnych podobieństw strukturalnych")
+    currentWindow.title("Interaktywny eksplorator lokalnych uliniowień strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -358,7 +421,7 @@ def statsWindow():
     currentWindow.grid_columnconfigure(0, weight=1)
     currentWindow.grid_columnconfigure(1, weight=1)
     
-    global regionId, regionX, regionY, regionZ, regionTemplateDistance
+    global regionId, regionX, regionY, regionZ, regionTemplateDistance, rmsdEntry
     group=LabelFrame(currentWindow, text="Współrzędne")
     group.grid(column=0,padx=5,pady=5,sticky='WE')
     Label(group, text="ID regionu:",anchor=W).grid(row=0,column=0,sticky='WE')
@@ -377,18 +440,14 @@ def statsWindow():
     regionTemplateDistance=Entry(group, width=20, justify=CENTER)  # todo: jw.
     regionTemplateDistance.grid(row=4,column=1,sticky='W')
     
-    global forceType
-    forceType=IntVar()
-    group=LabelFrame(currentWindow,text="Typ siły")
+    group=LabelFrame(currentWindow,text="Opcje")
     group.grid(column=1,row=0,sticky='NSWE',pady=5,padx=5)
-    ffRadio=Radiobutton(group,text="Force field",variable=forceType,value=0)
-    ffRadio.grid(row=0,sticky="W")
-    ffRadio.select()
-    Radiobutton(group,text="Spring",variable=forceType,value=1).grid(row=1,sticky="W")
+    Checkbutton(group,text="Koloruj region",command=doColorRegion).grid(row=0,sticky="W")
     
     # RMSD
     group=LabelFrame(currentWindow,text="Wykres RMSD (Root-mean-square diviation)")
     group.grid(row=1,columnspan=2,sticky="NSWE",padx=5,pady=5)
+    rmsdEntry=Entry(group,width=20,justify=CENTER)
     Label(group,text="\n\ntu bedzie wykres...\n\n").grid(sticky="WE")
     
 #    spacer
@@ -425,7 +484,7 @@ def configWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interaktywny eksplorator lokalnych podobieństw strukturalnych")
+    currentWindow.title("Interaktywny eksplorator lokalnych uliniowień strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -477,7 +536,7 @@ def helloWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interaktywny eksplorator lokalnych podobieństw strukturalnych")
+    currentWindow.title("Interaktywny eksplorator lokalnych uliniowień strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
