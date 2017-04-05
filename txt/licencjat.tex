@@ -81,12 +81,13 @@
   D.127.6. Numerical blabalysis}
 
 % Słowa kluczowe:
-\keywords{blabaliza różnicowa, fetory $\sigma$-$\rho$, fooizm,
-  blarbarucja, blaba, fetoryka, baleronik}
+\keywords{bioinformatyka, wirtualna rzeczywistość, podobieństwo strukturalne, RNA, DNA, białka, biopolimery, uliniowienie }
 
 % Tu jest dobre miejsce na Twoje własne makra i~środowiska:
 \newtheorem{defi}{Definicja}[section]
 
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
 % koniec definicji
 
 \begin{document}
@@ -95,38 +96,71 @@
 
 %tu idzie streszczenie na strone poczatkowa
 \begin{abstract}
-W pracy przedstawiono prototypową implementację blabalizatora różnsywnego sdfg sdfg sdfg dsfgsd fgsd fglkdsjgf lksdjfg ksdjfg sdjfglk sdfks dfgksjdflkdsj flkgsd fgsdl fglsd fsd fgs dfg sd fgs dfg sd fgs dfg sd fg sdf gsd fg sdf gsd fgs dfg sd fgsd gfs df gs 
+W pracy przedstawiono implementację programu narzędziowego służącego do interaktywnej eksploracji cząsteczek biopolimerów (polinukleotydów i polipeptydów) w poszukiwaniu miejsc optymalnych ze względu na lokalne podobieństwo strukturalne. W pracy szeroko zastosowano metody wirtualnej rzeczywistości wraz z obsługą urządzenia haptycznego Sensable Phantom Omni.
 \end{abstract}
 
 \tableofcontents
-\listoffigures
-\listoftables
+%\listoffigures
+%\listoftables
 
 \chapter*{Wprowadzenie}
 \addcontentsline{toc}{chapter}{Wprowadzenie}
+Biopolimery, a w szczególności kwasy nukleinowe i polipeptydy stanowią fundamenty życia. W każdej komórce oraz w całym organizmie są one odpowiedzialne za najważniejsze funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej, biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Polipeptydy i białka zaś są składnikami budulcowymi wielu organów, pełnią funkcje hormonalne czy regulatorowe.
 
-Blabalizator różnicowy jest podstawowym narzędziem blabalii
-fetorycznej.  Dlatego naukowcy z~całego świata prześcigają się
-w~próbach efektywnej implementacji.  Opracowana przez prof. Fifaka
-teoria fetorów $\sigma$-$\rho$ otwiera w~tej dziedzinie nowe
-możliwości.  Wykorzystujemy je w~niniejszej pracy.
+Pomimo odmiennych składników budulcowych – nukleotydów i aminokwasów – w obu przypadkach wymienionych biopolimerów ich funkcja wynika bezpośrednio ze struktury przestrzennej, która to za hipotezą Anfinsena [1] jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
+	
+Struktura przestrzenna biopolimerów stanowi obecnie przedmiot niezwykle intensywnych badań na całym świecie. Jest to bardzo ważne zagadnienie integrujące ze sobą grupy naukowców z dziedzin, które jeszcze na przełomie wieków miały ze sobą niewiele wspólnego. Do grona biologów i chemików dołączyli matematycy, fizycy oraz informatycy wspólnie tworząc bardzo nowatorskie narzędzia ułatwiające modelowanie i tworzenie symulacji zachodzących w skali molekularnej. W badania nad strukturami przestrzennymi biopolimerów zaangażowane są największe na świecie ośrodki naukowe, korporacje farmaceutyczne czy agencje rządowe. Badanie interakcji receptorów z ligandami, projektowanie nowych leków czy terapie celowane to tylko wąski wycinek zagadnień związanych z tymi pracami.
+	
+Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Obecnie najwydajniejsze komputery bez przerwy prowadzą obliczenia optymalnie pofałdowanych białek, kwasów nukleinowych czy prowadzą symulacje dynamiki molekularnej. Jest to dziedzina w której niemalże każdego roku dokonuje się przełomowych odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego konkursu CASP na najlepsze przewidywanie struktury białka, który za każdym razem przynosi coraz to doskonalsze wyniki. 
 
-Przystępne wprowadzenie do blabalii fetorycznej można znaleźć w~pracy
-Fifaka i~Gryzogrzechotalskiego \cite{ffgg}.  Dlatego w~niniejszym
-tekście ograniczymy się do przypomnienia pojęć podstawowych.
+Nie mniej ważnym od samych badań jest prezentacja ich wyników szerokiemu gronu odbiorców. Same efektowne wizualizacje wyników badań nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego dostępu nie mieliśmy nigdy wcześniej za pośrednictwem naszych zmysłów. W ostatnim czasie coraz częściej sięga się także do rozwiązań z zakresu wirtualnej rzeczywistości. 
 
-Praca składa się z~pięciu rozdziałów i~dodatków.
-W~rozdziale~\ref{r:pojecia} przypomniano podstawowe pojęcia blabalii
-fetorycznej.  Dotychczasowe próby implementacji blablizatora
-różnicowego zestawiono w~rozdziale~\ref{r:losers}.
-Rozdział~\ref{r:fifak} przedstawia teorię Fifaka i~wyjaśnia sposób jej
-wykorzystania w~implementacji blabalizatora.  W~rozdziale \ref{r:impl}
-przedstawiono algorytm blabalizy i~realizujący go program komputerowy.
-Ostatni rozdział zawiera przemyślenia dotyczące możliwego wpływu
-dostępności efektywnej blabalizy numerycznej na rozwój blabalii
-fetorycznej.  W~dodatkach umieszczono najciekawszy fragment programu,
-przykładowe dane i~wyniki działania programu.
+Mianem wirtualnej rzeczywistości (ang. virtual reality) określamy sztuczne, wykreowane przy pomocy technologii informatycznych multimedialne projekcje przestrzeni, przedmiotów czy zdarzeń. Na obecnym poziomie rozwoju technologii wirtualna rzeczywistość umożliwia człowiekowi wchodzenie w interakcję z tym środowiskiem przede wszystkim za pośrednictwem zmysłów wzorku, słuchu czy dotyku. 
 
+	Wirtualna rzeczywistość w dzisiejszym świecie zyskuje coraz to większą popularność w wielu dziedzinach życia, od zastosowań czysto rozrywkowych po zaawansowane projekty naukowe, przemysłowe czy wojskowe. Postępująca od wielu lat miniaturyzacja, rozwój nowych algorytmów czy drastyczne zwiększenie wydajności obliczeniowej sprzętu komputerowego jedynie przyspiesza ten proces. 
+\\
+\\
+\includegraphics[scale=0.35,right]{MooresLaw}
+\\
+\\
+	Elementami niezbędnymi do prawidłowego wykreowania wirtualnego środowiska jest zarówno dedykowane oprogramowanie jak i sprzęt konieczny do przekazywania informacji zwrotnych do użytkownika. Rzeczywistość wirtualna aby zostać możliwie najlepiej zinterpretowana przez ludzki mózg musi jak najbardziej przypominać rzeczywistość w której żyjemy na co dzień. Aby sprostać temu zadaniu najczęściej reprezentuje się ją w postaci trójwymiarowych scen. Tylko ten jeden czynnik powoduje, że do poprawnej symulacji niezbędne są nowoczesne, wysokowydajne procesory i karty graficzne będące w stanie przeprowadzić niezbędne obliczenia.
+
+	Jak już wspomniano wirtualna rzeczywistość może znajdować zastosowanie także w nauce w szczególności w dziedzinach w których obiekty zainteresowań są zbyt małe aby być widoczne gołym okiem, takie jak cząsteczki chemiczne lub pojedyncze atomy. Istnieje cały szereg programów przeprowadzających np. symulacje oddziaływań międzycząsteczkowych, zwijania białek (ang. protein folding) czy przeprowadzających obliczenia dynamiki molekularnej (ang. molecular dynamics), a także umożliwiających wizualizację tych symulacji. Stosunkowo niewiele jednak jest rozwiązań dedykowanych wirtualnej rzeczywistości, które mogłyby umożliwić interakcję ze sprzężeniem zwrotnym. 
+	
+	Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego dysponują sprzętem niezbędnym do realizacji takich zadań. Urządzenie haptyczne Sensable Phantom Omni jest przykładem trójwymiarowego wskaźnika ze zwrotną projekcją momentów sił, którego wykorzystanie otwiera całe spektrum nowych możliwości związanych z realizacją projektów wirtualnej rzeczywiści w biofizyce molekularnej. 
+	
+	Z punktu widzenia osoby zajmującej się szeroko pojętą biofizyką molekularną na szczególną uwagę zasługują związki
+
+\chapter*{Cel i zakres pracy}
+\addcontentsline{toc}{chapter}{Cel i zakres pracy}
+
+	W ramach niniejszej pracy została przedstawiona implementacja narzędzia z pogranicza wirtualnej rzeczywistości i biofizyki molekularnej. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość dopasowania strukturalnego wzorca (ang. template) i fragmentów cząsteczki celu (ang. target). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił do urządzenia haptycznego. 
+	
+	Program pracuje w formie wtyczki do pakietu PyMOL, do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości, bioinformatyczne algorytmy pomiaru jakości dopasowania struktur (RMSD), algorytmy wyszukujące optymalne dopasowanie (uliniowienie) struktur oraz algorytmy maksymalizujące stopień dopasowania struktur (algorytm Kabsch'a).
+
+	Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia stanowiska pracy składającego się z elementów przedstawionych na diagramie:
+	
+diagram prezentujący stanowisko pracy (komputer+haptic+vrpn+pymol)
+
+	W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
+
+\chapter{Metody lokalnego dopasowania struktur chemicznych}
+
+todo: streszczenie doktoratu PD
+
+	Ważnym problemem jest przeszukiwanie struktury trójwymiarowej 
+	
+\chapter{Urządzenie haptyczne Sensable Phantom Omni}
+
+
+Nadrzędnym celem wirtualnej rzeczywistości jest możliwie wierne odtworzenie rzeczywistości w świecie komputerowym oraz umożliwienie użytkownikowi wchodzenie w interakcję z tymi symulacjami. Między innymi do tego celu powstało urządzenie Phantom Omni opracowane przez firmę Sensable (obecnie Geomagic).
+
+\includegraphics[scale=0.5]{Sensable_Phantom_Omni}
+
+
+	
+	
+	
 \chapter{Podstawowe pojęcia}\label{r:pojecia}
 
 Pojęciem pierwotnym blabalii fetorycznej jest \emph{blaba}.
@@ -391,7 +425,7 @@ utajnieniu.
     aspektach pewnych aspektów}, Astrolog Polski, Zeszyt 16, Warszawa
   1916.
 
-%\bibitem[Fif00]{ffgg} Filigran Fifak, Gizbert Gryzogrzechotalski,
+\bibitem[Fif00]{ffgg} Filigran Fifak, Gizbert Gryzogrzechotalski,
   \textit{O blabalii fetorycznej}, Materiały Konferencji Euroblabal
   2000.
 
