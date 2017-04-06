@@ -145,17 +145,26 @@ Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia
 W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
 
 \chapter{Podstawy teoretyczne}
-W tym rozdziale są przedstawiona teoria leżąca u podstaw niniejszej pracy.
-
-\section{Środek masy}
+W tym rozdziale zaprezentowano podstawowe twierdzenia i teorię leżącą u podstaw niniejszej pracy. Skupiono się głównie na zagadnieniach związanych z wykorzystanymi algorytmami oceny podobieństwa strukturalnego, przekształceniami geometrycznymi oraz metodami dopasowania lokalnego (uliniawiania) struktur chemicznych.
 
 \section{RMSD}
-Jednym ze sposobów oceny średniej odległości lub podobieństwa dwóch dowolnych  obiektów (nie tylko struktur chemicznych) określonych w przestrzeni trójwymiarowej jest RMSD (ang. root-mean-square deviation). W bioinformatyce, obok GDT (ang. global distance test) i TM-score (ang. template modeling score) jest najszerzej stosowaną miarą podobieństwa strukturalnego. RMSD bazuje na średniokwadratowej odległości pomiędzy współrzędnymi analogicznych atomów zawartych w strukturze wzorca i we fragmencie cząsteczki celu o tej samej długości.
+
+Efektywna ocena podobieństwa struktur chemicznych jest kluczowym elementem niniejszej pracy. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości. Obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
+
+Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi atomów zawartych w strukturze wzorca (ang. template) i w odpowiednim fragmencie cząsteczki celu (ang. target). 
 \\
 \\
 \includegraphics[scale=0.8, center]{rmsd}
 \\
 \\
+O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. 
+
+W tym przypadku dane pochodza z zewnętrznej aplikacji, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu i odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (ang. threshold). Mogą to być np. alfa-helisy czy beta-wstążki, a także bliżej nieokreślone struktury drugorzędowe. Wynikiem takiej procedury uliniowienia jest plik mapujący (ang. mapping file) zawierający informację o \textit{regionach podobnych} do struktury wzorca w cząsteczce celu. 
+ 
+todo: różne wartości RMSD na przykładzie dopasowania struktur ( z pymola - 2,3 sztuki) 
+ 
+Należy wyznaczyć dwa wektory współrzędnych o jednakowym rozmiarze, który będzie identyczny z ilością współrzędnych struktury wzorca.
+
 Kod źródłowy funkcji realizującej obliczenie rmsd:
 def rmsd(a,b):
 	// tu będzie kod źródłowy przykładowej funkcji todo
