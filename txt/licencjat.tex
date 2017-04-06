@@ -29,7 +29,7 @@
 %\autoriv{Autor nr Cztery}{432145}
 %\autorv{Autor nr Pięć}{342011}
 
-\title{Tytuł pracy licencjackiej}
+\title{Interaktywna eksploracja i dopasowanie lokalnie optymalnych struktur biopolimerów z wykorzystaniem metod wirtualnej rzeczywistości}
 
 
 %\tytulang{An implementation of a difference blabalizer based on the theory of $\sigma$ -- $\rho$ phetors}
@@ -37,7 +37,7 @@
 %kierunek: 
 % - matematyka, informacyka, ...
 % - Mathematics, Computer Science, ...
-\kierunek{informatyka}
+\kierunek{bioinformatyka}
 
 % informatyka - nie okreslamy zakresu (opcja zakomentowana)
 % matematyka - zakres moze pozostac nieokreslony,
@@ -108,59 +108,176 @@ W pracy przedstawiono implementację programu narzędziowego służącego do int
 Biopolimery, a w szczególności kwasy nukleinowe i polipeptydy stanowią fundamenty życia. W każdej komórce oraz w całym organizmie są one odpowiedzialne za najważniejsze funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej, biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Polipeptydy i białka zaś są składnikami budulcowymi wielu organów, pełnią funkcje hormonalne czy regulatorowe.
 
 Pomimo odmiennych składników budulcowych – nukleotydów i aminokwasów – w obu przypadkach wymienionych biopolimerów ich funkcja wynika bezpośrednio ze struktury przestrzennej, która to za hipotezą Anfinsena [1] jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
-	
+
 Struktura przestrzenna biopolimerów stanowi obecnie przedmiot niezwykle intensywnych badań na całym świecie. Jest to bardzo ważne zagadnienie integrujące ze sobą grupy naukowców z dziedzin, które jeszcze na przełomie wieków miały ze sobą niewiele wspólnego. Do grona biologów i chemików dołączyli matematycy, fizycy oraz informatycy wspólnie tworząc bardzo nowatorskie narzędzia ułatwiające modelowanie i tworzenie symulacji zachodzących w skali molekularnej. W badania nad strukturami przestrzennymi biopolimerów zaangażowane są największe na świecie ośrodki naukowe, korporacje farmaceutyczne czy agencje rządowe. Badanie interakcji receptorów z ligandami, projektowanie nowych leków czy terapie celowane to tylko wąski wycinek zagadnień związanych z tymi pracami.
-	
+
 Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Obecnie najwydajniejsze komputery bez przerwy prowadzą obliczenia optymalnie pofałdowanych białek, kwasów nukleinowych czy prowadzą symulacje dynamiki molekularnej. Jest to dziedzina w której niemalże każdego roku dokonuje się przełomowych odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego konkursu CASP na najlepsze przewidywanie struktury białka, który za każdym razem przynosi coraz to doskonalsze wyniki. 
 
 Nie mniej ważnym od samych badań jest prezentacja ich wyników szerokiemu gronu odbiorców. Same efektowne wizualizacje wyników badań nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego dostępu nie mieliśmy nigdy wcześniej za pośrednictwem naszych zmysłów. W ostatnim czasie coraz częściej sięga się także do rozwiązań z zakresu wirtualnej rzeczywistości. 
 
 Mianem wirtualnej rzeczywistości (ang. virtual reality) określamy sztuczne, wykreowane przy pomocy technologii informatycznych multimedialne projekcje przestrzeni, przedmiotów czy zdarzeń. Na obecnym poziomie rozwoju technologii wirtualna rzeczywistość umożliwia człowiekowi wchodzenie w interakcję z tym środowiskiem przede wszystkim za pośrednictwem zmysłów wzorku, słuchu czy dotyku. 
 
-	Wirtualna rzeczywistość w dzisiejszym świecie zyskuje coraz to większą popularność w wielu dziedzinach życia, od zastosowań czysto rozrywkowych po zaawansowane projekty naukowe, przemysłowe czy wojskowe. Postępująca od wielu lat miniaturyzacja, rozwój nowych algorytmów czy drastyczne zwiększenie wydajności obliczeniowej sprzętu komputerowego jedynie przyspiesza ten proces. 
+Wirtualna rzeczywistość w dzisiejszym świecie zyskuje coraz to większą popularność w wielu dziedzinach życia, od zastosowań czysto rozrywkowych po zaawansowane projekty naukowe, przemysłowe czy wojskowe. Postępująca od wielu lat miniaturyzacja, rozwój nowych algorytmów czy drastyczne zwiększenie wydajności obliczeniowej sprzętu komputerowego jedynie przyspiesza ten proces. 
 \\
 \\
-\includegraphics[scale=0.35,right]{MooresLaw}
+\includegraphics[scale=0.35,center]{MooresLaw}
 \\
 \\
-	Elementami niezbędnymi do prawidłowego wykreowania wirtualnego środowiska jest zarówno dedykowane oprogramowanie jak i sprzęt konieczny do przekazywania informacji zwrotnych do użytkownika. Rzeczywistość wirtualna aby zostać możliwie najlepiej zinterpretowana przez ludzki mózg musi jak najbardziej przypominać rzeczywistość w której żyjemy na co dzień. Aby sprostać temu zadaniu najczęściej reprezentuje się ją w postaci trójwymiarowych scen. Tylko ten jeden czynnik powoduje, że do poprawnej symulacji niezbędne są nowoczesne, wysokowydajne procesory i karty graficzne będące w stanie przeprowadzić niezbędne obliczenia.
+Elementami niezbędnymi do prawidłowego wykreowania wirtualnego środowiska jest zarówno dedykowane oprogramowanie jak i sprzęt konieczny do przekazywania informacji zwrotnych do użytkownika. Rzeczywistość wirtualna aby zostać możliwie najlepiej zinterpretowana przez ludzki mózg musi jak najbardziej przypominać rzeczywistość w której żyjemy na co dzień. Aby sprostać temu zadaniu najczęściej reprezentuje się ją w postaci trójwymiarowych scen. Tylko ten jeden czynnik powoduje, że do poprawnej symulacji niezbędne są nowoczesne, wysokowydajne procesory i karty graficzne będące w stanie przeprowadzić niezbędne obliczenia.
 
-	Jak już wspomniano wirtualna rzeczywistość może znajdować zastosowanie także w nauce w szczególności w dziedzinach w których obiekty zainteresowań są zbyt małe aby być widoczne gołym okiem, takie jak cząsteczki chemiczne lub pojedyncze atomy. Istnieje cały szereg programów przeprowadzających np. symulacje oddziaływań międzycząsteczkowych, zwijania białek (ang. protein folding) czy przeprowadzających obliczenia dynamiki molekularnej (ang. molecular dynamics), a także umożliwiających wizualizację tych symulacji. Stosunkowo niewiele jednak jest rozwiązań dedykowanych wirtualnej rzeczywistości, które mogłyby umożliwić interakcję ze sprzężeniem zwrotnym. 
+Jak już wspomniano wirtualna rzeczywistość może znajdować zastosowanie także w nauce w szczególności w dziedzinach w których obiekty zainteresowań są zbyt małe aby być widoczne gołym okiem, takie jak cząsteczki chemiczne lub pojedyncze atomy. Istnieje cały szereg programów przeprowadzających np. symulacje oddziaływań międzycząsteczkowych, zwijania białek (ang. protein folding) czy przeprowadzających obliczenia dynamiki molekularnej (ang. molecular dynamics), a także umożliwiających wizualizację tych symulacji. Stosunkowo niewiele jednak jest rozwiązań dedykowanych wirtualnej rzeczywistości, które mogłyby umożliwić interakcję ze sprzężeniem zwrotnym. 
 	
-	Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego dysponują sprzętem niezbędnym do realizacji takich zadań. Urządzenie haptyczne Sensable Phantom Omni jest przykładem trójwymiarowego wskaźnika ze zwrotną projekcją momentów sił, którego wykorzystanie otwiera całe spektrum nowych możliwości związanych z realizacją projektów wirtualnej rzeczywiści w biofizyce molekularnej. 
+Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego dysponują sprzętem niezbędnym do realizacji takich zadań. Urządzenie haptyczne Sensable Phantom Omni jest przykładem trójwymiarowego wskaźnika ze zwrotną projekcją momentów sił, którego wykorzystanie otwiera całe spektrum nowych możliwości związanych z realizacją projektów wirtualnej rzeczywiści w biofizyce molekularnej. 
 	
-	Z punktu widzenia osoby zajmującej się szeroko pojętą biofizyką molekularną na szczególną uwagę zasługują związki
+Z punktu widzenia osoby zajmującej się szeroko pojętą biofizyką molekularną na szczególną uwagę zasługują związki
 
 \chapter*{Cel i zakres pracy}
 \addcontentsline{toc}{chapter}{Cel i zakres pracy}
 
-	W ramach niniejszej pracy została przedstawiona implementacja narzędzia z pogranicza wirtualnej rzeczywistości i biofizyki molekularnej. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość dopasowania strukturalnego wzorca (ang. template) i fragmentów cząsteczki celu (ang. target). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił do urządzenia haptycznego. 
+W ramach niniejszej pracy została przedstawiona implementacja narzędzia z pogranicza wirtualnej rzeczywistości i biofizyki molekularnej. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość dopasowania strukturalnego wzorca (ang. template) i fragmentów cząsteczki celu (ang. target). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił do urządzenia haptycznego. 
 	
-	Program pracuje w formie wtyczki do pakietu PyMOL, do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości, bioinformatyczne algorytmy pomiaru jakości dopasowania struktur (RMSD), algorytmy wyszukujące optymalne dopasowanie (uliniowienie) struktur oraz algorytmy maksymalizujące stopień dopasowania struktur (algorytm Kabsch'a).
+Program pracuje w formie wtyczki do pakietu PyMOL, do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości, bioinformatyczne algorytmy pomiaru jakości dopasowania struktur (RMSD), algorytmy wyszukujące optymalne dopasowanie (uliniowienie) struktur oraz algorytmy maksymalizujące stopień dopasowania struktur (algorytm Kabsch'a).
 
-	Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia stanowiska pracy składającego się z elementów przedstawionych na diagramie:
+Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia stanowiska pracy składającego się z elementów przedstawionych na diagramie:
 	
-diagram prezentujący stanowisko pracy (komputer+haptic+vrpn+pymol)
+\textbf{TODO:} diagram prezentujący stanowisko pracy (komputer+haptic+vrpn+pymol)
 
-	W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
+W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
 
-\chapter{Metody lokalnego dopasowania struktur chemicznych}
+\chapter{Podstawy teoretyczne}
+W tym rozdziale są przedstawiona teoria leżąca u podstaw niniejszej pracy.
 
+\section{Środek masy}
+
+\section{RMSD}
+Jednym ze sposobów oceny średniej odległości lub podobieństwa dwóch dowolnych  obiektów (nie tylko struktur chemicznych) określonych w przestrzeni trójwymiarowej jest RMSD (ang. root-mean-square deviation). W bioinformatyce, obok GDT (ang. global distance test) i TM-score (ang. template modeling score) jest najszerzej stosowaną miarą podobieństwa strukturalnego. RMSD bazuje na średniokwadratowej odległości pomiędzy współrzędnymi analogicznych atomów zawartych w strukturze wzorca i we fragmencie cząsteczki celu o tej samej długości.
+\\
+\\
+\includegraphics[scale=0.8, center]{rmsd}
+\\
+\\
+Kod źródłowy funkcji realizującej obliczenie rmsd:
+def rmsd(a,b):
+	// tu będzie kod źródłowy przykładowej funkcji todo
+
+\section{Algorytm Kabsch'a}
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jej wartości jest optymalna translacja i rotacja struktury wzorca nad strukturę celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Funkcję tę opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch .
+
+Powszechną metodą minimalizacji wartości RMSD jest translacja i rotacja struktury wzorca aby jak najlepiej nałożyć ją na strukturę celu. 
+
+def kabsch(a,b,c):
+	// tu będzie kod xrodlowy algorytmu kabscha
+
+\section{Pole siłowe}
+todo
+
+\section{Przekształcenia geometryczne}
+Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarne operacje intensywnie używane w niniejszej pracy. Do podstawowych przekształceń zaliczamy skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Optymalne metody numeryczne realizujące te przekształcenia są zatem priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. Niezbędne jest także stosowanie konwersji pomiędzy różnymi formatami danych zawierających informacje o przekształceniach czy nawet samymi sposobami przekształcania występującymi w pakiecie PyMOL i VRPN. 
+
+TODO: trochę ogólnych formalizmów matematycznych „czym są przekształcenia”
+
+\subsection{Skalowanie}
+	Skalowanie jest jednym z najprostszych przekształceń. Polega na przemnożeniu każdej składowej wektora współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnio określony wektor skalujący C' lub wartość skalarną C zwanymi współczynnikami skalowania. Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych wyjściowego obiektu, że w zależności od wartości  współczynnika skalującego może zostać:
+	
+zmniejszony, gdy C<1
+
+powiększony, gdy C>1
+
+niezmieniony, gdy C=1
+
+\subsection{Translacje}
+
+\subsection{Rotacje}
+W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor V. Dla przykładu punkt:
+A=(Ax, Ay, Az)
+przesunięty o wektor:
+V=(Vx, Vy, Vz)
+będzie miał współrzędne:
+A\=(Ax+Vx, Ay+Vy, Az+Vz)
+
+Translacje są powszechną operacją używaną między innymi w grafice komputerowej. Z tego faktu wynika, że tego typu
+
+Skalowanie jest operacją polegającą na przemnożeniu wektora punktów określonego w przestrzeni o dowolną wartość skalarną będącą 
+
+Przesunięcia o wektor czyli translacje stanowią pierwszy z tych elementów. Formalnie definicja translacji
+
+
+\section{Metody lokalnego dopasowania struktur chemicznych}
 todo: streszczenie doktoratu PD
 
-	Ważnym problemem jest przeszukiwanie struktury trójwymiarowej 
+Ważnym problemem jest przeszukiwanie struktury trójwymiarowej 
+
 	
 \chapter{Urządzenie haptyczne Sensable Phantom Omni}
-
-
 Nadrzędnym celem wirtualnej rzeczywistości jest możliwie wierne odtworzenie rzeczywistości w świecie komputerowym oraz umożliwienie użytkownikowi wchodzenie w interakcję z tymi symulacjami. Między innymi do tego celu powstało urządzenie Phantom Omni opracowane przez firmę Sensable (obecnie Geomagic).
+\\
+\\
+\includegraphics[scale=0.5,center]{Sensable_Phantom_Omni}
+\\
+\\
+\section{Opis urządzenia}
+Urządzenie haptyczne Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji obiektu z możliwością programowego sterowania zwrotną projekcją momentów sił – o trzech stopniach swobody. 
 
-\includegraphics[scale=0.5]{Sensable_Phantom_Omni}
+Jest to urządzenie wykorzystywane w profesjonalnych rozwiązaniach z zakresu wirtualnej rzeczywistości czy modelowania trójwymiarowego. Producent wraz z urządzeniem dostarcza  sterowniki oraz pakiet bibliotek programistycznych OpenHaptics umożliwiających tworzenie dowolnego oprogramowania w pełni wykorzystującego możliwości urządzenia. 
+
+Producent w nocie katalogowej podaje nominalną rozdzielczość zwracanej pozycji na około 450dpi (0.055mm) oraz tolerancję orientacji na około 5\% co w zupełności wystarcza do prezentowanych zastosowań.
+
+\textbf{TODO:} szczegolowy opis + rysunki
+	
+\section{Wymagania sprzętowe}
+
+	Urządzenia Sensable Phantom Omni w które wyposażona jest Pracownia Biofizyki Wydziału Fizyki Uniwersytetu Warszawskiego posiadają dwa rodzaje interfejsów: FireWire (IEEE-1394a) oraz Ethernet.
+	
+W pierwszym przypadku (na którym bazuje niniejsza praca) producent zaleca stosowanie kontrolerów IEEE-1394a opartych o chipset firmy NEC lub VIA. Ponadto w związku z zaprzestaniem wspierania tego standardu przez firmę Microsoft w systemach operacyjnych nowszych niż Windows 8?? wsparcie firmy Sensable dla tych urządzeń również zostało wstrzymane. Ta sytuacja rodzi cały szereg problemów już na etapie instalacji sterowników, w praktyce niemalże uniemożliwiając pracę z tym urządzeniem w nowszych systemach operacyjnych. 
+
+Rozwiązaniem problemu może okazać się praca na starszych wersjach sterowników lub zastosowanie systemu GNU/Linux na którym wsparcie jest wciąż zapewnione.
+	
+\textbf{TODO:} dopisac tu cos jeszcze...
+
+\section{Struktura oprogramowania OpenHaptics Toolkit}
+
+OpenHaptics Toolkit jest bogatym pakietem oprogramowania dostarczanego przez firmę Sensable. Umożliwia on dostęp do niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty abstrakcję. 
+\\
+\\
+\includegraphics[scale=0.5,center]{openhaptics}
+\\
+\\
+Na OpenHaptics Toolkit składa się kilka elementów składowych, są to:
+sterowniki PDD (Phantom Device Drivers) – sterowniki wszystkich urządzeń haptycznych oferowanych przez producenta:
+
+- Haptic Device API (HDAPI) – niskopoziomowe API umożliwiające bezpośredni dostęp do funkcji sterujących projekcją sił i pobieraniem danych o pozycji i orientacji wskaźnika
+
+- Haptic Library API (HLAPI) – wysokopoziomowe API zaprojektowane głównie pod kątem zgodności składniowej z OpenGL API
+
+\section{Przykłady wykorzystania}
+tu beda jakies rzeczy...
 
 
-	
-	
-	
+\chapter{Biblioteka VRPN}
+ll
+
+\section{Opis pakietu}
+opisik
+
+\section{Dostosowanie VRPN do wymagań niniejszej pracy}
+opis
+
+\section{Kompilacja i uruchomienie}
+kompilacja i uruchomienie
+
+\chapter{Pakiet PyMOL}
+opis pakietu
+
+\section{Opis Oprogramowania}
+opisik
+
+\section{Sposób tworzenia wtyczek}
+opisik
+
+\chapter{Opis stanowiska laboratoryjnego}
+
+
+
 \chapter{Podstawowe pojęcia}\label{r:pojecia}
 
 Pojęciem pierwotnym blabalii fetorycznej jest \emph{blaba}.
