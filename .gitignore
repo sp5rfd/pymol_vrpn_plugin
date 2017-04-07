@@ -1,3 +1,10 @@
 /nbproject
 nb-configuration.xml
 *.pyc
+*.aux
+*.dvi
+*.lof
+*.log
+*.lot
+*.toc
+*.synctex.gz
