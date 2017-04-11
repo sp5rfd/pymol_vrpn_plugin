@@ -147,7 +147,49 @@ Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia
 W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
 
 \chapter{Podstawy teoretyczne}
-W tym rozdziale zaprezentowano podstawowe twierdzenia i teorię leżącą u podstaw niniejszej pracy. Skupiono się głównie na zagadnieniach związanych z wykorzystanymi algorytmami oceny podobieństwa strukturalnego, przekształceniami geometrycznymi oraz metodami dopasowania lokalnego (uliniawiania) struktur chemicznych.
+W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się głównie na zagadnieniach związanych z przekształceniami geometrycznymi, wykorzystanymi algorytmami oceny podobieństwa strukturalnego oraz metodami dopasowania lokalnego (uliniawiania) struktur chemicznych.
+
+\section{Przekształcenia geometryczne}
+Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarne operacje intensywnie używane w niniejszej pracy. Do podstawowych przekształceń zaliczamy skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Optymalne metody numeryczne realizujące te przekształcenia są zatem priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. Niezbędne jest także stosowanie konwersji pomiędzy różnymi formatami danych zawierających informacje o przekształceniach czy nawet samymi sposobami przekształcania występującymi w pakiecie PyMOL i VRPN. 
+
+TODO: trochę ogólnych formalizmów matematycznych „czym są przekształcenia”
+
+\subsection{Skalowanie}
+Skalowanie (inaczej mnożenie przez skalar) to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $C$ lub dodatnio określony wektor $C'$ będące współczynnikami skalowania.
+
+W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie jako współczynników skalowania wektorów. Dla potrzeb niniejszej pracy wystarczy jednak, że wykonywane będzie skalowanie jako operacja mnożenia wektora współrzędnych przez skalar $C$.
+
+Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości  współczynnika skalującego może zostać: proporcjonalnie zmniejszony gdy $C<1$, proporcjonalnie powiekszony gdy $C>1$ lub gdy $C=1$ pozostanie niezmieniony.
+
+Dla wektora współrzędnych $p$ skalowanie przebiega:
+$$
+p'=C*p
+$$
+$$
+\begin{pmatrix}
+
+\end{pmatrix}
+$$
+
+\subsection{Translacje}
+
+\subsection{Rotacje i kwaterniony}
+W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor V. Dla przykładu punkt:
+A=(Ax, Ay, Az)
+przesunięty o wektor:
+V=(Vx, Vy, Vz)
+będzie miał współrzędne:
+A\=(Ax+Vx, Ay+Vy, Az+Vz)
+
+Translacje są powszechną operacją używaną między innymi w grafice komputerowej. Z tego faktu wynika, że tego typu
+
+Skalowanie jest operacją polegającą na przemnożeniu wektora punktów określonego w przestrzeni o dowolną wartość skalarną będącą 
+
+Przesunięcia o wektor czyli translacje stanowią pierwszy z tych elementów. Formalnie definicja translacji
+
+\section{Elementarne macierze przekształceń}
+
+\section{Współrzędne jednorodne i przekształcenia macierzowe}
 
 \section{RMSD}
 Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów niniejszej pracy. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
@@ -189,7 +231,7 @@ W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedu
 %\end{figure}
 
 \section{Algorytm Kabsch'a}
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Sposób wyznaczania tych optymalnych transformacji opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Isteniej kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
 
 Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$. Wektor $p$ stanowi zbiór współrzędnych kartezjańskich struktury wzorca, $q$ - wybranego regionu struktury celu:
 $$
@@ -214,7 +256,7 @@ $$
 Algorytm Kabsch'a składa się z 3 kroków:
 \begin{enumerate}
 \item \textbf{Translacja} \\
-W pierwszym kroku należy dokonać obliczenia punktów środkowych (centroidów) obu struktur ($Cp$ i $Cq$) i dokonać przesunięcia struktury wzorca o wektor $T$ rozpięty pomiędzy tymi punktami tak, aby centroidy nałożyły się na siebie. Jako punkt środkowy można wybrać środek masy lub środek geometryczny, np: 
+W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $T$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można zastosować na przykład równanie na środek geometryczny: 
 $$Cp = (Cp_x, Cp_y, Cp_z)$$
 gdzie:
 $$Cp_x = \frac{1}{N}\sum_{i=1}^{N}{x_{pi}}$$
@@ -227,50 +269,41 @@ $$Cq_x = \frac{1}{N}\sum_{i=1}^{N}{x_{qi}}$$
 $$Cq_y = \frac{1}{N}\sum_{i=1}^{N}{y_{qi}}$$
 $$Cq_z = \frac{1}{N}\sum_{i=1}^{N}{z_{qi}}$$
 zatem wektor translacji:
-$$ T = |Cp-Cq| = $$
-$$=(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
+$$ T = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
+możemy użyć do wykonania przesunięcia wszystkich punktów w $p$ i $q$:
+$$p'=p+T$$
 \item \textbf{Macierz kowariancji} \\
-Macierz kowariancji jest niezbędna do oceny tego jak bardzo obie struktury się od siebie różnią.
-\item \textbf{Optymalna macierz rotacji}
+Macierz kowariancji $A$ określa zależność liniową między zmiennymi $p$ i $q$. Jej poprawne wyliczenie stanowi podstawę do ustalenia optymalnej macierzy rotacji w kolejnym kroku.
+$$ 
+A=cov(p,q)
+$$
+$$
+ TODO
+$$
 
+\item \textbf{Optymalna macierz rotacji} \\
+Optymalna macierz rotacji powstaje z dekompozycji według wartości szczególnych macierzy $A$. SVD (ang. singular value decomposition) to taki rozkład zadanej macierzy na trzy specyficzne macierze $U$, $\Sigma$ oraz $V$, że zachodzi zależność:
+$$
+A=U \Sigma V^T
+$$
+$$
+ TODO
+$$
+gdzie:
+
+\quad\textbf{$U$ i $V$} to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
+
+\quad\textbf{$\Sigma$} macierz diagonalna
+
+wówczas optymalną macierz rotacji $R$ uzyskujemy:
+
+$$R=VU^T$$
 
 \end{enumerate}
 
 
-
 \section{Pole siłowe}
 todo
-
-\section{Przekształcenia geometryczne}
-Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarne operacje intensywnie używane w niniejszej pracy. Do podstawowych przekształceń zaliczamy skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Optymalne metody numeryczne realizujące te przekształcenia są zatem priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. Niezbędne jest także stosowanie konwersji pomiędzy różnymi formatami danych zawierających informacje o przekształceniach czy nawet samymi sposobami przekształcania występującymi w pakiecie PyMOL i VRPN. 
-
-TODO: trochę ogólnych formalizmów matematycznych „czym są przekształcenia”
-
-\subsection{Skalowanie}
-	Skalowanie jest jednym z najprostszych przekształceń. Polega na przemnożeniu każdej składowej wektora współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnio określony wektor skalujący C' lub wartość skalarną C zwanymi współczynnikami skalowania. Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych wyjściowego obiektu, że w zależności od wartości  współczynnika skalującego może zostać:
-	
-zmniejszony, gdy C<1
-
-powiększony, gdy C>1
-
-niezmieniony, gdy C=1
-
-\subsection{Translacje}
-
-\subsection{Rotacje}
-W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor V. Dla przykładu punkt:
-A=(Ax, Ay, Az)
-przesunięty o wektor:
-V=(Vx, Vy, Vz)
-będzie miał współrzędne:
-A\=(Ax+Vx, Ay+Vy, Az+Vz)
-
-Translacje są powszechną operacją używaną między innymi w grafice komputerowej. Z tego faktu wynika, że tego typu
-
-Skalowanie jest operacją polegającą na przemnożeniu wektora punktów określonego w przestrzeni o dowolną wartość skalarną będącą 
-
-Przesunięcia o wektor czyli translacje stanowią pierwszy z tych elementów. Formalnie definicja translacji
-
 
 \section{Metody lokalnego dopasowania struktur chemicznych}
 todo: streszczenie doktoratu PD
