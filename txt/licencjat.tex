@@ -92,7 +92,10 @@
 \usepackage{amsmath}
 % koniec definicji
 
+
 \begin{document}
+
+\boldmath		% matematyka w BOLD-zie
 
 \maketitle
 
@@ -107,7 +110,7 @@ W pracy przedstawiono implementację programu narzędziowego służącego do int
 
 \chapter*{Wprowadzenie}
 \addcontentsline{toc}{chapter}{Wprowadzenie}
-Biopolimery, a w szczególności kwasy nukleinowe i polipeptydy stanowią fundamenty życia. W każdej komórce oraz w całym organizmie są one odpowiedzialne za najważniejsze funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej, biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Polipeptydy i białka zaś są składnikami budulcowymi wielu organów, pełnią funkcje hormonalne czy regulatorowe.
+Biopolimery, a w szczególności kwasy nukleinowe i polipeptydy stanowią fundamenty życia. W każdej komórce oraz w całym organizmie są one odpowiedzialne za najważniejsze funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej, biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Polipeptydy zaś są składnikami budulcowymi wielu organów, pełnią funkcje hormonalne czy regulatorowe.
 
 Pomimo odmiennych składników budulcowych – nukleotydów i aminokwasów – w obu przypadkach wymienionych biopolimerów ich funkcja wynika bezpośrednio ze struktury przestrzennej, która to za hipotezą Anfinsena [1] jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
 
@@ -155,62 +158,112 @@ Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarn
 TODO: trochę ogólnych formalizmów matematycznych „czym są przekształcenia”
 
 \subsection{Skalowanie}
-Skalowanie (inaczej mnożenie przez skalar) to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $C$ lub dodatnio określony wektor $C'$ będące współczynnikami skalowania.
-
-W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie jako współczynników skalowania wektorów. Dla potrzeb niniejszej pracy wystarczy jednak, że wykonywane będzie skalowanie jako operacja mnożenia wektora współrzędnych przez skalar $C$.
+Skalowanie (inaczej mnożenie przez skalar) to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $C$ lub dodatnio określony wektor $\vec{C}$ będące współczynnikami skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie jako współczynników skalowania wektorów. Dla potrzeb niniejszej pracy wystarczy jednak, że wykonywane będzie skalowanie jako operacja mnożenia wektora współrzędnych przez skalar $C$.
 
 Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości  współczynnika skalującego może zostać: proporcjonalnie zmniejszony gdy $C<1$, proporcjonalnie powiekszony gdy $C>1$ lub gdy $C=1$ pozostanie niezmieniony.
 
-Dla wektora współrzędnych $p$ skalowanie przebiega:
+Dla $N$ elementowego wektora współrzędnych $\vec{p}$:
 $$
-p'=C*p
-$$
-$$
+\vec{p}=
 \begin{pmatrix}
+x_1 & y_1 & z_1 \\
+x_2 & y_2 & z_2 \\
+\vdots & \vdots & \vdots \\
+x_N & y_N & z_N 
+\end{pmatrix}
+$$
+skalowanie przebiega:
+$$
+\vec{p'}=C\vec{p}
+$$
 
+$$
+\vec{p}=
+\begin{pmatrix}
+Cx_1 & Cy_1 & Cz_1 \\
+Cx_2 & Cy_2 & Cz_2 \\
+\vdots & \vdots & \vdots \\
+Cx_N & Cy_N & Cz_N 
 \end{pmatrix}
 $$
 
 \subsection{Translacje}
+W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od mnożenia przez skalar, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$:
+$$
+\vec{T}=\begin{pmatrix}
+t_z & t_y & t_z
+\end{pmatrix}
+$$
 
+Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla wektora współrzędnych $\vec{p}$ operacja przesunięcia wygląda następująco:
+
+$$
+\vec{p'}=\vec{p}+\vec{T}
+$$
+
+$$
+\vec{p'}=
+\begin{pmatrix}
+x_1+t_x & Cy_1+t_y & Cz_1+t_z \\
+Cx_2+t_x & Cy_2+t_y & Cz_2+t_z \\
+\vdots & \vdots & \vdots \\
+Cx_N+t_x & Cy_N+t_y & Cz_N+t_z 
+\end{pmatrix}
+$$
 \subsection{Rotacje i kwaterniony}
-W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor V. Dla przykładu punkt:
-A=(Ax, Ay, Az)
-przesunięty o wektor:
-V=(Vx, Vy, Vz)
-będzie miał współrzędne:
-A\=(Ax+Vx, Ay+Vy, Az+Vz)
-
-Translacje są powszechną operacją używaną między innymi w grafice komputerowej. Z tego faktu wynika, że tego typu
-
-Skalowanie jest operacją polegającą na przemnożeniu wektora punktów określonego w przestrzeni o dowolną wartość skalarną będącą 
-
-Przesunięcia o wektor czyli translacje stanowią pierwszy z tych elementów. Formalnie definicja translacji
+todo: rotacje i kwaterniony
 
 \section{Elementarne macierze przekształceń}
+Współcześnie wszelkie operacje graficzne, a w szczególności tranformacje są wykonywane na milionach punktów (pikseli). Często także pojawia się sytuacja w której przekształcenia geometryczne są wykonywane jednocześnie. Można sobie wyobrazić sytuację w której obiekt przestrzenny należy przesunąć jednocześnie dokonując obrotu. 
+
+Bezpośrednia implementacja powyższych transformacji byłaby dość kłopotliwa, gdyż każda operacja musiałaby zostać wykonana oddzielnie. Jednak przede wszystkim nie byłaby optymalna obliczeniowo. Do tego celu opracowano ujednolicone narzędzie, doskonale spełniające zadanie: \textit{macierze przekształceń}.
+
+Macierze przekształceń powstały przede wszystkim z myślą o implementacji na współczesnych komputerach, które doskonale radzą sobie z obliczeniami macierzowymi. Istnieją dziesiątki rozmaitych bibliotek wspomagających tego typu obliczenia, ponadto operacje macierzowe można łatwo zrównoleglać i optymalizować.
+
+Macierze przekształceń stanowią ujednolicony i łatwy sposób posługiwania się wszystkimi zdefiniowanymi transformacjami, a w szczególności: skalowaniem, translacją i rotacją. Każdą z powyższych operacji można opisać jako operacje macierzowe modyfikujące zbiór punktów w przestrzeni.
+\\
+Przykładowo mając dany wektor współrzędnych $\vec{X}$ opisujący położenie punktu w przestrzeni trójwymiarowej:
+$$
+\vec{X}=\begin{bmatrix}
+x \\
+y \\
+z
+\end{bmatrix}
+$$
+możemy zdefiniowac taką macierz $Trans(a,b,c)$:
+$$
+\vec{Trans(a,b,c)}=\begin{bmatrix}
+a \\
+b \\
+c
+\end{bmatrix}
+$$
+
 
 \section{Współrzędne jednorodne i przekształcenia macierzowe}
+
+
 
 \section{RMSD}
 Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów niniejszej pracy. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
 
 Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi atomów zawartych w strukturze wzorca (ang. template) i w odpowiednim fragmencie cząsteczki celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
 
-\boldmath{
+
 $$
 RMSD(p,q) = \sqrt{\frac{1}{N}\sum_{i=1}^{N}||p_i-q_i||^{2}} = 
 $$
 $$ 
 = \sqrt{\frac{1}{N}\sum_{i=1}^{N}((p_{ix}-q_{ix})^{2}+(p_{iy}-q_{iy})^{2}+(p_{iz}-q_{iz})^{2})}
 $$
-}
+
 gdzie:
 
-\textbf{$p$} - wektor współrzędnych struktury wzorca
+$p$ - wektor współrzędnych struktury wzorca
 
-\textbf{$q$} - wektor współrzędnych wybranego regionu w strukturze celu
+$q$ - wektor współrzędnych wybranego regionu w strukturze celu
 
-\textbf{$N$} - długość wektorów współrzędnych \textbf{$p$} i \textbf{$q$}
+$N$ - długość wektorów współrzędnych $p$ i $q$
 \\
 \\
 O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. 
@@ -291,9 +344,9 @@ $$
 $$
 gdzie:
 
-\quad\textbf{$U$ i $V$} to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
+\quad$U$ i $V$ to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
 
-\quad\textbf{$\Sigma$} macierz diagonalna
+\quad$\Sigma$ macierz diagonalna
 
 wówczas optymalną macierz rotacji $R$ uzyskujemy:
 
@@ -380,7 +433,7 @@ opisik
 \chapter{Opis stanowiska laboratoryjnego}
 
 
-
+\iffalse
 \chapter{Podstawowe pojęcia}\label{r:pojecia}
 
 Pojęciem pierwotnym blabalii fetorycznej jest \emph{blaba}.
@@ -635,6 +688,8 @@ utajnieniu.
   \end{tabular}
 \end{center}
 
+\fi
+
 \begin{thebibliography}{99}
 \addcontentsline{toc}{chapter}{Bibliografia}
 
@@ -679,6 +734,16 @@ utajnieniu.
     w~blabalizie}, Młody Technik, nr~11, 1969.
 
 \end{thebibliography}
+
+\chapter*{Kod źródłowy programu}
+
+def vrpn():
+
+...
+
+...
+
+...
 
 \end{document}
 
