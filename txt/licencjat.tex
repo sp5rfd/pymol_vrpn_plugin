@@ -153,76 +153,113 @@ W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
 W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się głównie na zagadnieniach związanych z przekształceniami geometrycznymi, wykorzystanymi algorytmami oceny podobieństwa strukturalnego oraz metodami dopasowania lokalnego (uliniawiania) struktur chemicznych.
 
 \section{Przekształcenia geometryczne}
-Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarne operacje intensywnie używane w niniejszej pracy. Do podstawowych przekształceń zaliczamy skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Optymalne metody numeryczne realizujące te przekształcenia są zatem priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. Niezbędne jest także stosowanie konwersji pomiędzy różnymi formatami danych zawierających informacje o przekształceniach czy nawet samymi sposobami przekształcania występującymi w pakiecie PyMOL i VRPN. 
+Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarne operacje intensywnie używane w niniejszej pracy. Do podstawowych przekształceń zaliczamy między innymi skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Optymalne metody numeryczne realizujące te przekształcenia są zatem priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. Niezbędne jest także stosowanie konwersji pomiędzy różnymi formatami danych zawierających informacje o przekształceniach czy nawet samymi sposobami przekształcania występującymi w pakiecie PyMOL i VRPN. 
 
-TODO: trochę ogólnych formalizmów matematycznych „czym są przekształcenia”
+Ogólną postać przekształceń możemy zdefiniować równaniem:
+$$
+\vec{x'}=R*S*\vec{x}+T
+$$
+\\
+gdzie:
+
+$\vec{X}$ jest wektorem współrzędnych zadanego punktu
+
+$R$ jest macierzą obrotu 
+
+$S$ jest współczynnikiem skalowania
+
+$T$ jest macierzą transformacji
 
 \subsection{Skalowanie}
-Skalowanie (inaczej mnożenie przez skalar) to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $C$ lub dodatnio określony wektor $\vec{C}$ będące współczynnikami skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie jako współczynników skalowania wektorów. Dla potrzeb niniejszej pracy wystarczy jednak, że wykonywane będzie skalowanie jako operacja mnożenia wektora współrzędnych przez skalar $C$.
+Skalowanie to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $S$ lub dodatnio określony wektor $\vec{S}$ będące współczynnikami skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora współczynników skalowania. Dla potrzeb niniejszej pracy wystarczy jednak, że wykonywane będzie skalowanie jako operacja mnożenia wektora współrzędnych przez skalar $C$.
 
-Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości  współczynnika skalującego może zostać: proporcjonalnie zmniejszony gdy $C<1$, proporcjonalnie powiekszony gdy $C>1$ lub gdy $C=1$ pozostanie niezmieniony.
+Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości  współczynnika skalującego może zostać: proporcjonalnie zmniejszony gdy $S<1$, proporcjonalnie powiekszony gdy $S>1$ lub gdy $S=1$ pozostanie niezmieniony.
 
-Dla $N$ elementowego wektora współrzędnych $\vec{p}$:
-$$
-\vec{p}=
-\begin{pmatrix}
-x_1 & y_1 & z_1 \\
-x_2 & y_2 & z_2 \\
-\vdots & \vdots & \vdots \\
-x_N & y_N & z_N 
-\end{pmatrix}
-$$
-skalowanie przebiega:
-$$
-\vec{p'}=C\vec{p}
-$$
+Skalowanie punktu $P=(x,y,z)$ o wektor $\vec{S}=(S_x,S_y,S_z)$ reprezentuje równanie:
 
 $$
-\vec{p}=
-\begin{pmatrix}
-Cx_1 & Cy_1 & Cz_1 \\
-Cx_2 & Cy_2 & Cz_2 \\
-\vdots & \vdots & \vdots \\
-Cx_N & Cy_N & Cz_N 
-\end{pmatrix}
+x'=x*S_x
+$$
+$$
+y'=y*S_y
+$$
+$$
+z'=z*S_z
 $$
 
 \subsection{Translacje}
-W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od mnożenia przez skalar, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$:
+W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$:
 $$
-\vec{T}=\begin{pmatrix}
-t_z & t_y & t_z
-\end{pmatrix}
+\vec{T}=(t_x, t_y, t_z)
 $$
-
-Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla wektora współrzędnych $\vec{p}$ operacja przesunięcia wygląda następująco:
+Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla punktu $P=(x,y,z)$ operacja przesunięcia o wektor $\vec{T}$ wygląda następująco:
 
 $$
-\vec{p'}=\vec{p}+\vec{T}
+x'=x+T_x
 $$
-
 $$
-\vec{p'}=
-\begin{pmatrix}
-x_1+t_x & Cy_1+t_y & Cz_1+t_z \\
-Cx_2+t_x & Cy_2+t_y & Cz_2+t_z \\
-\vdots & \vdots & \vdots \\
-Cx_N+t_x & Cy_N+t_y & Cz_N+t_z 
-\end{pmatrix}
+y'=y+T_y
+$$
+$$
+z'=z+T_z
 $$
 \subsection{Rotacje i kwaterniony}
-todo: rotacje i kwaterniony
-
-\section{Elementarne macierze przekształceń}
-Współcześnie wszelkie operacje graficzne, a w szczególności tranformacje są wykonywane na milionach punktów (pikseli). Często także pojawia się sytuacja w której przekształcenia geometryczne są wykonywane jednocześnie. Można sobie wyobrazić sytuację w której obiekt przestrzenny należy przesunąć jednocześnie dokonując obrotu. 
-
-Bezpośrednia implementacja powyższych transformacji byłaby dość kłopotliwa, gdyż każda operacja musiałaby zostać wykonana oddzielnie. Jednak przede wszystkim nie byłaby optymalna obliczeniowo. Do tego celu opracowano ujednolicone narzędzie, doskonale spełniające zadanie: \textit{macierze przekształceń}.
-
-Macierze przekształceń powstały przede wszystkim z myślą o implementacji na współczesnych komputerach, które doskonale radzą sobie z obliczeniami macierzowymi. Istnieją dziesiątki rozmaitych bibliotek wspomagających tego typu obliczenia, ponadto operacje macierzowe można łatwo zrównoleglać i optymalizować.
-
-Macierze przekształceń stanowią ujednolicony i łatwy sposób posługiwania się wszystkimi zdefiniowanymi transformacjami, a w szczególności: skalowaniem, translacją i rotacją. Każdą z powyższych operacji można opisać jako operacje macierzowe modyfikujące zbiór punktów w przestrzeni.
+Rotacje to obroty, blablabla
 \\
+Rotacje punktu $P=(x,y,z)$ wokół osi $X$ osi reprezentuje równania:
+$$
+x'=x
+$$
+$$
+y'=ycos(\alpha)-zsin(\alpha)
+$$
+$$
+z'=ysin(\alpha)+zcos(\alpha)
+$$
+\\
+Rotacja $P$ wokół osi $Y$ to:
+$$
+x'=
+$$
+$$
+y'=
+$$
+$$
+z'=
+$$
+
+
+
+\section{Przekształcenia macierzowe}
+Współcześnie wszelkie operacje graficzne, a w szczególności tranformacje są wykonywane na milionach punktów (pikseli). Bezpośrednia implementacja powyższych przekształceń byłaby dość kłopotliwa gdyż nie dość, że każda operacja musiałaby zostać wykonana oddzielnie, to jednak przede wszystkim nie byłoby to optymalne obliczeniowo rozwiązanie. Do tego celu opracowano ujednolicone narzędzie, doskonale spełniające zadanie: \textit{macierze przekształceń}.
+
+Macierze przekształceń stanowią łatwy sposób posługiwania się wszystkimi zdefiniowanymi transformacjami, a w szczególności: skalowaniem, translacją i rotacją. Każdą z powyższych operacji można opisać jako operacje macierzowe modyfikujące zbiór punktów w przestrzeni. 
+\\
+\\
+Elementarna rotacja jest rotacją danego punktu wokół jednej z osi układu współrzędnych ($X$, $Y$ lub $Z$).
+$$
+A=\begin{bmatrix}
+
+\end{bmatrix}
+$$
+
+
+$$
+T=\begin{bmatrix}
+t_x \\
+t_y \\
+t_z
+\end{bmatrix}
+$$
+
+
+Często także pojawia się sytuacja w której przekształcenia geometryczne są wykonywane jednocześnie. Można sobie wyobrazić sytuację w której obiekt przestrzenny należy przesunąć jednocześnie dokonując obrotu. 
+
+
+Macierze przekształceń powstały przede wszystkim z myślą o implementacji na współczesnych komputerach, które bardzo dobrze radzą sobie z obliczeniami macierzowymi. Istnieją dziesiątki rozmaitych bibliotek wspomagających tego typu kalkulacje, ponadto operacje macierzowe można łatwo zrównoleglać i optymalizować.
+
 Przykładowo mając dany wektor współrzędnych $\vec{X}$ opisujący położenie punktu w przestrzeni trójwymiarowej:
+
 $$
 \vec{X}=\begin{bmatrix}
 x \\
@@ -230,17 +267,11 @@ y \\
 z
 \end{bmatrix}
 $$
-możemy zdefiniowac taką macierz $Trans(a,b,c)$:
-$$
-\vec{Trans(a,b,c)}=\begin{bmatrix}
-a \\
-b \\
-c
-\end{bmatrix}
-$$
+możemy zdefiniowac macierz $T(a,b,c)$:
 
 
-\section{Współrzędne jednorodne i przekształcenia macierzowe}
+\section{Współrzędne jednorodne}
+Współrzędne jednorodne są sposobem reprezentacji punktów przestrzeni $n$-wymiarowej za pomocą układu $n+1$ współrzędnych. Zostały one wprowadzone przez niemieckiego matematyka Augusta Möbiusa w 1827 roku i opisane w jego pracy Der barycentrische Calcul. Möbius zauważył, że nie jest możliwe przedstawienie wszystkich transformacji geometrycznych za pomocą elementarnych macierzy transformacji. Aby rozwiązać ten problem opracowano właśnie współrzędne jednorodne. Zostały one docenione w dzisiejszych czasach szczególnie przez programistów grafiki komputerowej, gdyż same stanowią łatwe w implementacji narzędzie transformacji geometrycznych.
 
 
 
@@ -309,7 +340,7 @@ $$
 Algorytm Kabsch'a składa się z 3 kroków:
 \begin{enumerate}
 \item \textbf{Translacja} \\
-W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $T$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można zastosować na przykład równanie na środek geometryczny: 
+W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $\vec{T}$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można zastosować na przykład równanie na środek geometryczny: 
 $$Cp = (Cp_x, Cp_y, Cp_z)$$
 gdzie:
 $$Cp_x = \frac{1}{N}\sum_{i=1}^{N}{x_{pi}}$$
