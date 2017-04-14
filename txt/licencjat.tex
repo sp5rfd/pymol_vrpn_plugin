@@ -178,13 +178,11 @@ Geometryczna intuicja stojąca za operacją skalowania polega na takim przekszta
 Skalowanie punktu $P=(x,y,z)$ o wektor $\vec{S}=(S_x,S_y,S_z)$ reprezentuje równanie:
 
 $$
-x'=x*S_x
-$$
-$$
-y'=y*S_y
-$$
-$$
+\begin{array}{lr}
+x'=x*S_x \\
+y'=y*S_y \\
 z'=z*S_z
+\end{array}
 $$
 
 \subsection{Translacje}
@@ -195,40 +193,44 @@ $$
 Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla punktu $P=(x,y,z)$ operacja przesunięcia o wektor $\vec{T}$ wygląda następująco:
 
 $$
-x'=x+T_x
-$$
-$$
-y'=y+T_y
-$$
-$$
+\begin{array}{lr}
+x'=x+T_x \\
+y'=y+T_y \\
 z'=z+T_z
+\end{array}
 $$
 \subsection{Rotacje i kwaterniony}
-Rotacje to obroty, blablabla
-\\
-Rotacje punktu $P=(x,y,z)$ wokół osi $X$ osi reprezentuje równania:
+Trzecią elementarną transformacją jest rotacja. W odróżnieniu od prostego skalowania czy translacji jest operacją bardziej złożoną. Po pierwsze kolejność wykonywania rotacji ma znaczenie ($R_1R_2\neq R_2R_1$), po drugie samych reprezentacji rotacji jest kilka. Najpopularniejszym z nich są obroty o zadany kąt wokół jednej z osi układu współrzędnych lub arbitralnej osi obrotu.
+
+Współrzędne punktu $P'=(x',y',z')$ będącego wynikiem rotacji o zadany kąt $\alpha$ wokół osi układu współrzędnych wyrażają się następująco:
+
 $$
-x'=x
-$$
-$$
-y'=ycos(\alpha)-zsin(\alpha)
-$$
-$$
+\begin{array}{lr}
+x'=x \\
+y'=ycos(\alpha)-zsin(\alpha) \\
 z'=ysin(\alpha)+zcos(\alpha)
+\end{array}
 $$
 \\
 Rotacja $P$ wokół osi $Y$ to:
 $$
-x'=
+\begin{array}{lr}
+x'=zsin(\alpha)+xcos(\alpha) \\
+y'=y \\
+z'=xcos(\alpha)-xcos(\alpha)
+\end{array}
 $$
+\\
+Rotacja $P$ wokół osi $Z$ to:
 $$
-y'=
+\begin{array}{lr}
+x'=xcos(\alpha)-ysin(\alpha) \\
+y'=xsin(\alpha)+ycos(\alpha) \\
+z'=z
+\end{array}
 $$
-$$
-z'=
-$$
-
-
+\\
+Wygodnym sposobem reprezentacji rotacji są kwaterniony. Kwaterniony zostały odkryte (wynalezione?) 
 
 \section{Przekształcenia macierzowe}
 Współcześnie wszelkie operacje graficzne, a w szczególności tranformacje są wykonywane na milionach punktów (pikseli). Bezpośrednia implementacja powyższych przekształceń byłaby dość kłopotliwa gdyż nie dość, że każda operacja musiałaby zostać wykonana oddzielnie, to jednak przede wszystkim nie byłoby to optymalne obliczeniowo rozwiązanie. Do tego celu opracowano ujednolicone narzędzie, doskonale spełniające zadanie: \textit{macierze przekształceń}.
