@@ -150,32 +150,46 @@ Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia
 W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
 
 \chapter{Podstawy teoretyczne}
-W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się głównie na zagadnieniach związanych z przekształceniami geometrycznymi, wykorzystanymi algorytmami oceny podobieństwa strukturalnego oraz metodami dopasowania lokalnego (uliniawiania) struktur chemicznych.
+W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się na zagadnieniach związanych z przekształceniami geometrycznymi, algorytmami oceny podobieństwa strukturalnego oraz metodami lokalnego dopasowania (uliniawiania) struktur chemicznych.
 
 \section{Przekształcenia geometryczne}
-Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią elementarne operacje intensywnie używane w niniejszej pracy. Do podstawowych przekształceń zaliczamy między innymi skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Optymalne metody numeryczne realizujące te przekształcenia są zatem priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. Niezbędne jest także stosowanie konwersji pomiędzy różnymi formatami danych zawierających informacje o przekształceniach czy nawet samymi sposobami przekształcania występującymi w pakiecie PyMOL i VRPN. 
+Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią jedne z elementarnych operacji często używanych w niniejszej pracy. Do podstawowych przekształceń zaliczamy między innymi skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Z racji tego, że przekształcenia geometryczne operują na milionach punktów (pikseli) w przestrzeni trójwymiarowej, to optymalne metody numeryczne je realizujące są priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe. 
 
-Ogólną postać przekształceń możemy zdefiniować równaniem:
+Współpraca bibliotek programistycznych (pochodzących od różnych dostawców) może wymagać konwersji pomiędzy różnymi formatami zapisu transformacji. Szczególna uwagę należy zwrócić na konwersję orientacji wskaźnika z formatu zwracanego przez bibliotekę VRPN (kwaterniony) na format akceptowany przez PyMOL (macierze rotacji) i odwrotnie. Ten aspekt zostanie omówiony w dalszej części pracy.
+
+Ogólną postać przekształceń geometrycznych możemy zdefiniować jako:
 $$
-\vec{x'}=R*S*\vec{x}+T
+\vec{P'}=S*R*\vec{P}+T
 $$
 \\
 gdzie:
+\\
 
-$\vec{X}$ jest wektorem współrzędnych zadanego punktu
+$\vec{P'}$ jest wektorem współrzędnych punktu $[x',y',z']^T$ po dokonanych transformacjach
 
-$R$ jest macierzą obrotu 
+$\vec{P}$ jest wektorem współrzędnych punktu $[x,y,z]^T$ poddanego transformacjom
 
-$S$ jest współczynnikiem skalowania
+$S$ reprezentuje operację skalowania
 
-$T$ jest macierzą transformacji
+$R$ reprezentuje operację rotacji
+
+$T$ reprezentuje operację translacji
+\\
+
+Z uwagi na konieczność dostosowania transformacji do wykonywania na współczesnych komputerach opracowano efektywne reprezentacje tych operacji. 
 
 \subsection{Skalowanie}
-Skalowanie to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $S$ lub dodatnio określony wektor $\vec{S}$ będące współczynnikami skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora współczynników skalowania. Dla potrzeb niniejszej pracy wystarczy jednak, że wykonywane będzie skalowanie jako operacja mnożenia wektora współrzędnych przez skalar $C$.
+Skalowanie to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $S$ albo dodatnio określony wektor $\vec{S}$ stanowiące współczynniki skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach jednak dla potrzeb niniejszej pracy wystarczy, że wykonywane skalowanie będzie operacją mnożenia wektora współrzędnych przez skalar $S$.
 
-Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości  współczynnika skalującego może zostać: proporcjonalnie zmniejszony gdy $S<1$, proporcjonalnie powiekszony gdy $S>1$ lub gdy $S=1$ pozostanie niezmieniony.
+Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynnika skalującego może on zostać: 
 
-Skalowanie punktu $P=(x,y,z)$ o wektor $\vec{S}=(S_x,S_y,S_z)$ reprezentuje równanie:
+- niezmieniony, gdy $S=1$
+
+- proporcjonalnie pomniejszony, gdy $S<1$
+
+- proporcjonalnie powiekszony, gdy $S>1$
+\\
+Współrzędne po operacji skalowania punktu $P=[x,y,z]^T$ o wektor współczynników $\vec{S}=[S_x,S_y,S_z]^T$ reprezentuje równanie:
 
 $$
 \begin{array}{lr}
