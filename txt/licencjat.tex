@@ -152,11 +152,25 @@ W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
 \chapter{Podstawy teoretyczne}
 W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się na zagadnieniach związanych z przekształceniami geometrycznymi, algorytmami oceny podobieństwa strukturalnego oraz metodami lokalnego dopasowania (uliniawiania) struktur chemicznych.
 
-\section{Przekształcenia geometryczne}
-Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią jedne z elementarnych operacji używanych w niniejszej pracy. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują one na milionach punktów (pikseli) w przestrzeni trójwymiarowej, optymalne metody numeryczne które je realizują są priorytetem i muszą w minimalnym stopniu obciążać komputerowe jednostki obliczeniowe i procesory graficzne. 
+\section{Przekształcenia geometryczne i ich reprezentacje}
+Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią jedne z elementarnych operacji używanych w niniejszej pracy. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują one na milionach punktów w przestrzeni trójwymiarowej (pikseli), optymalne metody numeryczne które je realizują są priorytetem i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
 
-Współpraca bibliotek programistycznych pochodzących od różnych dostawców może wymagać konwersji pomiędzy różnymi formatami zapisu transformacji. Szczególna uwagę należy zwrócić na konwersję orientacji wskaźnika z formatu dostarczonego przez bibliotekę VRPN (kwaterniony) na format akceptowany przez PyMOL (macierze rotacji) i odwrotnie. Ten aspekt zostanie omówiony w dalszej części pracy.
+Współpraca bibliotek programistycznych pochodzących od różnych dostawców może wymagać konwersji pomiędzy różnymi formatami opisu transformacji. Szczególną uwagę należy zwrócić na konwersję orientacji wskaźnika urządzenia haptycznego z formatu dostarczonego przez bibliotekę VRPN (kwaterniony) na format akceptowany przez PyMOL (oś i kąt obrotu) i odwrotnie - ten aspekt zostanie omówiony w dalszej części pracy.
 
+Z uwagi na konieczność dostosowania transformacji do wykonywania na współczesnych komputerach niezbędne było opracowanie efektywnych obliczeniowo metod numerycznych i reprezentacji tych operacji. Bezpośrednia ich implementacja byłaby dość kłopotliwa gdyż nie dość, że każda z nich musiałaby zostać wykonana oddzielnie, to przede wszystkim nie byłoby to optymalne obliczeniowo rozwiązanie. Do tego celu wybrano ujednolicone narzędzia rozwiązujące powyższe problemy: \textit{elementarne macierze transformacji} i \textit{współrzędne jednorodne}.
+
+\textit{Elementarne macierze transformacji} stanowią łatwy sposób posługiwania się przekształceniami geometrycznymi. Każda z powyższych operacji może zostać opisana jako prosta operacja macierzowa (dodawanie albo mnożenie) modyfikująca zbiór punktów w przestrzeni (który również jest reprezentowany jako macierz). %Macierze przekształceń powstały przede wszystkim z myślą o implementacji na współczesnych komputerach, które bardzo dobrze radzą sobie z obliczeniami macierzowymi. Istnieją dziesiątki rozmaitych bibliotek wspomagających tego typu kalkulacje, ponadto operacje macierzowe można łatwo zrównoleglać i optymalizować.
+
+
+Często jednak pojawia się sytuacja w której wiele przekształceń geometrycznych jest wykonywanych jednocześnie.Dla przykładu można sobie wyobrazić sytuację w której obiekt należy przesunąć jednocześnie dokonując jego obrotu. Niestety stosowanie samych elementarnych macierzy transformacji uniemożliwia rozwiązanie tej kwestii, dopiero współrzędne jednorodne pozwoliły w pełni wyeliminować ten problem.
+
+\textit{Współrzędne jednorodne} są sposobem reprezentacji punktów przestrzeni $n$-wymiarowej za pomocą układu $n+1$ współrzędnych. Zostały one wprowadzone przez niemieckiego matematyka Augusta Möbiusa w 1827 roku i opisane w jego pracy \textit{Der barycentrische Calcul}. 
+
+Współrzędne jednorodne to narzędzie matematyczne stanowiące pewne udoskonalenie elementarnych macierzy transformacji. Umożliwiają wykonywanie wielu przekształceń jednocześnie i za pomocą jednej operacji macierzowej - mnożenia. Współrzędne jednorodne dają możliwość skumulowania wszystkich transformacji jakie chcemy wykonać na strukturze przestrzennej w jednej odpowiednio zbudowanej macierzy. W dzisiejszych czasach zostały one docenione w wielu dziedzinach nie tylko bezpośrednio związanych z grafiką komputerową ale także w robotyce czy biofizyce.
+
+Poniżej szczegółowo opisane zostały operacje skalowania, translacji oraz rotacji. Dla każdej z tych operacji zostały podane formuły matematyczne, ich reprezentacja za pomocą elementarnych macierzy transformacji oraz współrzędnych jednorodnych. Dodatkowo dla rotacji została przedstawiona reprezentacja kwaternionów.
+
+\iffalse
 Ogólną postać przekształceń geometrycznych możemy zdefiniować jako:
 $$
 \vec{P'}=S*R*\vec{P}+T
@@ -175,17 +189,6 @@ $R$ reprezentuje operację rotacji
 
 $T$ reprezentuje operację translacji
 \\
-
-Z uwagi na konieczność dostosowania transformacji do wykonywania ich na współczesnych komputerach niezbędne było opracowanie efektywnych obliczeniowo reprezentacji tych operacji. Bezpośrednia implementacja tych przekształceń byłaby dość kłopotliwa gdyż nie dość, że każda z nich musiałaby zostać wykonana oddzielnie, to przede wszystkim nie byłoby to optymalne obliczeniowo rozwiązanie. Do tego celu wybrano ujednolicone narzędzie rozwiązujące powyższe problemy: \textit{przekształcenia macierzowe} i \textit{współrzędne jednorodne}.
-
-\textit{Przekształcenia macierzowe} stanowią łatwy i jednolity sposób posługiwania się wszystkimi rodzajami transformacji. Każdą z powyższych operacji można opisać jako elementarne operacje na macierzach (dodawanie lub mnożenie) modyfikujące zbiór punktów w przestrzeni (który również jest reprezentowany jako macierz). Macierze przekształceń powstały przede wszystkim z myślą o implementacji na współczesnych komputerach, które bardzo dobrze radzą sobie z obliczeniami macierzowymi. Istnieją dziesiątki rozmaitych bibliotek wspomagających tego typu kalkulacje, ponadto operacje macierzowe można łatwo zrównoleglać i optymalizować.
-
-
-Często także pojawia się sytuacja w której przekształcenia geometryczne są wykonywane jednocześnie. Można sobie wyobrazić sytuację w której obiekt przestrzenny należy przesunąć jednocześnie dokonując obrotu. 
-
-\textit{Współrzędne jednorodne} stanowią pewne rozszerzenie macierzy przekształceń umożliwiające wykonywanie wielu transformacji jednocześnie - za pomocą jednej operacji macierzowej, zwykle mnożenia. Współrzędne jednorodne zostaną szczegółowo opisane w dalszej części pracy.
-
-Współrzędne jednorodne są sposobem reprezentacji punktów przestrzeni $n$-wymiarowej za pomocą układu $n+1$ współrzędnych. Zostały one wprowadzone przez niemieckiego matematyka Augusta Möbiusa w 1827 roku i opisane w jego pracy Der barycentrische Calcul. Möbius zauważył, że nie jest możliwe przedstawienie wszystkich transformacji geometrycznych za pomocą elementarnych macierzy transformacji. Aby rozwiązać ten problem opracowano właśnie współrzędne jednorodne. Zostały one docenione w dzisiejszych czasach szczególnie przez programistów grafiki komputerowej, gdyż same stanowią łatwe w implementacji narzędzie transformacji geometrycznych.
 \\
 \\
 Elementarna rotacja jest rotacją danego punktu wokół jednej z osi układu współrzędnych ($X$, $Y$ lub $Z$).
@@ -216,18 +219,21 @@ z
 $$
 możemy zdefiniowac macierz $T(a,b,c)$:
 
+\fi
+
 \subsection{Skalowanie}
 Skalowanie to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $S$ albo dodatnio określony wektor $\vec{S}$ stanowiące współczynniki skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach jednak dla potrzeb niniejszej pracy wystarczy, że wykonywane skalowanie będzie operacją mnożenia wektora współrzędnych przez skalar $S$.
 
-Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynnika skalującego może on zostać: 
+Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynników skalujących może on zostać: 
 
 - niezmieniony, gdy $S=1$
 
-- proporcjonalnie pomniejszony, gdy $S<1$
+- pomniejszony proporcjonalnie do $S$, gdy $0<S<1$
 
-- proporcjonalnie powiekszony, gdy $S>1$
+- powiekszony proporcjonalnie do $S$, gdy $S>1$
 \\
-Współrzędne po operacji skalowania punktu $P=[x,y,z]^T$ o wektor współczynników $\vec{S}=[S_x,S_y,S_z]^T$ reprezentuje równanie:
+\\
+Współrzędne punktu $P=(x,y,z)$ po operacji skalowania o wektor współczynników $\vec{S}=[S_x,S_y,S_z]^T$ reprezentuje równanie:
 
 $$
 \begin{array}{lr}
@@ -237,7 +243,7 @@ z'=z*S_z
 \end{array}
 $$
 
-Reprezentacja skalowania za pomocą elementarnych macierzy przekształceń polega na stworzeniu takiej macierzy $S$, że wektor skalujący $\vec{S}$ zostanie wpisany do niej w następujący sposób:
+Reprezentacja skalowania za pomocą elementarnych macierzy transformacji polega na stworzeniu takiej macierzy $\hat{S}$, że wartości wektora skalującego $\vec{S}$ zostaną wpisane do niej w następujący sposób:
 $$
 \hat{S}=
 \begin{bmatrix}
@@ -272,6 +278,53 @@ y*S_y \\
 z*S_z 
 \end{bmatrix}
 $$
+\\
+Aby przedstawić operację skalowania we współrzędnych jednorodnych należy stworzyć nową macierz $\bar{S}$ o rozmiarze o 1 większym, niż macierz elementarna $\hat{S}$ oraz nowy wektor $P_2$ o długości o 1 większej niż $P$:
+$$
+\bar{S} = 
+\begin{bmatrix}
+S_x & 0 & 0 & 0 \\
+0 & S_y & 0 & 0 \\
+0 & 0 & S_z & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+, 
+\vec{P_2}=
+\begin{bmatrix} 
+x \\ 
+y \\ 
+z \\
+1
+\end{bmatrix} 
+$$
+zatem:
+$$
+\vec{P_2'}=\bar{S}*\vec{P_2}
+$$
+$$
+\vec{P_2'} = 
+\begin{bmatrix}
+S_x & 0 & 0 & 0 \\
+0 & S_y & 0 & 0 \\
+0 & 0 & S_z & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+*
+\begin{bmatrix} 
+x \\ 
+y \\ 
+z \\
+1
+\end{bmatrix} 
+=
+\begin{bmatrix} 
+x*S_x \\ 
+y*S_y \\ 
+z*S_z \\
+1
+\end{bmatrix}
+$$
+
 \subsection{Translacje}
 W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$:
 $$
@@ -286,8 +339,33 @@ y'=y+T_y \\
 z'=z+T_z
 \end{array}
 $$
+Z powyższego jasno wynika, że translacje można reprezentować jako operację sumy dwóch wektorów:
+$$
+\vec{P'}=\vec{P}+\vec{T}
+$$
+$$
+\vec{P'}
+=
+\begin{bmatrix}
+x \\
+y \\
+z
+\end{bmatrix}
++
+\begin{bmatrix}
+T_x \\
+T_y \\
+T_z 
+\end{bmatrix}
+=
+\begin{bmatrix}
+x+T_x \\
+y+T_y \\
+z+T_z 
+\end{bmatrix}
+$$
 
-Reprezentacja macierzowa takiego zapisu, w odróżnieniu od skalowania może być przedstawiona jedynie w formie współrzędnych jednorodnych. 
+Reprezentacja przy pomocy współrzędnych jednorodnych ponownie wymaga skonstruowania w odpowiedni sposób macierzy translacji poprzez wpisanie do niej w odpowiednim miejscu wektora translacji $\vec{T}$: 
 
 $$
 \vec{P'}=
@@ -390,16 +468,9 @@ z \\
 \end{bmatrix}
 $$
 
-
-Wygodnym sposobem reprezentacji rotacji są kwaterniony. Kwaterniony zostały odkryte (wynalezione?) 
-
-\section{Przekształcenia macierzowe}
-
-
-
-\section{Współrzędne jednorodne}
-
-
+W przypadku rotacji, poza współrzędnymi jednorodnymi należy tutaj rozpatrzyć także reprezentację za pomocą kwaternionów. 
+Wygodnym sposobem reprezentacji rotacji są kwaterniony. Kwaterniony zostały wprowadzone przez Hamiltona, który poszukiwał wygodnego i sposobu reprezentacji obrotów.
+Kwaterniony to czwórka liczb 
 
 
 \section{RMSD}
