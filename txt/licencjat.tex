@@ -222,7 +222,7 @@ możemy zdefiniowac macierz $T(a,b,c)$:
 \fi
 
 \subsection{Skalowanie}
-Skalowanie to operacja polegająca na mnożeniu wszystkich współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez dodatnią liczbę rzeczywistą $S$ albo dodatnio określony wektor $\vec{S}$ stanowiące współczynniki skalowania. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach jednak dla potrzeb niniejszej pracy wystarczy, że wykonywane skalowanie będzie operacją mnożenia wektora współrzędnych przez skalar $S$.
+Skalowanie to operacja polegająca na mnożeniu współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez współczynniki skalowania. Współczynniki skalowania są dodatnią liczbę rzeczywistą $S$ albo dodatnio określony wektor liczb rzeczywistych $\vec{S}$. W ogólności możemy proporcjonalnie skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach jednak dla potrzeb niniejszej pracy wystarczy, że wykonywane skalowanie będzie operacją mnożenia wektora współrzędnych przez skalar $S$.
 
 Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynników skalujących może on zostać: 
 
@@ -233,23 +233,24 @@ Geometryczna intuicja stojąca za operacją skalowania polega na takim przekszta
 - powiekszony proporcjonalnie do $S$, gdy $S>1$
 \\
 \\
-Współrzędne punktu $P=(x,y,z)$ po operacji skalowania o wektor współczynników $\vec{S}=[S_x,S_y,S_z]^T$ reprezentuje równanie:
+Współrzędne punktu $P=(x,y,z)$ po operacji skalowania o wektor współczynników $\vec{S}=[s_x,s_y,s_z]^T$ są równe:
 
 $$
 \begin{array}{lr}
-x'=x*S_x \\
-y'=y*S_y \\
-z'=z*S_z
+x'=x*s_x \\
+y'=y*s_y \\
+z'=z*s_z
 \end{array}
 $$
 
 Reprezentacja skalowania za pomocą elementarnych macierzy transformacji polega na stworzeniu takiej macierzy $\hat{S}$, że wartości wektora skalującego $\vec{S}$ zostaną wpisane do niej w następujący sposób:
 $$
-\hat{S}=
+\hat{S}
+=
 \begin{bmatrix}
-S_x & 0 & 0 \\
-0 & S_y & 0 \\
-0 & 0 & S_z
+s_x & 0 & 0 \\
+0 & s_y & 0 \\
+0 & 0 & s_z
 \end{bmatrix}
 $$
 zatem:
@@ -261,9 +262,9 @@ $$
 \vec{P'}
 =
 \begin{bmatrix}
-S_x & 0 & 0 \\
-0 & S_y & 0 \\
-0 & 0 & S_z
+s_x & 0 & 0 \\
+0 & s_y & 0 \\
+0 & 0 & s_z
 \end{bmatrix}
 *
 \begin{bmatrix} 
@@ -273,23 +274,25 @@ z
 \end{bmatrix} 
 =
 \begin{bmatrix} 
-x*S_x \\ 
-y*S_y \\ 
-z*S_z 
+x*s_x \\ 
+y*s_y \\ 
+z*s_z 
 \end{bmatrix}
 $$
 \\
-Aby przedstawić operację skalowania we współrzędnych jednorodnych należy stworzyć nową macierz $\bar{S}$ o rozmiarze o 1 większym, niż macierz elementarna $\hat{S}$ oraz nowy wektor $P_2$ o długości o 1 większej niż $P$:
+Aby przedstawić operację skalowania we współrzędnych jednorodnych należy stworzyć nową macierz $\bar{S}$ o rozmiarze o 1 większym, niż macierz elementarna $\hat{S}$ oraz nowy wektor $\dot{\vec{P}}$ o długości o 1 większej niż $\vec{P}$:
 $$
-\bar{S} = 
+\bar{S} 
+= 
 \begin{bmatrix}
-S_x & 0 & 0 & 0 \\
-0 & S_y & 0 & 0 \\
-0 & 0 & S_z & 0 \\
+s_x & 0 & 0 & 0 \\
+0 & s_y & 0 & 0 \\
+0 & 0 & s_z & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 , 
-\vec{P_2}=
+\dot{\vec{P}}
+=
 \begin{bmatrix} 
 x \\ 
 y \\ 
@@ -299,14 +302,14 @@ z \\
 $$
 zatem:
 $$
-\vec{P_2'}=\bar{S}*\vec{P_2}
+\dot{\vec{P'}}=\bar{S}*\dot{\vec{P}}
 $$
 $$
 \vec{P_2'} = 
 \begin{bmatrix}
-S_x & 0 & 0 & 0 \\
-0 & S_y & 0 & 0 \\
-0 & 0 & S_z & 0 \\
+s_x & 0 & 0 & 0 \\
+0 & s_y & 0 & 0 \\
+0 & 0 & s_z & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 *
@@ -318,25 +321,23 @@ z \\
 \end{bmatrix} 
 =
 \begin{bmatrix} 
-x*S_x \\ 
-y*S_y \\ 
-z*S_z \\
+x*s_x \\ 
+y*s_y \\ 
+z*s_z \\
 1
 \end{bmatrix}
 $$
 
 \subsection{Translacje}
-W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$:
-$$
-\vec{T}=(t_x, t_y, t_z)
-$$
-Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla punktu $P=(x,y,z)$ operacja przesunięcia o wektor $\vec{T}$ wygląda następująco:
+W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$.
+
+Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla punktu $P=(x,y,z)$ operacja przesunięcia o wektor $\vec{T}=[t_x, t_y, t_z]^T$ wygląda następująco:
 
 $$
 \begin{array}{lr}
-x'=x+T_x \\
-y'=y+T_y \\
-z'=z+T_z
+x'=x+t_x \\
+y'=y+t_y \\
+z'=z+t_z
 \end{array}
 $$
 Z powyższego jasno wynika, że translacje można reprezentować jako operację sumy dwóch wektorów:
@@ -365,8 +366,30 @@ z+T_z
 \end{bmatrix}
 $$
 
-Reprezentacja przy pomocy współrzędnych jednorodnych ponownie wymaga skonstruowania w odpowiedni sposób macierzy translacji poprzez wpisanie do niej w odpowiednim miejscu wektora translacji $\vec{T}$: 
-
+Reprezentacja przy pomocy współrzędnych jednorodnych ponownie wymaga skonstruowania w odpowiedni sposób macierzy translacji $\bar{T}$ poprzez wpisanie do niej w odpowiednim miejscu wektora translacji $\vec{T}$ oraz wektora współrzędnych $\dot{\vec{P}}$ analogicznie jak w przypadku skalowania:
+$$
+\bar{T}
+=
+\begin{bmatrix}
+1 & 0 & 0 & T_x \\
+0 & 1 & 0 & T_y \\
+0 & 0 & 1 & T_z \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+,
+\dot{\vec{P}}
+=
+\begin{bmatrix}
+x \\
+y \\
+z \\
+1
+\end{bmatrix}
+$$
+zatem:
+$$
+\vec{P'}=\bar{T}*\dot{\vec{P}}
+$$
 $$
 \vec{P'}=
 \begin{bmatrix}
@@ -391,7 +414,7 @@ z+T_z \\
 \end{bmatrix}
 $$
 \subsection{Rotacje i kwaterniony}
-Trzecią elementarną transformacją jest rotacja. W odróżnieniu od prostego skalowania czy translacji jest operacją bardziej złożoną. Po pierwsze kolejność wykonywania rotacji ma znaczenie ($R_xR_y\neq R_yR_x$), po drugie samych reprezentacji rotacji jest kilka. Najpopularniejszym z nich są obroty o zadany kąt wokół jednej z osi układu współrzędnych lub arbitralnej osi obrotu.
+Trzecią elementarną transformacją jest rotacja. W odróżnieniu od skalowania czy translacji jest operacją bardziej złożoną. Po pierwsze kolejność wykonywania rotacji ma znaczenie ($R_xR_y\neq R_yR_x$), po drugie samych reprezentacji rotacji jest co najmniej kilka. Najpopularniejszym z nich są obroty o zadany kąt wokół jednej z osi układu współrzędnych lub arbitralnej osi obrotu i na tym typie skupiono się w tej pracy.
 
 Współrzędne punktu $P'=(x',y',z')$ będącego wynikiem rotacji o zadany kąt $\alpha$ wokół osi układu współrzędnych wyrażają się następująco:
 
@@ -420,57 +443,88 @@ y'=xsin(\alpha)+ycos(\alpha) \\
 z'=z
 \end{array}
 $$
-\\
-Reprezentacja rotacji we współrzędnych jednorodnych ma postać następujących macierzy:
+Elementarne macierze przekształceń w tym przypadku wyglądają następująco:
 $$
-Rx(\alpha) = 
+\hat{Rx}(\alpha)
+=
+\begin{bmatrix}
+1 & 0 & 0 \\
+0 & cos(\alpha) & -sin(\alpha) \\
+0 & sin(\alpha) & cos(\alpha)
+\end{bmatrix}
+$$
+$$
+\hat{Ry}(\beta)
+=
+\begin{bmatrix}
+cos(\beta) & 0 & sin(\beta) \\
+0 & 1 & 0 \\
+-sin(\beta) & 0 & cos(\beta) \\
+\end{bmatrix}
+$$
+$$
+\hat{Rz}(\gamma)
+=
+\begin{bmatrix}
+cos(\gamma) & -sin(\gamma) & 0 \\
+sin(\gamma) & cos(\gamma) & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+$$
+gdzie:
+
+$\hat{Rx}(\alpha)$ obrót wokół osi $x$ o kąt $\alpha$
+
+$\hat{Ry}(\beta)$ obrót wokół osi $y$ o kąt $\beta$
+
+$\hat{Rz}(\gamma)$ obrót wokół osi $z$ o kąt $\gamma$
+\\
+\\
+Reprezentacja macierzy rotacji we współrzędnych jednorodnych ma następującą postać:
+$$
+\bar{Rx}(\alpha) = 
 \begin{bmatrix}
 1 & 0 & 0 & 0 \\
 0 & cos(\alpha) & -sin(\alpha) & 0 \\
 0 & sin(\alpha) & cos(\alpha) & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
-\begin{bmatrix}
-x \\
-y \\
-z \\
-1
-\end{bmatrix}
 $$
 $$
-Ry(\beta) = 
+\bar{Ry}(\beta) = 
 \begin{bmatrix}
 cos(\beta) & 0 & sin(\beta) & 0 \\
 0 & 1 & 0 & 0 \\
 -sin(\beta) & 0 & cos(\beta) & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
-\begin{bmatrix}
-x \\
-y \\
-z \\
-1
-\end{bmatrix}
 $$
 $$
-Rz(\gamma) = 
+\bar{Rz}(\gamma) = 
 \begin{bmatrix}
 cos(\gamma) & -sin(\gamma) & 0 & 0 \\
 sin(\gamma) & cos(\gamma) & 0 & 0 \\
 0 & 0 & 1 & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
-\begin{bmatrix}
-x \\
-y \\
-z \\
-1
-\end{bmatrix}
 $$
 
-W przypadku rotacji, poza współrzędnymi jednorodnymi należy tutaj rozpatrzyć także reprezentację za pomocą kwaternionów. 
-Wygodnym sposobem reprezentacji rotacji są kwaterniony. Kwaterniony zostały wprowadzone przez Hamiltona, który poszukiwał wygodnego i sposobu reprezentacji obrotów.
-Kwaterniony to czwórka liczb 
+W przypadku rotacji, poza współrzędnymi jednorodnymi należy tutaj rozpatrzyć także reprezentację za pomocą kwaternionów. Kwaterniony są strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Hamiltona, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
+
+Kwaterniony najczęściej są przedstawiane jako liczba $q$ taka, że:
+$$
+q=a+bi+cj+dk=w+xi+yj+zk
+$$
+gdzie:
+
+$a$, $b$, $c$, $d$, $w$, $x$, $y$, $z$ - współczynniki rzeczywiste
+
+$i$, $j$, $k$ - współczynniki urojone
+\\
+\\
+Kwaterniony mogą stanowic alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Dzięki temu możemy z powodzeniem przeprowadzać konwersję pomiędzy nimi a kwaternionami. Co więcej dzięki za ich pomocą z powodzeniem można przedstawić rotację wokół arbitralnie wybranej osi obrotu (todo: czy to prawda???).
+
+
 
 
 \section{RMSD}
