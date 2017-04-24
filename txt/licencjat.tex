@@ -139,15 +139,17 @@ Z punktu widzenia osoby zajmującej się szeroko pojętą biofizyką molekularn�
 \chapter*{Cel i zakres pracy}
 \addcontentsline{toc}{chapter}{Cel i zakres pracy}
 
-W ramach niniejszej pracy została przedstawiona implementacja narzędzia z pogranicza wirtualnej rzeczywistości i biofizyki molekularnej. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość dopasowania strukturalnego wzorca (ang. template) i fragmentów cząsteczki celu (ang. target). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił do urządzenia haptycznego. 
+W ramach niniejszej pracy została przedstawiona implementacja aplikacji narzędziowej z pogranicza biofizyki molekularnej i wirtualnej rzeczywistości. Program służący do interaktywnej (przy aktywnym udziale użytkownika) eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość lokalnego dopasowania strukturalnego wzorca (ang. template) i fragmentów cząsteczki celu (ang. target). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił do urządzenia haptycznego. 
 	
-Program pracuje w formie wtyczki do pakietu PyMOL, do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości, bioinformatyczne algorytmy pomiaru jakości dopasowania struktur (RMSD), algorytmy wyszukujące optymalne dopasowanie (uliniowienie) struktur oraz algorytmy maksymalizujące stopień dopasowania struktur (algorytm Kabsch'a).
+Program funkcjonuje w formie wtyczki do pakietu PyMOL, do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości, a także bioinformatyczne algorytmy pomiaru jakości dopasowania struktur (RMSD), algorytmy wyszukujące optymalne dopasowanie (uliniowienie) strukturalne oraz algorytmy maksymalizujące stopień dopasowania struktur (algorytm Kabsch'a).
 
 Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia stanowiska pracy składającego się z elementów przedstawionych na diagramie:
-	
-\textbf{TODO:} diagram prezentujący stanowisko pracy (komputer+haptic+vrpn+pymol)
-
-W dalszej części pracy szczegółowo zostanie opisane stanowisko pracy.
+\\
+\\
+\includegraphics[scale=0.8,center]{stanowisko}
+\\
+\\
+Powyższe stanowisko pracy zostało szczegółowo opisane w dalszej części pracy.
 
 \chapter{Podstawy teoretyczne}
 W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się na zagadnieniach związanych z przekształceniami geometrycznymi, algorytmami oceny podobieństwa strukturalnego oraz metodami lokalnego dopasowania (uliniawiania) struktur chemicznych.
@@ -416,8 +418,10 @@ $$
 \subsection{Rotacje i kwaterniony}
 Trzecią elementarną transformacją jest rotacja. W odróżnieniu od skalowania czy translacji jest operacją bardziej złożoną. Po pierwsze kolejność wykonywania rotacji ma znaczenie ($R_xR_y\neq R_yR_x$), po drugie samych reprezentacji rotacji jest co najmniej kilka. Najpopularniejszym z nich są obroty o zadany kąt wokół jednej z osi układu współrzędnych lub arbitralnej osi obrotu i na tym typie skupiono się w tej pracy.
 
-Współrzędne punktu $P'=(x',y',z')$ będącego wynikiem rotacji o zadany kąt $\alpha$ wokół osi układu współrzędnych wyrażają się następująco:
-
+Współrzędne punktu $P'=(x',y',z')$ będącego wynikiem rotacji punktu $P=(x,y,z)$ wokół poszczególnych osi ($OX$, $OY$, $OZ$) układu współrzędnych o zadany kąt (odpowiednio $\alpha$, $\beta$ i $\gamma$) wyrażają się następująco:
+\\
+\\
+rotacja $P$ wokół osi $OX$:
 $$
 \begin{array}{lr}
 x'=x \\
@@ -426,20 +430,20 @@ z'=ysin(\alpha)+zcos(\alpha)
 \end{array}
 $$
 \\
-Rotacja $P$ wokół osi $Y$ to:
+rotacja $P$ wokół osi $OY$:
 $$
 \begin{array}{lr}
-x'=zsin(\alpha)+xcos(\alpha) \\
+x'=zsin(\beta)+xcos(\beta) \\
 y'=y \\
-z'=xcos(\alpha)-xcos(\alpha)
+z'=xcos(\beta)-xcos(\beta)
 \end{array}
 $$
 \\
-Rotacja $P$ wokół osi $Z$ to:
+rotacja $P$ wokół osi $OZ$:
 $$
 \begin{array}{lr}
-x'=xcos(\alpha)-ysin(\alpha) \\
-y'=xsin(\alpha)+ycos(\alpha) \\
+x'=xcos(\gamma)-ysin(\gamma) \\
+y'=xsin(\gamma)+ycos(\gamma) \\
 z'=z
 \end{array}
 $$
@@ -473,14 +477,14 @@ sin(\gamma) & cos(\gamma) & 0 \\
 $$
 gdzie:
 
-$\hat{Rx}(\alpha)$ obrót wokół osi $x$ o kąt $\alpha$
+$\hat{Rx}(\alpha)$ obrót wokół osi $OX$ o kąt $\alpha$
 
-$\hat{Ry}(\beta)$ obrót wokół osi $y$ o kąt $\beta$
+$\hat{Ry}(\beta)$ obrót wokół osi $OY$ o kąt $\beta$
 
-$\hat{Rz}(\gamma)$ obrót wokół osi $z$ o kąt $\gamma$
+$\hat{Rz}(\gamma)$ obrót wokół osi $OZ$ o kąt $\gamma$
 \\
 \\
-Reprezentacja macierzy rotacji we współrzędnych jednorodnych ma następującą postać:
+Jak wszystkie inne transformacje, rotacje równiez można przedstawić we współrzędnych jednorodnych. Mają one wówczas następującą postać:
 $$
 \bar{Rx}(\alpha) = 
 \begin{bmatrix}
@@ -509,21 +513,40 @@ sin(\gamma) & cos(\gamma) & 0 & 0 \\
 \end{bmatrix}
 $$
 
-W przypadku rotacji, poza współrzędnymi jednorodnymi należy tutaj rozpatrzyć także reprezentację za pomocą kwaternionów. Kwaterniony są strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Hamiltona, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
+Poza powyższymi reprezentacjami, rotacje posiadają jeszcze jedną być może najważniejszą z punktu widzenia programisty reprezentację: \textit{kwaterniony}.
 
-Kwaterniony najczęściej są przedstawiane jako liczba $q$ taka, że:
+Kwaterniony są strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Hamiltona, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
+
+Kwaternion $q$ to taka czwórka liczb rzeczywistych $x$, $y$, $z$ i $w$ spełniająca równanie:
 $$
-q=a+bi+cj+dk=w+xi+yj+zk
+q=w+xi+yj+zk
 $$
 gdzie:
 
-$a$, $b$, $c$, $d$, $w$, $x$, $y$, $z$ - współczynniki rzeczywiste
+$i$, $j$, $k$ - współczynniki urojone takie, że $i^2=j^2=k^2=ijk=-1$
 
-$i$, $j$, $k$ - współczynniki urojone
+$w$ - część skalarna kwaterniona
+
+$x$, $y$, $z$ - część wektorowa kwaterniona
 \\
 \\
-Kwaterniony mogą stanowic alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Dzięki temu możemy z powodzeniem przeprowadzać konwersję pomiędzy nimi a kwaternionami. Co więcej dzięki za ich pomocą z powodzeniem można przedstawić rotację wokół arbitralnie wybranej osi obrotu (todo: czy to prawda???).
+Kwaterniony mogą stanowic alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Dzięki temu możemy z powodzeniem przeprowadzać konwersję pomiędzy nimi a kwaternionami. Dzięki kwaternionom z powodzeniem można przedstawić rotację wokół arbitralnie wybranej osi obrotu. 
 
+Załóżmy, że chcemy stworzyć kwaternion $q$ reprezentujący obrót o kąt $\alpha$ wokół wektora $\vec{v}=[v_x,v_y,v_z]$. Kwaternion taki tworzymy w następujący sposób
+
+$$
+\begin{array}{lr}
+w=cos(\alpha/2) \\
+x=v_x sin(\alpha/2) \\
+y=v_y sin(\alpha/2) \\
+z=v_z sin(\alpha/2) 
+\end{array}
+$$
+
+wówczas:
+$$
+q=cos(\alpha/2)+v_xsin(\alpha/2)i+v_ysin(\alpha/2)j+v_zsin(\alpha/2)k
+$$
 
 
 
@@ -532,12 +555,12 @@ Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elem
 
 Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi atomów zawartych w strukturze wzorca (ang. template) i w odpowiednim fragmencie cząsteczki celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
 
-
 $$
-RMSD(p,q) = \sqrt{\frac{1}{N}\sum_{i=1}^{N}||p_i-q_i||^{2}} = 
-$$
-$$ 
+\begin{array}{lr}
+RMSD(p,q) = \sqrt{\frac{1}{N}\sum_{i=1}^{N}||p_i-q_i||^{2}} = \\
+\\
 = \sqrt{\frac{1}{N}\sum_{i=1}^{N}((p_{ix}-q_{ix})^{2}+(p_{iy}-q_{iy})^{2}+(p_{iz}-q_{iz})^{2})}
+\end{array}
 $$
 
 gdzie:
@@ -555,16 +578,16 @@ W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedu
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.25]{rmsd3}
+\includegraphics[scale=0.2]{rmsd3}
 \caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=3.985}
 \end{figure}
 
-%
-%\begin{figure}[H]
-%\centering
-%\includegraphics[scale=0.25]{rmsd0}
-%\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do %podobnego regionu struktury celu (zielona), RMSD=0}
-%\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{rmsd0}
+\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=0}
+\end{figure}
 
 \section{Algorytm Kabsch'a}
 RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Isteniej kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
@@ -705,13 +728,19 @@ opis
 kompilacja i uruchomienie
 
 \chapter{Pakiet PyMOL}
-opis pakietu
+PyMOL jest oprogramowaniem służącym głównie do wizualizacji struktur chemicznych oraz przeprowadzania na nich prostych obliczeń. Jego historia sięga roku 2000, kiedy to Warren Lyford DeLano zainicjował powstanie projektu. Przez lata intensywnych prac nad rozwojem program stał się standardowym narzędziem wykorzystywanym przez wiele wiodących ośrodków naukowo badawczych. Obecnie nad jego rozwojem czuwa firma \textit{Schrödinger, Inc}.
 
 \section{Opis Oprogramowania}
 opisik
 
-\section{Sposób tworzenia wtyczek}
-opisik
+\section{Rozszerzanie funkcjonalności pakietu PyMOL}
+Funkcjonalność pakiet PyMOL może być w łatwy sposób rozszerzalna poprzez wbudowany system obsługi wtyczek (ang. plugin) tworzonych w języku Python. Programista ma dostęp do rozbudowanego API (ang. application programming interface) zawierającego szeroki wachlarz funkcji umożliwiających prowadzenie różnych obliczeń na załadowanych strukturach. Ponadto programista tworząc wtyczki może z powodzeniem korzystać z biblioteki standardowej języka Python oraz dowolnych bibliotek zewnętrznych autorów.
+
+Podczas tworzenia oprogramowania będącego przedmiotem niniejszej pracy korzystano zarówno z API wbudowanego w PyMOL jak również z zewnętrznych bibliotek takich jak VRPN do obsługi urządzenia haptycznego.
+
+Tworzenie wtyczek polega na zdefiniowaniu funkcji \textbf{\_\_init\_\_(self)}, która podczas uruchamiania programu PyMOL tworzy nową pozycję w menu. Jednym z jej parametrów jest referencję do głównej funkcji programu rozszerzającego (wtyczki). Taką funkcję należy zdefiniować w osobnym pliku z rozszerzeniem \textit{.py}.
+
+\section{Uruchamianie wtyczek w ramach środowiska PyMOL}
 
 \chapter{Opis stanowiska laboratoryjnego}
 
