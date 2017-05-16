@@ -163,15 +163,24 @@ Konfiguracja powyższego stanowiska pracy zostało szczegółowo opisane w dalsz
 W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się na zagadnieniach związanych z przekształceniami geometrycznymi, algorytmami oceny podobieństwa strukturalnego oraz metodami lokalnego dopasowania (uliniawiania) struktur chemicznych.
 
 \section{Metody dopasowania struktur chemicznych}
-Celem poszukiwania optymalnych metod dopasowania strukturalnego jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu i bez znajomości sekwencji. 
+Celem poszukiwania optymalnych metod dopasowania strukturalnego (ang. structural alignment) jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu i bez znajomości sekwencji. 
 
 Metody dopasowań strukturalnych pierwotnie odnosiły się do cząsteczek polipeptydów i białek jako podstawowych biopolimerów, szybko jednak ich zastosowanie zostało rozszerzone także na kwasy nukleinowe, w szczególności niekodujący RNA gdyż posiada on ważne funkcje biologiczne (np. enzymatyczne) oraz analogiczne do polipeptydów formy trzeciorzędowe. 
 
 Z uwagi na znacznie wyższą ewolucyjną trwałość struktury przestrzennej w porównaniu do sekwencji (zarówno aminokwasowej jak i nukleotydowej) poszukiwanie dopasowań strukturalnych jest często dużo skuteczniejszą metodą znajdowania związków ewolucyjnych niż klasyczne uliniowienie sekwencji. 
 
-Metody dopasowania struktur możemy podzielić na globalne, których celem jest porównywanie całych struktur trzeciorzędowych oraz lokalne polegające na poszukiwaniu najlepszego dopasowania fragmentu cząsteczki wzorca (np. struktury drugorzędowej) do \textit{podobnego} miejsca w obrębie cząsteczki celu.
+Metody dopasowania możemy podzielić na globalne, których celem jest porównywanie całych struktur trzeciorzędowych oraz lokalne polegające na poszukiwaniu najlepszego dopasowania fragmentu cząsteczki wzorca (np. struktury drugorzędowej) do \textit{podobnego} miejsca w obrębie cząsteczki celu i ewentualna późniejsza ich synteza do dopasowania globalnego.
 
-Istnieją dobrze opisane algorytmy służące do oceny jakości takich dopasowań. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (ang. root-mean-squared deviation), która zostanie szczegółowo opisana w dalszej części pracy.
+Kluczowym aspektem tych metod jest efektywna ocena ich jakości. Istnieją zatem dobrze opisane algorytmy służące do szacowania jakości dopasowań strukturalnych. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (ang. root-mean-squared deviation), która zostanie szczegółowo opisana w dalszej części pracy.
+
+Obliczenie dopasowania strukturalnego ponadto implikuje powstanie dopasowania sekwencyjnego pomiędzy przyrównywanymi merami w każdym z łańcuchów. Ocena takiego jednowymiarowego uliniowienia sekwencji również da nam wiedzę o tym jak bliska relacja występuje pomiędzy strukturami.
+
+\subsection{Globalne dopasowanie struktur} 
+Z powodu dużej złożoności biopolimerów zostało opracowanych wiele metod upraszczających ich reprezentacje do celów obliczeniowych. Przede wszystkim dąży się do rezygnacji z rozpatrywania lokalizacji wszystkich atomów pochodzących z każdego meru na rzeczy jedynie tych należących do szkieletu (ang. backbone) cząsteczki (np. $\alpha$-węgle aminokwasów czy pentozy kwasów nukleinowych), z pominięciem lub daleko idącym ograniczeniem roli łańcuchów bocznych.
+
+Globalne dopasowanie polega na obliczaniu optymalnego nałożenia na siebie (superpozycji) dwóch struktur. Takie iteracyjne podejście w każdym kolejnym kroku poprzez odpowiednie przesunięcia i obroty struktur dąży do minimalizowania odległości pomiędzy atomami i jest najskuteczniejsze gdy podobieństwo porównywanych struktur jest dostatecznie wysokie aby obliczenia dążyły do optymalnego globalnie rezultatu.
+
+Globalne dopasowanie często jest stosowane do porównywania różnych konformacji tego samego polimeru, na przykład do oceny jakości algorytmów przewidujących strukturę białek. 
 
 \subsection{Lokalne dopasowanie struktur} 
 Jak już wspomniano, lokalne dopasowanie polega na przeszukiwaniu części lub całej cząsteczki celu (ang. target) w poszukiwaniu wybranych wcześniej fragmentów struktur zwanych wzorcami (ang. template). Wzorcami mogą być struktury drugorzędowe, miejsca wiążące lub inne dowolnie wybrane fragmenty. Wynikiem przeprowadzonych operacji lokalnego dopasowania jest indeks miejsc do których wzorzec jest \textit{podobny} wraz z ich miarą dopasowania. 
@@ -179,8 +188,6 @@ Jak już wspomniano, lokalne dopasowanie polega na przeszukiwaniu części lub c
 Spośród wielu opracowanych metod realizacji lokalnego dopasowania, warto wspomnieć przede wszystkim o metodzie opartej o deskryptory lokalnej struktury [1], która stanowi podstawę implementacji oprogramowania dostarczającego dane wejściowe do programu będącego przedmiotem niniejszej pracy. 
 
 
-\subsection{Globalne dopasowanie struktur} 
-Globalne dopasowanie polega na obliczaniu optymalnego nałożenia na siebie - superpozycji - dwóch struktur. Takie iteracyjne podejście, w każdym kroku dąży do minimalizowania odległości pomiędzy atomami i jest skuteczne tylko gdy podobieństwo porównywanych struktur jest dostatecznie wysokie aby obliczenia dążyły do optymalnego globalnie rezultatu.
 
 
 \section{Przekształcenia geometryczne i ich reprezentacje}
