@@ -160,35 +160,162 @@ Poprawne uruchomienie i korzystanie z prezentowanego programu wymaga zestawienia
 Konfiguracja powyższego stanowiska pracy zostało szczegółowo opisane w dalszej części pracy.
 
 \chapter{Podstawy teoretyczne}
-W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się na zagadnieniach związanych z przekształceniami geometrycznymi, algorytmami oceny podobieństwa strukturalnego oraz metodami lokalnego dopasowania (uliniawiania) struktur chemicznych.
+W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur chemicznych, algorytmach oceny podobieństwa strukturalnego (RMSD), sposobach ich minimalizacji (algorytm Kabsch'a) oraz zagadnieniach związanych z przekształceniami geometrycznymi.
 
 \section{Metody dopasowania struktur chemicznych}
 Celem poszukiwania optymalnych metod dopasowania strukturalnego (ang. structural alignment) jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu i bez znajomości sekwencji. 
 
-Metody dopasowań strukturalnych pierwotnie odnosiły się do cząsteczek polipeptydów i białek jako podstawowych biopolimerów, szybko jednak ich zastosowanie zostało rozszerzone także na kwasy nukleinowe, w szczególności niekodujący RNA gdyż posiada on ważne funkcje biologiczne (np. enzymatyczne) oraz analogiczne do polipeptydów formy trzeciorzędowe. 
+Metody dopasowań strukturalnych pierwotnie odnosiły się do cząsteczek polipeptydów i białek jako podstawowych biopolimerów, szybko jednak ich zastosowanie zostało rozszerzone także na kwasy nukleinowe, w szczególności niekodujący RNA gdyż posiada on ważne funkcje biologiczne (np. enzymatyczne) oraz analogiczne do polipeptydów formy drugo- i trzeciorzędowe. 
 
-Z uwagi na znacznie wyższą ewolucyjną trwałość struktury przestrzennej w porównaniu do sekwencji (zarówno aminokwasowej jak i nukleotydowej) poszukiwanie dopasowań strukturalnych jest często dużo skuteczniejszą metodą znajdowania związków ewolucyjnych niż klasyczne uliniowienie sekwencji. 
+Z uwagi na znacznie wyższą ewolucyjną trwałość struktury przestrzennej w porównaniu do sekwencji (zarówno aminokwasowej jak i nukleotydowej) poszukiwanie dopasowań strukturalnych często bywa dużo skuteczniejszą metodą znajdowania związków ewolucyjnych niż klasyczne uliniowienie sekwencji. 
 
-Metody dopasowania możemy podzielić na globalne, których celem jest porównywanie całych struktur trzeciorzędowych oraz lokalne polegające na poszukiwaniu najlepszego dopasowania fragmentu cząsteczki wzorca (np. struktury drugorzędowej) do \textit{podobnego} miejsca w obrębie cząsteczki celu i ewentualna późniejsza ich synteza do dopasowania globalnego.
-
-Kluczowym aspektem tych metod jest efektywna ocena ich jakości. Istnieją zatem dobrze opisane algorytmy służące do szacowania jakości dopasowań strukturalnych. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (ang. root-mean-squared deviation), która zostanie szczegółowo opisana w dalszej części pracy.
+Kluczowym aspektem tych metod jest efektywna ocena ich jakości. Niestety nie ma jednej uniwersalnej miary podobieństwa struktur,  istnieje jednak kilka dobrze opisanych algorytmów służących do szacowania jakości dopasowań strukturalnych. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (ang. root-mean-squared deviation), która zostanie szczegółowo opisana w dalszej części pracy.
 
 Obliczenie dopasowania strukturalnego ponadto implikuje powstanie dopasowania sekwencyjnego pomiędzy przyrównywanymi merami w każdym z łańcuchów. Ocena takiego jednowymiarowego uliniowienia sekwencji również da nam wiedzę o tym jak bliska relacja występuje pomiędzy strukturami.
 
+Z powodu dużej złożoności biopolimerów zostało opracowanych wiele metod upraszczających ich reprezentacje do celów obliczeniowych. Przede wszystkim dąży się do rezygnacji z bezpośredniego rozpatrywania lokalizacji wszystkich atomów pochodzących z każdego meru na rzeczy jedynie tych należących do szkieletu (ang. backbone) cząsteczki (np. $\alpha$-węgle aminokwasów czy pentozy kwasów nukleinowych), z pominięciem lub daleko idącym ograniczeniem roli łańcuchów bocznych.
+
+Metody dopasowania możemy podzielić na globalne, których celem jest porównywanie całych struktur trzeciorzędowych oraz lokalne polegające na poszukiwaniu najlepszego dopasowania fragmentu cząsteczki wzorca (np. struktury drugorzędowej) do wybranego \textit{regionu} (miejsca w obrębie cząsteczki celu) i ewentualna późniejsza ich łączenie do dopasowania globalnego.
+
 \subsection{Globalne dopasowanie struktur} 
-Z powodu dużej złożoności biopolimerów zostało opracowanych wiele metod upraszczających ich reprezentacje do celów obliczeniowych. Przede wszystkim dąży się do rezygnacji z rozpatrywania lokalizacji wszystkich atomów pochodzących z każdego meru na rzeczy jedynie tych należących do szkieletu (ang. backbone) cząsteczki (np. $\alpha$-węgle aminokwasów czy pentozy kwasów nukleinowych), z pominięciem lub daleko idącym ograniczeniem roli łańcuchów bocznych.
 
-Globalne dopasowanie polega na obliczaniu optymalnego nałożenia na siebie (superpozycji) dwóch struktur. Takie iteracyjne podejście w każdym kolejnym kroku poprzez odpowiednie przesunięcia i obroty struktur dąży do minimalizowania odległości pomiędzy atomami i jest najskuteczniejsze gdy podobieństwo porównywanych struktur jest dostatecznie wysokie aby obliczenia dążyły do optymalnego globalnie rezultatu.
+Globalne dopasowanie polega na obliczaniu optymalnego nałożenia na siebie (superpozycji) dwóch lub więcej struktur. Jest to iteracyjne podejście, które dąży do minimalizowania odległości pomiędzy atomami (lub wybranymi punktami charakteryzującymi dany mer cząsteczki) w każdym kolejnym kroku poprzez dokonywanie odpowiednich przesunięć i obrotów struktur względem siebie. 
 
-Globalne dopasowanie często jest stosowane do porównywania różnych konformacji tego samego polimeru, na przykład do oceny jakości algorytmów przewidujących strukturę białek. 
+Globalne dopasowanie jest najskuteczniejsze gdy podobieństwo porównywanych struktur jest ma tyle wysokie aby obliczenia dążyły do optymalnego globalnie rezultatu. Jest to często stosowana metoda służąca do porównywania różnych konformacji tego samego polimeru, na przykład do oceny jakości algorytmów przewidujących strukturę białek lub porównywanie struktur tych samych białek pochodzących z różnych organizmów. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{global_superposition}
+\caption{Superpozycja dwóch struktur tioredoksyny (białko o długości 105 aminokwasów) ludzkiej (kolor czerwony) i pochodzącej z muszki owocowej \textit{Drosophila melanogaster} (kolor żółty), RMSD=1.244\AA }
+\end{figure}
 
 \subsection{Lokalne dopasowanie struktur} 
-Jak już wspomniano, lokalne dopasowanie polega na przeszukiwaniu części lub całej cząsteczki celu (ang. target) w poszukiwaniu wybranych wcześniej fragmentów struktur zwanych wzorcami (ang. template). Wzorcami mogą być struktury drugorzędowe, miejsca wiążące lub inne dowolnie wybrane fragmenty. Wynikiem przeprowadzonych operacji lokalnego dopasowania jest indeks miejsc do których wzorzec jest \textit{podobny} wraz z ich miarą dopasowania. 
+Jak już wspomniano, lokalne dopasowanie polega na przeszukiwaniu części lub całości cząsteczki celu (ang. target) w poszukiwaniu takich regionów, które \textit{są podobne} do wybranych struktur zwanych wzorcami (ang. template). Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące lub inne dowolnie wybrane fragmenty cząsteczek. Z grupy lokalnych można z powodzeniem budować uliniowienie globalne.
 
-Spośród wielu opracowanych metod realizacji lokalnego dopasowania, warto wspomnieć przede wszystkim o metodzie opartej o deskryptory lokalnej struktury [1], która stanowi podstawę implementacji oprogramowania dostarczającego dane wejściowe do programu będącego przedmiotem niniejszej pracy. 
+Metody lokalnego dopasowania zostały użyte do porównań stworzenia baz danych typu ,,all-to-all'' zawierających porównania wszystkich par struktur z bazy \textit{Protein Data Bank}.
+
+Spośród wielu opracowanych metod realizacji lokalnego dopasowania, warto wspomnieć przede wszystkim o metodzie opartej o \textit{lokalne deskryptory struktury} [1]. Stanowi ona podstawę implementacji oprogramowania dostarczającego dane wejściowe do programu będącego przedmiotem niniejszej pracy. 
+
+\textit{Lokalne deskryptory struktury białek} stanowią pewną abstrakcję opisującą otoczenie każdego aminokwasu...
+\\
+\\
+\textbf{TODO: jak dokładnie działa oprogramowanie pydesk? czy jego podstawą są deskryptory lokalnej struktury? }
+\\
+\\
+Wynikiem przeprowadzonych operacji lokalnego dopasowania jest indeks miejsc do których wzorzec jest \textit{podobny} wraz z ich miarą dopasowania. Należy pamiętać, że jeden wzorzec może być podobny do wielu regionów w obrębie tej samej cząsteczki celu, przez co może występować w wielu miejscach w ramach indeksu mapującego.
+
+Rezultatem działania ww. programu jest plik mapujący, który zawiera informacje o wszystkich miejscach dla których został przekroczony zadany próg podobieństwa do struktury wzorca. Innymi słowy uzyskujemy kompletną mapę cząsteczki celu z wyróżnionymi regionami, których superpozycja ze strukturą wzorca daje stopień podobieństwa nie gorszy niż zadany próg.
 
 
+\section{RMSD}
+Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów niniejszej pracy. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
 
+Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi atomów zawartych w strukturze wzorca (ang. template) i w odpowiednim fragmencie cząsteczki celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
+
+$$
+\begin{array}{lr}
+RMSD(p,q) = \sqrt{\frac{1}{N}\sum_{i=1}^{N}||p_i-q_i||^{2}} = \\
+\\
+= \sqrt{\frac{1}{N}\sum_{i=1}^{N}((p_{ix}-q_{ix})^{2}+(p_{iy}-q_{iy})^{2}+(p_{iz}-q_{iz})^{2})}
+\end{array}
+$$
+
+gdzie:
+
+$p$ - wektor współrzędnych struktury wzorca
+
+$q$ - wektor współrzędnych wybranego regionu w strukturze celu
+
+$N$ - długość wektorów współrzędnych $p$ i $q$
+\\
+\\
+O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. 
+
+W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu i odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (ang. threshold). Wynikiem takiej procedury są dane mapujące (ang. mapping file) zawierające informację o lokalizacji \textit{regionów podobnych} do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{rmsd3}
+\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=3.985}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{rmsd0}
+\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=0}
+\end{figure}
+
+\section{Algorytm Kabsch'a}
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Isteniej kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
+
+Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$. Wektor $p$ stanowi zbiór współrzędnych kartezjańskich struktury wzorca, $q$ - wybranego regionu struktury celu:
+$$
+p=
+\begin{pmatrix}
+ x_{p1} & y_{p1} & z_{p1} \\
+ x_{p2} & y_{p2} & z_{p2} \\
+ \vdots & \vdots & \vdots \\
+ x_{pN} & y_{pN} & z_{pN}
+\end{pmatrix}
+$$
+$$
+q= 
+\begin{pmatrix}
+ x_{q1} & y_{q1} & z_{q1} \\
+ x_{q2} & y_{q2} & z_{q2} \\
+ \vdots & \vdots & \vdots \\
+ x_{qN} & y_{qN} & z_{qN}
+\end{pmatrix}
+$$
+\\
+Algorytm Kabsch'a składa się z 3 kroków:
+\begin{enumerate}
+\item \textbf{Translacja} \\
+W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $\vec{T}$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można zastosować na przykład równanie na środek geometryczny: 
+$$Cp = (Cp_x, Cp_y, Cp_z)$$
+gdzie:
+$$Cp_x = \frac{1}{N}\sum_{i=1}^{N}{x_{pi}}$$
+$$Cp_y = \frac{1}{N}\sum_{i=1}^{N}{y_{pi}}$$
+$$Cp_z = \frac{1}{N}\sum_{i=1}^{N}{z_{pi}}$$
+oraz
+$$Cq = (Cq_x, Cq_y, Cq_z)$$
+gdzie:
+$$Cq_x = \frac{1}{N}\sum_{i=1}^{N}{x_{qi}}$$
+$$Cq_y = \frac{1}{N}\sum_{i=1}^{N}{y_{qi}}$$
+$$Cq_z = \frac{1}{N}\sum_{i=1}^{N}{z_{qi}}$$
+zatem wektor translacji:
+$$ T = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
+możemy użyć do wykonania przesunięcia wszystkich punktów w $p$ i $q$:
+$$p'=p+T$$
+\item \textbf{Macierz kowariancji} \\
+Macierz kowariancji $A$ określa zależność liniową między zmiennymi $p$ i $q$. Jej poprawne wyliczenie stanowi podstawę do ustalenia optymalnej macierzy rotacji w kolejnym kroku.
+$$ 
+A=cov(p,q)
+$$
+$$
+ TODO
+$$
+
+\item \textbf{Optymalna macierz rotacji} \\
+Optymalna macierz rotacji powstaje z dekompozycji według wartości szczególnych macierzy $A$. SVD (ang. singular value decomposition) to taki rozkład zadanej macierzy na trzy specyficzne macierze $U$, $\Sigma$ oraz $V$, że zachodzi zależność:
+$$
+A=U \Sigma V^T
+$$
+$$
+ TODO
+$$
+gdzie:
+
+\quad$U$ i $V$ to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
+
+\quad$\Sigma$ macierz diagonalna
+
+wówczas optymalną macierz rotacji $R$ uzyskujemy:
+
+$$R=VU^T$$
+
+\end{enumerate}
 
 \section{Przekształcenia geometryczne i ich reprezentacje}
 Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią jedne z elementarnych operacji używanych w niniejszej pracy. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują one na milionach punktów w przestrzeni trójwymiarowej (pikseli), optymalne metody numeryczne które je realizują są priorytetem i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
@@ -585,137 +712,26 @@ q=cos(\alpha/2)+v_xsin(\alpha/2)i+v_ysin(\alpha/2)j+v_zsin(\alpha/2)k
 $$
 
 
-
-\section{RMSD}
-Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów niniejszej pracy. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
-
-Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi atomów zawartych w strukturze wzorca (ang. template) i w odpowiednim fragmencie cząsteczki celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
-
-$$
-\begin{array}{lr}
-RMSD(p,q) = \sqrt{\frac{1}{N}\sum_{i=1}^{N}||p_i-q_i||^{2}} = \\
-\\
-= \sqrt{\frac{1}{N}\sum_{i=1}^{N}((p_{ix}-q_{ix})^{2}+(p_{iy}-q_{iy})^{2}+(p_{iz}-q_{iz})^{2})}
-\end{array}
-$$
-
-gdzie:
-
-$p$ - wektor współrzędnych struktury wzorca
-
-$q$ - wektor współrzędnych wybranego regionu w strukturze celu
-
-$N$ - długość wektorów współrzędnych $p$ i $q$
-\\
-\\
-O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. 
-
-W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu i odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (ang. threshold). Wynikiem takiej procedury są dane mapujące (ang. mapping file) zawierające informację o lokalizacji \textit{regionów podobnych} do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.2]{rmsd3}
-\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=3.985}
-\end{figure}
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.2]{rmsd0}
-\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=0}
-\end{figure}
-
-\section{Algorytm Kabsch'a}
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Isteniej kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
-
-Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$. Wektor $p$ stanowi zbiór współrzędnych kartezjańskich struktury wzorca, $q$ - wybranego regionu struktury celu:
-$$
-p=
-\begin{pmatrix}
- x_{p1} & y_{p1} & z_{p1} \\
- x_{p2} & y_{p2} & z_{p2} \\
- \vdots & \vdots & \vdots \\
- x_{pN} & y_{pN} & z_{pN}
-\end{pmatrix}
-$$
-$$
-q= 
-\begin{pmatrix}
- x_{q1} & y_{q1} & z_{q1} \\
- x_{q2} & y_{q2} & z_{q2} \\
- \vdots & \vdots & \vdots \\
- x_{qN} & y_{qN} & z_{qN}
-\end{pmatrix}
-$$
-\\
-Algorytm Kabsch'a składa się z 3 kroków:
-\begin{enumerate}
-\item \textbf{Translacja} \\
-W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $\vec{T}$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można zastosować na przykład równanie na środek geometryczny: 
-$$Cp = (Cp_x, Cp_y, Cp_z)$$
-gdzie:
-$$Cp_x = \frac{1}{N}\sum_{i=1}^{N}{x_{pi}}$$
-$$Cp_y = \frac{1}{N}\sum_{i=1}^{N}{y_{pi}}$$
-$$Cp_z = \frac{1}{N}\sum_{i=1}^{N}{z_{pi}}$$
-oraz
-$$Cq = (Cq_x, Cq_y, Cq_z)$$
-gdzie:
-$$Cq_x = \frac{1}{N}\sum_{i=1}^{N}{x_{qi}}$$
-$$Cq_y = \frac{1}{N}\sum_{i=1}^{N}{y_{qi}}$$
-$$Cq_z = \frac{1}{N}\sum_{i=1}^{N}{z_{qi}}$$
-zatem wektor translacji:
-$$ T = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
-możemy użyć do wykonania przesunięcia wszystkich punktów w $p$ i $q$:
-$$p'=p+T$$
-\item \textbf{Macierz kowariancji} \\
-Macierz kowariancji $A$ określa zależność liniową między zmiennymi $p$ i $q$. Jej poprawne wyliczenie stanowi podstawę do ustalenia optymalnej macierzy rotacji w kolejnym kroku.
-$$ 
-A=cov(p,q)
-$$
-$$
- TODO
-$$
-
-\item \textbf{Optymalna macierz rotacji} \\
-Optymalna macierz rotacji powstaje z dekompozycji według wartości szczególnych macierzy $A$. SVD (ang. singular value decomposition) to taki rozkład zadanej macierzy na trzy specyficzne macierze $U$, $\Sigma$ oraz $V$, że zachodzi zależność:
-$$
-A=U \Sigma V^T
-$$
-$$
- TODO
-$$
-gdzie:
-
-\quad$U$ i $V$ to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
-
-\quad$\Sigma$ macierz diagonalna
-
-wówczas optymalną macierz rotacji $R$ uzyskujemy:
-
-$$R=VU^T$$
-
-\end{enumerate}
-
-
 \section{Pole siłowe}
 todo
 	
 \chapter{Urządzenie haptyczne Sensable Phantom Omni}
-Nadrzędnym celem wirtualnej rzeczywistości (ang. virtual reality) jest możliwie wierne odtworzenie świata rzeczywistego w formie programu komputerowego czy multimedialnej prezentacji oraz umożliwienie użytkownikowi wchodzenie w interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń typu HCI (ang. human computer interface) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę Sensable (obecnie Geomagic). 
-\\
-\\
-\includegraphics[scale=0.5,center]{Sensable_Phantom_Omni}
-\\
-\\
+Nadrzędnym celem wirtualnej rzeczywistości (ang. virtual reality) jest możliwie wierne odtworzenie świata rzeczywistego lub fikcyjnego w formie programu komputerowego czy multimedialnej prezentacji oraz umożliwienie użytkownikowi wchodzenie w interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń klasy HCI (ang. human computer interface) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę SensAble (obecnie Geomagic). 
 
-Niniejsza praca w dużym stopniu opiera się na wykorzystaniu tych urządzeń do odzworowywania rzeczywistych ruchów ręki użytkownika w świecie wirtualnym. Pracownie Zakładu Biofizyki Wydziału Fizyki Uniwersytetu Warszawskiego są wyposażone w tego typu urządzenia, zostały one udostępnione autorowi celem realizacji niniejszej pracy.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5,center]{Sensable_Phantom_Omni}
+\caption{Urządzenie haptyczne SensAble Phantom Omni}
+\end{figure}
+
+Niniejsza praca w znacznym stopniu opiera się na wykorzystaniu tych urządzeń do odzworowywania rzeczywistych ruchów ręki użytkownika w świecie wirtualnym. Pracownie Zakładu Biofizyki Wydziału Fizyki Uniwersytetu Warszawskiego są wyposażone w tego typu urządzenia, zostały one udostępnione autorowi celem realizacji niniejszej pracy.
 
 \section{Opis urządzenia}
-Urządzenie haptyczne (ang. haptic) Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji z możliwością programowego sterowania zwrotną projekcją momentów sił o trzech stopniach swobody (pozycja wskaźnika). 
+Urządzenie haptyczne (ang. haptic device) Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji z możliwością programowego sterowania zwrotną projekcją (ang. force feedback) momentów sił w trzech stopniach swobody (sterowanie pozycją wskaźnika). Ponadto w urządzeniach dostępne są dwa przyciski monostabilne do dowolnego wykorzystania.
 
-Phantom Omni jest wykorzystywany w profesjonalnych rozwiązaniach z zakresu wirtualnej rzeczywistości czy modelowania trójwymiarowego. Umożliwia użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą zmysłu dotyku. Wraz z urządzeniem producent dostarcza sterowniki oraz pakiet bibliotek programistycznych OpenHaptics umożliwiających tworzenie oprogramowania w pełni wykorzystującego jego możliwości. 
+Phantom Omni jest urządzeniem znajdującym zastosowanie w różnego rodzaju aplikacjach działających na styku świata wirtualnego z rzeczywistym. Umożliwia ono użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą zmysłu dotyku. Dzięki dostarczonym przez producenta sterownikom i bogatemu zestawowi bibliotek programistycznych OpenHaptics możliwe jest tworzenie oprogramowania w pełni wykorzystującego możliwości oferowane przez urządzenie.
 
-Specyfikację techniczną urządzenia prezentuje poniższa tabela
+Specyfikację techniczną urządzenia prezentuje poniższa tabela:
 
 \begin{center}
 	\begin{tabular}{|l|p{4cm}|}
@@ -725,33 +741,34 @@ Specyfikację techniczną urządzenia prezentuje poniższa tabela
 		\hline Sztywność & oś X: 1.26 N/mm $\newline$ oś Y: 2.31 N/mm $\newline$ oś Z: 1.02 N/mm \\
  		\hline Dane o pozycji i orientacji & osi X, Y i Z $\newline$ kąty $\alpha$, $\beta$ i $\gamma$ $\newline$ (6 stopni swobody)\\
 		\hline Zwrotna projekcja sił & osi X, Y i Z $\newline$ (3 stopnie swobody) \\
-		\hline Interfejs & IEEE-1394a, Ethernet \\
+		\hline Interfejs & IEEE-1394a $\newline$ Ethernet \\
 		\hline
 	\end{tabular}
 \end{center}
-
-\textbf{TODO:} szczegolowy opis + rysunki
 	
 \section{Wymagania sprzętowe}
 
 	Urządzenia Sensable Phantom Omni w które wyposażone są Pracownie Biofizyki FUW posiadają dwa rodzaje interfejsów: FireWire (IEEE-1394a) oraz Ethernet. 
 
-Interfejs Ethernet jest powszechnie spotykany w większości komputerów i systemy operacyjne bezproblemowo radzą sobie z jego obsługą. Użycie urządzenia Phantom Omni z interfejsem sieciowym wiąże się jednak z instalacją dedykowanych sterowników oraz pakietu OpenHaptics v3.0, które jak podaje producent są wspierają jedynie systemy do Windows 7 co uniemożliwia korzystanie z nich na nowszych platformach.
+Interfejs Ethernet jest powszechnie spotykany w większości komputerów i systemy operacyjne bezproblemowo radzą sobie z jego obsługą. Użycie urządzenia Phantom Omni z interfejsem sieciowym wiąże się jednak z instalacją dedykowanych sterowników oraz pakietu OpenHaptics v3.0, które jak podaje producent są wspierają jedynie systemy do Windows 7 włącznie, co uniemożliwia korzystanie z nich na nowszych platformach.
 
 FireWire jest standardem łącza szeregowego opracowanym w 1995 roku, który umożliwia szybką transmisję danych. Został on zaprojektowany przede wszystkim do szybkiego przesyłania danych o dużym rozmiarze, zatem jest często wykorzystywany przez producentów sprzętu multimedialnego. Jednak w związku z systematycznym wycofywaniem się (od 2011 roku) producentów sprzętu i oprogramowania ze wspierania interfejsu FireWire, korzystanie z urządzeń w niego wyposażonych rodzi wiele problemów. Użytkownik jest zmuszony do poszukiwania kart rozszerzeń do stacji roboczych mających obsługiwać urządzenia - na dodatek firma SenseAble zaleca korzystanie wyłącznie z kontrolerów IEEE-1394a opartych o chipset firmy NEC lub VIA co jeszcze bardziej utrudnia proces wdrażania.
 
-Powyższe trudności powodują, że sam proces instalacji i uruchomienia urządzenia staje się bardzo kłopotliwy, a często niemożliwy. Stacje robocze korzystające z urządzeń Phantom Omni w Pracowniach Biofizyki FUW działają na systemach operacyjny CentOS w wersji 6.0, który pozwalał na stosunkowo stabilne działanie urządzenia. Wraz ze sterownikami i pakietem OpenHaptics w pracowniach uruchomiony jest framework VRPN (Virtual Reality Perfipherial Network), który został opisany w dalszej części pracy.
+Powyższe trudności powodują, że sam proces instalacji i uruchomienia urządzenia staje się bardzo kłopotliwy, a często niemożliwy. Stacje robocze korzystające z urządzeń Phantom Omni w Pracowniach Biofizyki FUW działają na systemach operacyjny CentOS w wersji 6.0, który pozwalał na stosunkowo stabilne działanie urządzenia. 
 
-Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był przedmiotem niniejszej pracy.
+Wraz ze sterownikami i pakietem OpenHaptics v3.0 w pracowniach uruchomiony jest framework VRPN (Virtual Reality Perfipherial Network), który został opisany w dalszej części pracy dostarczający uniwersalną i łatwą w użyciu warstwę API nad wieloma rodzajami urządzeń klasy HCI. 
+
+Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był przedmiotem niniejszej pracy. Twórca pracy miał do dyspozycji stanowisko pracy wyposażone w uruchomione urządzenie haptyczne, zainstalowany zestaw sterowników, bibliotek i pakiet VRPN.
 
 \section{OpenHaptics Toolkit v3.0}
 
-OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego przez producenta urządzenia. Zawiera on zestaw sterowników, bibliotek, narzędzi i przykładowych kodów źródłowych ułatwiających programiście wrożenie rozwiązań haptycznych w dowolnym programie komputerowym. Biblioteki programistyczne dają dostęp do szerokiego zakresu niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty abstrakcję. 
-\\
-\\
+OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego przez producenta urządzenia. Zawiera on zestaw sterowników, bibliotek, narzędzi i przykładowych kodów źródłowych ułatwiających programiście wdrożenie rozwiązań haptycznych w dowolnym programie komputerowym. Biblioteki programistyczne dają dostęp do szerokiego zakresu niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty warstwę abstrakcji. 
+
+\begin{figure}[H]
+\centering
 \includegraphics[scale=0.5,center]{openhaptics}
-\\
-\\
+\caption{Architektura pakietu OpenHaptics}
+\end{figure}
 
 \subsection{Phantom Device Drivers}
 Phantom Device Drivers (PDD) to zestaw sterowników do różnych urządzeń haptycznych oferowanych przez producenta.
@@ -843,6 +860,7 @@ Tworzenie wtyczek polega na zdefiniowaniu funkcji \textbf{\_\_init\_\_(self)}, k
 \section{Uruchamianie wtyczek w ramach środowiska PyMOL}
 
 \chapter{Opis stanowiska laboratoryjnego}
+
 
 
 \iffalse
