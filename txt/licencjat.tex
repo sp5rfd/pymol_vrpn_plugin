@@ -716,7 +716,7 @@ $$
 todo
 	
 \chapter{Urządzenie haptyczne Sensable Phantom Omni}
-Nadrzędnym celem wirtualnej rzeczywistości (ang. virtual reality) jest możliwie wierne odtworzenie świata rzeczywistego lub fikcyjnego w formie programu komputerowego czy multimedialnej prezentacji oraz umożliwienie użytkownikowi wchodzenie w interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń klasy HCI (ang. human computer interface) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę SensAble (obecnie Geomagic). 
+Nadrzędnym celem wirtualnej rzeczywistości (ang. virtual reality) jest możliwie wierne odtworzenie świata rzeczywistego lub fikcyjnego w formie programu komputerowego czy multimedialnej prezentacji. Ponadto metody i narzędzia wirtualnej rzeczywistości umozliwiają użytkownikowi wchodzenie w czynna interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń klasy HCI (ang. human computer interface) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę SensAble (obecnie Geomagic). 
 
 \begin{figure}[H]
 \centering
@@ -727,9 +727,9 @@ Nadrzędnym celem wirtualnej rzeczywistości (ang. virtual reality) jest możliw
 Niniejsza praca w znacznym stopniu opiera się na wykorzystaniu tych urządzeń do odzworowywania rzeczywistych ruchów ręki użytkownika w świecie wirtualnym. Pracownie Zakładu Biofizyki Wydziału Fizyki Uniwersytetu Warszawskiego są wyposażone w tego typu urządzenia, zostały one udostępnione autorowi celem realizacji niniejszej pracy.
 
 \section{Opis urządzenia}
-Urządzenie haptyczne (ang. haptic device) Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji z możliwością programowego sterowania zwrotną projekcją (ang. force feedback) momentów sił w trzech stopniach swobody (sterowanie pozycją wskaźnika). Ponadto w urządzeniach dostępne są dwa przyciski monostabilne do dowolnego wykorzystania.
+Urządzenie haptyczne (ang. haptic device) Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji. Urządzenie ma także możliwość programowego sterowania zwrotną projekcją (ang. force feedback) momentów sił w trzech stopniach swobody (sterowanie pozycją wskaźnika). Ponadto w urządzeniach dostępne są dwa przyciski monostabilne do dowolnego wykorzystania.
 
-Phantom Omni jest urządzeniem znajdującym zastosowanie w różnego rodzaju aplikacjach działających na styku świata wirtualnego z rzeczywistym. Umożliwia ono użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą zmysłu dotyku. Dzięki dostarczonym przez producenta sterownikom i bogatemu zestawowi bibliotek programistycznych OpenHaptics możliwe jest tworzenie oprogramowania w pełni wykorzystującego możliwości oferowane przez urządzenie.
+Phantom Omni jest urządzeniem znajdującym zastosowanie w różnego rodzaju aplikacjach działających na styku świata wirtualnego z rzeczywistym. Umożliwia ono użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą \textit{zmysłu dotyku}. Dzięki dostarczonym przez producenta sterownikom i bogatemu zestawowi bibliotek programistycznych OpenHaptics możliwe jest tworzenie oprogramowania w pełni wykorzystującego możliwości oferowane przez urządzenie.
 
 Specyfikację techniczną urządzenia prezentuje poniższa tabela:
 
@@ -744,21 +744,21 @@ Specyfikację techniczną urządzenia prezentuje poniższa tabela:
 		\hline Interfejs & IEEE-1394a $\newline$ Ethernet \\
 		\hline
 	\end{tabular}
-\end{center}
+\end{center}	
 	
 \section{Wymagania sprzętowe}
 
-	Urządzenia Sensable Phantom Omni w które wyposażone są Pracownie Biofizyki FUW posiadają dwa rodzaje interfejsów: FireWire (IEEE-1394a) oraz Ethernet. 
+	Urządzenia Sensable Phantom Omni w które wyposażone są Pracownie Biofizyki FUW posiadają dwa rodzaje interfejsów: Ethernet oraz FireWire (IEEE-1394a). 
 
 Interfejs Ethernet jest powszechnie spotykany w większości komputerów i systemy operacyjne bezproblemowo radzą sobie z jego obsługą. Użycie urządzenia Phantom Omni z interfejsem sieciowym wiąże się jednak z instalacją dedykowanych sterowników oraz pakietu OpenHaptics v3.0, które jak podaje producent są wspierają jedynie systemy do Windows 7 włącznie, co uniemożliwia korzystanie z nich na nowszych platformach.
 
-FireWire jest standardem łącza szeregowego opracowanym w 1995 roku, który umożliwia szybką transmisję danych. Został on zaprojektowany przede wszystkim do szybkiego przesyłania danych o dużym rozmiarze, zatem jest często wykorzystywany przez producentów sprzętu multimedialnego. Jednak w związku z systematycznym wycofywaniem się (od 2011 roku) producentów sprzętu i oprogramowania ze wspierania interfejsu FireWire, korzystanie z urządzeń w niego wyposażonych rodzi wiele problemów. Użytkownik jest zmuszony do poszukiwania kart rozszerzeń do stacji roboczych mających obsługiwać urządzenia - na dodatek firma SenseAble zaleca korzystanie wyłącznie z kontrolerów IEEE-1394a opartych o chipset firmy NEC lub VIA co jeszcze bardziej utrudnia proces wdrażania.
+FireWire jest standardem łącza szeregowego opracowanym w 1995 roku, który umożliwia szybką transmisję danych. Został on zaprojektowany przede wszystkim do szybkiego przesyłania danych o dużym rozmiarze, zatem jest często wykorzystywany przez producentów sprzętu multimedialnego. Jednak w związku z systematycznym wycofywaniem się (od 2011 roku) producentów sprzętu i oprogramowania ze wspierania interfejsu FireWire, korzystanie z urządzeń w niego wyposażonych rodzi wiele problemów. Użytkownik jest zmuszony do poszukiwania dedykowanych (spełniających wymagania producenta) kart rozszerzeń do stacji roboczych mających obsługiwać urządzenia - na dodatek firma SenseAble zaleca korzystanie wyłącznie z kontrolerów IEEE-1394a opartych o chipset firmy NEC lub VIA co może dodatkowo utrudnić proces wdrażania urządzeń do pracy.
 
-Powyższe trudności powodują, że sam proces instalacji i uruchomienia urządzenia staje się bardzo kłopotliwy, a często niemożliwy. Stacje robocze korzystające z urządzeń Phantom Omni w Pracowniach Biofizyki FUW działają na systemach operacyjny CentOS w wersji 6.0, który pozwalał na stosunkowo stabilne działanie urządzenia. 
+Powyższe trudności powodują, że sama instalacja i uruchomienie urządzenia staje się bardzo kłopotliwe, a często niemożliwe. Stacje robocze korzystające z urządzeń Phantom Omni w Pracowniach Biofizyki FUW działają na systemach operacyjny CentOS w wersji 6.0 ze zmodyfikowanym jądrem GNU/Linux, który pozwalał na stosunkowo stabilne działanie urządzenia. 
 
-Wraz ze sterownikami i pakietem OpenHaptics v3.0 w pracowniach uruchomiony jest framework VRPN (Virtual Reality Perfipherial Network), który został opisany w dalszej części pracy dostarczający uniwersalną i łatwą w użyciu warstwę API nad wieloma rodzajami urządzeń klasy HCI. 
+Wraz ze sterownikami i pakietem OpenHaptics v3.0 w pracowniach uruchomiony jest framework Virtual Reality Perfipherial Network (został opisany w dalszej części pracy), dostarczający uniwersalną i łatwą w użyciu warstwę API nad wieloma rodzajami urządzeń klasy HCI. 
 
-Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był przedmiotem niniejszej pracy. Twórca pracy miał do dyspozycji stanowisko pracy wyposażone w uruchomione urządzenie haptyczne, zainstalowany zestaw sterowników, bibliotek i pakiet VRPN.
+Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był przedmiotem niniejszej pracy. Autor pracy miał do dyspozycji przygotowane stanowisko pracy, wyposażone w uruchomione urządzenie haptyczne, zainstalowany zestaw sterowników, bibliotek i pakiet VRPN.
 
 \section{OpenHaptics Toolkit v3.0}
 
@@ -770,67 +770,65 @@ OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego prze
 \caption{Architektura pakietu OpenHaptics}
 \end{figure}
 
+Składnia bibliotek programistycznych pakietu OpenHaptics Toolkit jest wzorowana na składni biblioteki OpenGL i umożliwia tworzenie programów w języku C oraz C++. 
+
 \subsection{Phantom Device Drivers}
-Phantom Device Drivers (PDD) to zestaw sterowników do różnych urządzeń haptycznych oferowanych przez producenta.
-
-
+Producent oprócz Phantom Omni dostarcza także innego rodzaju urządzenia haptyczne, skierowane do innych grup odbiorców. Phantom Device Drivers (PDD) to zestaw sterowników do wszystkich urządzeń haptycznych oferowanych przez producenta. 
 
 \subsection{Haptic Device API}
-- Haptic Device API (HDAPI) – niskopoziomowe API umożliwiające bezpośredni dostęp do funkcji sterujących projekcją sił i pobieraniem danych o pozycji i orientacji wskaźnika
+Haptic Device API (HDAPI) to niskopoziomowe interfejs programistyczny umożliwiający bezpośredni dostęp do wszystkich funkcji związanych z urzadzeniami haptycznymi.
 
+Poniższy diagram przedstawia kompletną architekturę modułu HDAPI:
 
-\subsection{Haptic Library Api}
-- Haptic Library API (HLAPI) – wysokopoziomowe API zaprojektowane głównie pod kątem zgodności składniowej z OpenGL API
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.65,center]{hdapi}
+\caption{Architektura HDAPI}
+\end{figure}
 
+Poza bardziej zaawansowanymi funkcjami związanymi na przykład z takimi aspektami jak wielowątkowość czy wywołania synchroniczne i asynchroniczne, HDAPI zwraca elementarne dane o pozycji i orientacji, umożliwia sterowanie sprzężeniem zwrotnym czy wyzwalanie funkcji (ang. callback) w odpowiedzi na wciskanie wbudowanych przycisków.
 
+HDAPI dostarcza także rozbudowane API systemu detekcji i przechwytywania błędów, kalibracji urządzenia, itp.
 
-\section{Przykłady wykorzystania}
-tu beda jakies rzeczy...
-sdf
-sdf
-sdf
-s
-sdf
-s
+Programista dostaje także bogaty zestaw przykładowych kodów źródłowych stanowiących przykłady wykorzystania poszczególnych funkcjonalności HDAPI.
 
-sd
+\subsection{Haptic Library API}
+Haptic Library API (HLAPI) to biblioteki wysokopoziomowego interfejsu programistycznego zaprojektowane głównie pod kątem zgodności z OpenGL API. HLAPI umożliwia dalekoidącą integrację z istniejącym kodem i \textit{bytami} (strukturami, funkcjami, itp.) pochodzącymi z OpenGL. Ponadto ułatwia współpracę z zewnętrznymi bibliotekami dostarczającymi funkcjonalności obliczeń fizycznych (dynamika, detekcji kolizji, itp.).
 
-sdf
-sdf
+W odróżnieniu od surowego sterowania momentami sił działającymi na urządzenie (jak w przypadku HDAPI), tutaj możemy definiować bardziej złożone obiekty przestrzenne (bryły, powierzchnie) na które urządzenie haptyczne może oddziaływać. Również sposób reprezentacji sił dostarczony przez HLAPI jest bardziej rozbudowany, do dyspozycji programisty jest symulacja lepkości, sprężyny, grawitacji czy  tarcia.
 
+Podobnie jak w przypadku HDAPI programista dostaje bogaty zestaw przykładowych kodów źródłowych, umożliwiających natychmiastowe przestestowanie interesujących rozwiązań.
 
-sdf
+Poniższy diagram przedstawia kompletną architekturę modułu HLAPI:
 
-sdf
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.65,center]{hlapi}
+\caption{Architektura HLAPI}
+\end{figure}
 
-sdf
+\subsection{QuickHaptics Micro API}
+QuickHaptics Micro API jest rozwiązaniem działającym \textit{na szczycie piramidy} OpenHaptics Toolkit.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6,center]{quickhaptics}
+\caption{QuickHaptics Micro API}
+\end{figure}
 
-sd
+Zgodnie z zapewnieniami producenta, QuickHaptics dostarcza jeszcze szybszych i łatwiejszych rozwiązań do tworzenia aplikacji wykorzystujących możliwości jego urządzeń. QuickHaptics Micro API stanowi kolejny, jeszcze wyższy poziom abstrakcji ponad HDAPI oraz HLAPI, który integrując je dostarcza interfejsy w postaci klas języka C++. Umożliwia tworzenie w pełni funkcjonalnych programów przez osoby nie posiadające dużego doświadczenia w zakresie metod wirtualnej rzeczywistości, programowania grafiki komputerowej czy obsługi urządzeń haptycznych.
 
-sdf
+Wszystkie elementy składające się na OpenHaptics Toolkit mogą być ze sobą łączone i używane zamiennie. 
 
-sdf
+\section{Servo Loop}
+\textit{Servo Loop} to specjalna, działająca w osobnym wątku z wysokim priorytetem pętla, którą musi posiadać każdy program współpracujący z urządzeniami haptycznymi.
 
-sfd
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5,center]{servoloop}
+\caption{Servo Loop}
+\end{figure}
 
-sdf
-
-sdf
-
-sdf
-
-sdf
-
-sdf
-
-sdf
-
-sd
-
-sdf
-
-
-
+Zapewnienie stabilnego i realistycznego odwzorowania efektów sprzężenia zwrotnego jest tutaj najwyższym priorytetem. Wymagane jest aby pętla \textit{Servo Loop} była wykonywana z częstotliwością co najmniej 1kHz.
 
 \chapter{Biblioteka VRPN}
 ll
