@@ -830,11 +830,21 @@ Wszystkie elementy składające się na OpenHaptics Toolkit mogą być ze sobą 
 
 Zapewnienie stabilnego i realistycznego odwzorowania efektów sprzężenia zwrotnego jest tutaj najwyższym priorytetem. Wymagane jest aby pętla \textit{Servo Loop} była wykonywana z częstotliwością co najmniej 1kHz.
 
-\chapter{Biblioteka VRPN}
-ll
+\chapter{Virtual Reality Peripheral Network}
+Virtual Reality Peripheral Network - VRPN - jest rozbudowaną biblioteką, szkieletem aplikacji (ang. application framework) ułatwiającym tworzenie programów komputerowych wykorzystujących urządzenia używane w systemach wirtualnej rzeczywistości. VRPN dostarcza interfejsów programistycznych i serwerów uniezależniających programistę od wyboru konkretnych rozwiązań sprzętowych.
 
 \section{Opis pakietu}
-opisik
+Pakiet VRPN jest od podstaw zaprojektowany jako oprogramowanie sieciocentryczne. Ponadto niezależnie od wykorzystywanych urządzeń HCI programista jest zwolniony z konieczności ich niezależnej obsługi. Jedyne o czym należy pamiętać to tzw. klasa urządzenia którym się posługuje. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6,center]{vrpn}
+\caption{Architektura VRPN}
+\end{figure}
+
+VRPN definiuje kilka abstrakcyjnych klas urządzeń którymi sę posługuje: Analog, Button, Dial, ForceDevice, Imager, Sound, Text oraz Tracker. Przy czym konkretne urządzenie może należeć jednocześnie do jednej lub kilku klas (np. Phantom Omni to Tracker oraz Button). 
+
+Istnienie ww. klas powoduje, że wszystkie urządzenia danego typu zgłaszają zmiany stanów jako asynchroniczne wywołania funkcji (ang. callback) przekazującej obiekty lub wartości swoich klas. Zadaniem programisty jest jedynie obsłużenie przychodzących danych, bez konieczności zwracania uwagi na to z jakiego konkretnego urządzenia one pochodzą.
 
 \section{Dostosowanie VRPN do wymagań niniejszej pracy}
 opis
