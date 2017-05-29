@@ -831,10 +831,10 @@ Wszystkie elementy składające się na OpenHaptics Toolkit mogą być ze sobą 
 Zapewnienie stabilnego i realistycznego odwzorowania efektów sprzężenia zwrotnego jest tutaj najwyższym priorytetem. Wymagane jest aby pętla \textit{Servo Loop} była wykonywana z częstotliwością co najmniej 1kHz.
 
 \chapter{Virtual Reality Peripheral Network}
-Virtual Reality Peripheral Network - VRPN - jest rozbudowaną biblioteką, szkieletem aplikacji (ang. application framework) ułatwiającym tworzenie programów komputerowych wykorzystujących urządzenia używane w systemach wirtualnej rzeczywistości. VRPN dostarcza interfejsów programistycznych i serwerów uniezależniających programistę od wyboru konkretnych rozwiązań sprzętowych.
+Virtual Reality Peripheral Network (w skrócie VRPN) jest rozbudowaną biblioteką, szkieletem aplikacji (ang. application framework) i zbiorem narzędzi ułatwiających tworzenie programów komputerowych wykorzystujących urządzenia używane w systemach wirtualnej rzeczywistości. VRPN dostarcza abstrakcyjnych interfejsów programistycznych i serwerów uniezależniających programistę konkretnych rozwiązań sprzętowych. Umożliwia stosunkowo proste budowanie aplikacji obsługujących urządzenia HCI w wielu popularnych językach programowania (np. C++, Python czy Java).
 
 \section{Opis pakietu}
-Pakiet VRPN jest od podstaw zaprojektowany jako oprogramowanie sieciocentryczne. Ponadto niezależnie od wykorzystywanych urządzeń HCI programista jest zwolniony z konieczności ich niezależnej obsługi. Jedyne o czym należy pamiętać to tzw. klasa urządzenia którym się posługuje. 
+Pakiet VRPN jest od podstaw zaprojektowany jako oprogramowanie sieciocentryczne, tzn. takie w którym sieć komputerowa odgrywa kluczową rolę.
 
 \begin{figure}[H]
 \centering
@@ -842,33 +842,46 @@ Pakiet VRPN jest od podstaw zaprojektowany jako oprogramowanie sieciocentryczne.
 \caption{Architektura VRPN}
 \end{figure}
 
-VRPN definiuje kilka abstrakcyjnych klas urządzeń którymi sę posługuje: Analog, Button, Dial, ForceDevice, Imager, Sound, Text oraz Tracker. Przy czym konkretne urządzenie może należeć jednocześnie do jednej lub kilku klas (np. Phantom Omni to Tracker oraz Button). 
+VRPN definiuje kilka abstrakcyjnych klas wspieranych urządzeń: Analog, Button, Dial, ForceDevice, Imager, Sound, Text oraz Tracker. Przy czym konkretne urządzenie może należeć jednocześnie do jednej lub kilku klas (np. Phantom Omni to Tracker, Button oraz ForceDevice). Istnienie ww. klas powoduje, że wszystkie urządzenia danego typu zgłaszają zmiany stanów jako asynchroniczne wywołania funkcji (ang. callback) przekazując w ten sposób obiekty lub wartości parametrów swoich klas. Zadaniem programisty jest odbiór i interpretacja przychodzących danych. Pozwala to na wygodne i szybkie wdrażanie rozwiązań opartych o urządzenia HCI nawet przez osoby bez wcześniejszego doświadczenia z systemami wirtualnej rzeczywistości.
 
-Istnienie ww. klas powoduje, że wszystkie urządzenia danego typu zgłaszają zmiany stanów jako asynchroniczne wywołania funkcji (ang. callback) przekazującej obiekty lub wartości swoich klas. Zadaniem programisty jest jedynie obsłużenie przychodzących danych, bez konieczności zwracania uwagi na to z jakiego konkretnego urządzenia one pochodzą.
+Domyślnie VRPN jest napisany w języku C++, jednak posiada wbudowane mechanizmy generujące kod w języku Python czy Java. W trakcie kompilacji biblioteki z zamiarem jej użycia po stronie klienckiej należy zwrócic szczególną uwagę na docelowy język którego będziemy używać i podać odpowiednie parametry kompilacji. 
 
-\section{Dostosowanie VRPN do wymagań niniejszej pracy}
-opis
+\section{Opis użycia VRPN}
+W niniejszej pracy wykorzystuje się integrację pakietu VRPN z urządzeniem Phantom Omni do otrzymywania danych statusowych o pozycji, orientacji i wciśniętych przyciskach oraz sterowania sprzężeniem zwrotnym.
 
-\section{Kompilacja i uruchomienie}
-kompilacja i uruchomienie
+Stacja robocza obsługująca urządzenie haptyczne posiada skonfigurowany do jego obsługi proces \textit{vrpn\_server} będący serwerem TCP/IP oczekującym na przychodzące połączenia od zainteresowanych aplikacji klienckich. Konfiguracja serwera jest przechowywana w tekstowym pliku konfiguracyjnym \textit{vrpn.cfg}, który jest ładowany każdorazowo podczas uruchamiania. 
 
-\chapter{Pakiet PyMOL}
-PyMOL jest oprogramowaniem służącym głównie do wizualizacji struktur chemicznych oraz przeprowadzania na nich prostych obliczeń. Jego historia sięga roku 2000, kiedy to Warren Lyford DeLano zainicjował powstanie projektu. Przez lata intensywnych prac nad rozwojem program stał się standardowym narzędziem wykorzystywanym przez wiele wiodących ośrodków naukowo badawczych. Obecnie nad jego rozwojem czuwa firma \textit{Schrödinger, Inc}.
+Stworzona aplikacja, w tym przypadku wtyczka do programu PyMOL, jest klientem TCP/IP próbującym nawiązać połączenie z ww. serwerem. W trakcie jej uruchamiania tworzone są obiekty klas \textit{vrpn\_Tracker}, \textit{vrpn\_Button} i \textit{vrpn\_ForceDevice} posiadające wskaźniki do funkcji-uchwytów (ang. handler) odpowiednio przetwarzających odebrane danymi.
 
-\section{Opis Oprogramowania}
-opisik
+Zarejestrowanie funkcji-uchwytu (tutaj funkcja \textit{button\_handler(...)}) w obiekcie klasy \textit{vrpn\_Button} i obsługa przychodzących zdarzeń jest trywialna i sprowadza się do rozpoznania zmiany stanu jednego z dwóch przycisków. W ramach niniejszej pracy przyciski zostały oprogramowane tak, że wciśnięcie pierwszego z nich powoduje wykonanie superpozycji (nałożenia się) struktury wzorca z najbliższym możliwym do dopasowania regionem - zgodnie z danymi pochodzącymi z \textit{pliku mapującego}. Wciśnięcie drugiego przycisku powoduje wykonanie zbliżenia na linię łączącą środki ciężkości ww. struktur.
+
+Dane udostępniane przez obiekt klasy \textit{vrpn\_Tracker} to pozycja i orientacja wskaźnika. Odebrane surowe dane należy przeliczyć na jednostki i wielkości obsługiwane przez pakiet PyMOL. W przypadku orientacji należy przejść z reprezentacji w kwaternionach (wydawana przez VRPN) na postać (akceptowaną przez PyMOL) oś-kąt (ang. axis-angle), ta operacja została opisana w części teoretycznej pracy. Współrzędne pozycji wskaźnika należy przemnożyć przez dobrany eksperymentalnie współczynnik skalujący, który spowoduje realistyczne odwzorowanie przesunięć z przestrzeni rzeczywistej w przestrzeni wirtualnej.
+
+Klasa \textit{vrpn\_ForceDevice} umożliwia sterowanie serwomechanizmami wbudowanymi w urządzenie Phantom Omni. Biblioteka VRPN dostarcza szereg metod umożliwiających wykonanie takich operacji na kilka sposobów: począwszy od najprostszego podania wektora pola siłowego, poprzez zdefiniowanie wirtualnej sprężyny zaczepionej w zadanym punkcie, aż do tworzenia wirtualnych powierzchni czy brył.
+
+Integracja oraz przetwarzanie danych dostarczanych przez pakiet VRPN były znaczącą częścią pracy. Użycie pakietu VRPN zamiast w miejsce biblioteki OpenHaptics dało znaczący wzrost niezależności projektu od konkretnego urządzenia haptycznego i otworzyło wiele możliwości dalszego rozwoju i wykorzystania stworzonego w ramach niniejszej pracy oprogramowania. 
+
+\chapter{Implementacja oprogramowania}
+
+Oprogramowanie będące przedmiotem niniejszej pracy zostało stworzone jako rozszerzenie popularnego pakietu PyMOL...
+
+\section{Opis stanowiska laboratoryjnego}
+lalala opis stanowiska
 
 \section{Rozszerzanie funkcjonalności pakietu PyMOL}
+
+Oprogramowanie będące przedmiotem niniejszej pracy zostało stworzone jako rozszerzenie popularnego pakietu PyMOL...
+
+
+PyMOL jest oprogramowaniem służącym głównie do wizualizacji struktur chemicznych oraz przeprowadzania na nich prostych obliczeń. Jego historia sięga roku 2000, kiedy to Warren Lyford DeLano zainicjował powstanie projektu. Przez lata intensywnych prac nad rozwojem program stał się standardowym narzędziem wykorzystywanym przez wiele wiodących ośrodków naukowo badawczych. Obecnie nad jego rozwojem czuwa firma \textit{Schrödinger, Inc}.
+
 Funkcjonalność pakiet PyMOL może być w łatwy sposób rozszerzalna poprzez wbudowany system obsługi wtyczek (ang. plugin) tworzonych w języku Python. Programista ma dostęp do rozbudowanego API (ang. application programming interface) zawierającego szeroki wachlarz funkcji umożliwiających prowadzenie różnych obliczeń na załadowanych strukturach. Ponadto programista tworząc wtyczki może z powodzeniem korzystać z biblioteki standardowej języka Python oraz dowolnych bibliotek zewnętrznych autorów.
 
 Podczas tworzenia oprogramowania będącego przedmiotem niniejszej pracy korzystano zarówno z API wbudowanego w PyMOL jak również z zewnętrznych bibliotek takich jak VRPN do obsługi urządzenia haptycznego.
 
 Tworzenie wtyczek polega na zdefiniowaniu funkcji \textbf{\_\_init\_\_(self)}, która podczas uruchamiania programu PyMOL tworzy nową pozycję w menu. Jednym z jej parametrów jest referencję do głównej funkcji programu rozszerzającego (wtyczki). Taką funkcję należy zdefiniować w osobnym pliku z rozszerzeniem \textit{.py}.
 
-\section{Uruchamianie wtyczek w ramach środowiska PyMOL}
-
-\chapter{Opis stanowiska laboratoryjnego}
-
+\section{Opis implementacji}
 
 
 \iffalse
@@ -1173,7 +1186,8 @@ utajnieniu.
 
 \end{thebibliography}
 
-\chapter*{Kod źródłowy programu}
+\chapter*{Kod źródłowy}
+\addcontentsline{toc}{chapter}{Kod źródłowy}
 
 \begin{lstlisting}
 # -*- coding: utf-8 -*-
