@@ -863,15 +863,26 @@ Integracja oraz przetwarzanie danych dostarczanych przez pakiet VRPN były znacz
 
 \chapter{Implementacja oprogramowania}
 
-Oprogramowanie będące przedmiotem niniejszej pracy zostało stworzone jako rozszerzenie popularnego pakietu PyMOL...
+Oprogramowanie będące przedmiotem niniejszej pracy zostało stworzone jako rozszerzenie (ang. plugin) popularnego pakietu PyMOL. Wykorzystano w nim możliwości wizualizacyjne pakietu w połączeniu z danymi o pozycji i orientacji urządzenia Phantom Omni odbieranymi dzięki bibliotece VRPN. Dane wejściowe do programu - plik mapujący struktury biopolimerów - został dostarczony przez zewnętrzne oprogramowanie (opisane w części teoretycznej pracy).
 
 \section{Opis stanowiska laboratoryjnego}
-lalala opis stanowiska
+Jak wspomniano we wstępie do pracy prawidłowe uruchomienie oprogramowania będącego jej przedmiotem wymaga wcześniejszego zestwienia odpowiednio skonfigurowanego stanowiska laboratoryjnego. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6,center]{stanowisko}
+\caption{Schemat stanowiska laboratoryjnego}
+\end{figure}
+
+Stanowisko składa się z połączonych siecią komputerową stacji roboczych, gdzie jedna stanowi host dla urządzenia Phantom Omni, druga natomiast to łączący się z nią klient. 
+
+Komputer-host musi posiadać kompatybilną z urządzeniem Phantom Omni kartę rozszerzeń z portem IEEE-1394 (FireWire). Sterowniki wraz z pakietem OpenHaptics oraz pakiet VRPN ze skonfigurowanym procesem \textit{vrpn\_server} nasłuchującym połączeń przychodzących na wybranym porcie TCP. 
+
+Druga stacja robocza stanowiska laboratoryjnego posiada zainstalowany pakiet PyMOL z oprogramowaniem rozszerzającym jego funkcjonalność - przedmiot niniejszej pracy. Po jego uruchomieniu, załadowaniu danych wejściowych oraz podaniu adresu IP hosta urządzenia Phantom Omni, program próbuję nawiązać z nim połączenie aby rozpocząć pracę.
+
+W szczególności host urządzenia Phantom Omni oraz pakiet PyMOL mogą być uruchomione na jednej maszynie i wykorzystywać interfejs \textit{localhost}.
 
 \section{Rozszerzanie funkcjonalności pakietu PyMOL}
-
-Oprogramowanie będące przedmiotem niniejszej pracy zostało stworzone jako rozszerzenie popularnego pakietu PyMOL...
-
 
 PyMOL jest oprogramowaniem służącym głównie do wizualizacji struktur chemicznych oraz przeprowadzania na nich prostych obliczeń. Jego historia sięga roku 2000, kiedy to Warren Lyford DeLano zainicjował powstanie projektu. Przez lata intensywnych prac nad rozwojem program stał się standardowym narzędziem wykorzystywanym przez wiele wiodących ośrodków naukowo badawczych. Obecnie nad jego rozwojem czuwa firma \textit{Schrödinger, Inc}.
 
@@ -882,6 +893,9 @@ Podczas tworzenia oprogramowania będącego przedmiotem niniejszej pracy korzyst
 Tworzenie wtyczek polega na zdefiniowaniu funkcji \textbf{\_\_init\_\_(self)}, która podczas uruchamiania programu PyMOL tworzy nową pozycję w menu. Jednym z jej parametrów jest referencję do głównej funkcji programu rozszerzającego (wtyczki). Taką funkcję należy zdefiniować w osobnym pliku z rozszerzeniem \textit{.py}.
 
 \section{Opis implementacji}
+llalala
+
+\section{Opis oprogramowania}
 
 
 \iffalse
