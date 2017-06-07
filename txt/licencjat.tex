@@ -206,9 +206,9 @@ Rezultatem działania ww. programu jest plik mapujący, który zawiera informacj
 
 
 \section{RMSD}
-Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów niniejszej pracy. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
+Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów procesu dopasowania strukturalnego. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
 
-Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi atomów zawartych w strukturze wzorca (ang. template) i w odpowiednim fragmencie cząsteczki celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
+Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi odpowiadających sobie atomów (lub innych punktów charakterystycznych) zawartych w strukturze wzorca (ang. template) i cząsteczce celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
 
 $$
 \begin{array}{lr}
@@ -217,19 +217,19 @@ RMSD(p,q) = \sqrt{\frac{1}{N}\sum_{i=1}^{N}||p_i-q_i||^{2}} = \\
 = \sqrt{\frac{1}{N}\sum_{i=1}^{N}((p_{ix}-q_{ix})^{2}+(p_{iy}-q_{iy})^{2}+(p_{iz}-q_{iz})^{2})}
 \end{array}
 $$
-
+\\
 gdzie:
-
-$p$ - wektor współrzędnych struktury wzorca
-
-$q$ - wektor współrzędnych wybranego regionu w strukturze celu
-
+\\
+$p$ - wektor punktów struktury wzorca
+\\
+$q$ - wektor punktów wybranego regionu w strukturze celu
+\\
 $N$ - długość wektorów współrzędnych $p$ i $q$
 \\
 \\
 O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. 
 
-W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu i odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (ang. threshold). Wynikiem takiej procedury są dane mapujące (ang. mapping file) zawierające informację o lokalizacji \textit{regionów podobnych} do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
+W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu oraz odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (ang. threshold). Wynikiem takiej procedury są dane mapujące (ang. mapping file) zawierające informację o lokalizacji \textit{regionów podobnych} do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
 
 \begin{figure}[H]
 \centering
@@ -245,9 +245,9 @@ W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedu
 \end{figure}
 
 \section{Algorytm Kabsch'a}
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Isteniej kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
 
-Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$. Wektor $p$ stanowi zbiór współrzędnych kartezjańskich struktury wzorca, $q$ - wybranego regionu struktury celu:
+Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$:
 $$
 p=
 \begin{pmatrix}
@@ -267,6 +267,13 @@ q=
 \end{pmatrix}
 $$
 \\
+gdzie:
+\\
+$p$ wektor punktów struktury wzorcowej
+\\
+$q$ wektor punktów wybranego regionu struktury celu
+\\
+\\
 Algorytm Kabsch'a składa się z 3 kroków:
 \begin{enumerate}
 \item \textbf{Translacja} \\
@@ -282,14 +289,14 @@ gdzie:
 $$Cq_x = \frac{1}{N}\sum_{i=1}^{N}{x_{qi}}$$
 $$Cq_y = \frac{1}{N}\sum_{i=1}^{N}{y_{qi}}$$
 $$Cq_z = \frac{1}{N}\sum_{i=1}^{N}{z_{qi}}$$
-zatem wektor translacji:
+zatem wektor translacji $T$ taki, że:
 $$ T = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
 możemy użyć do wykonania przesunięcia wszystkich punktów w $p$ i $q$:
 $$p'=p+T$$
 \item \textbf{Macierz kowariancji} \\
-Macierz kowariancji $A$ określa zależność liniową między zmiennymi $p$ i $q$. Jej poprawne wyliczenie stanowi podstawę do ustalenia optymalnej macierzy rotacji w kolejnym kroku.
+Macierz kowariancji $A$ określa zależność liniową między wektorami $p'$ i $q$. Jej poprawne wyliczenie stanowi podstawę do ustalenia optymalnej macierzy rotacji w kolejnym kroku
 $$ 
-A=cov(p,q)
+A=cov(p',q)
 $$
 $$
  TODO
