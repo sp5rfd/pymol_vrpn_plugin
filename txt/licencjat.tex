@@ -1,4 +1,4 @@
-%
+%	%
 % Niniejszy plik stanowi przykład formatowania pracy magisterskiej na
 % Wydziale MIM UW.  Szkielet użytych poleceń można wykorzystywać do
 % woli, np. formatujac wlasna prace.
@@ -245,7 +245,7 @@ W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedu
 \end{figure}
 
 \section{Algorytm Kabsch'a}
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jego wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jej wartości (maksymalizacji dopasowania) jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
 
 Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$:
 $$
@@ -277,7 +277,7 @@ $q$ wektor punktów wybranego regionu struktury celu
 Algorytm Kabsch'a składa się z 3 kroków (http://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures):
 \begin{enumerate}
 \item \textbf{Translacja} \\
-W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $\vec{T}$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można zastosować na przykład równanie na środek geometryczny: 
+W pierwszym kroku należy dokonać obliczenia centroidów ($Cp$ i $Cq$) obu struktur i dokonać przesunięcia struktury wzorca o wektor $\vec{T}$ rozpięty pomiędzy tymi punktami tak, aby nałożyły się one na siebie. Do obliczenia centroidu można posłużyć się wzorem na średnią arytmetyczną wartości poszczególnych współrzędnych: 
 $$Cp = (Cp_x, Cp_y, Cp_z)$$
 gdzie:
 $$Cp_x = \frac{1}{N}\sum_{i=1}^{N}{x_{pi}}$$
@@ -289,141 +289,102 @@ gdzie:
 $$Cq_x = \frac{1}{N}\sum_{i=1}^{N}{x_{qi}}$$
 $$Cq_y = \frac{1}{N}\sum_{i=1}^{N}{y_{qi}}$$
 $$Cq_z = \frac{1}{N}\sum_{i=1}^{N}{z_{qi}}$$
-zatem wektor translacji $T$ taki, że:
-$$ T = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
+zatem wektor translacji $\vec{T}$ taki, że:
+$$ \vec{T} = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
 możemy użyć do wykonania przesunięcia wszystkich punktów w $p$ i $q$:
-$$p'=p+T$$
+$$p'=p+\vec{T}$$
 \item \textbf{Macierz kowariancji} \\
-Macierz kowariancji $A$ określa zależność liniową między wektorami $p'$ i $q$. Jej poprawne wyliczenie stanowi podstawę do ustalenia optymalnej macierzy rotacji w kolejnym kroku
+Po wykonanym przesunięciu należy obliczyć zależność liniową pomiędzy współrzędnymi wektorów $p'$ i $q$. Poprawne wyliczenie macierzy kowariancji $A$ będzie także stanowiło podstawę do ustalenia optymalnej macierzy rotacji (w kolejnym kroku):
 $$ 
 A=cov(p',q)
 $$
+lub równoważnie w zapisie macierzowym:
 $$
- TODO
+ A = p'q^T
 $$
 
 \item \textbf{Optymalna macierz rotacji} \\
-Optymalna macierz rotacji powstaje z dekompozycji według wartości szczególnych macierzy $A$. SVD (ang. singular value decomposition) to taki rozkład zadanej macierzy na trzy specyficzne macierze $U$, $\Sigma$ oraz $V$, że zachodzi zależność:
+Optymalna macierz rotacji powstaje z \textit{dekompozycji według wartości szczególnych} macierzy $A$. SVD (ang. singular value decomposition) to taki rozkład zadanej macierzy na trzy specyficzne macierze $U$, $\Sigma$ oraz $V$, że zachodzi zależność:
 $$
 A=U \Sigma V^T
 $$
-$$
- TODO
-$$
 gdzie:
+\\
+$U$ i $V$ to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
+\\
+$\Sigma$ macierz diagonalna (taka, że na przekątnej mamy nieujemne liczby rzeczywiste, będące \textit{wartościami szczególnymi} macierzy A)
+\\
+\\
+Sprawdzając znak wartość wyznacznika:
+$$
+s=sign(det(VW^T))
+$$
+upewniamy się, że operujemy w ramach prawoskrętnego układu współrzędnych. Ostatecznie uzyskujemy optymalną macierz rotacji $R$:
 
-\quad$U$ i $V$ to macierze ortogonalne (takie, że $U^{-1}=U^{T}$ oraz $V^{-1}=V^{T}$)
-
-\quad$\Sigma$ macierz diagonalna
-
-wówczas optymalną macierz rotacji $R$ uzyskujemy:
-
-$$R=VU^T$$
+$$
+R=V
+\begin{pmatrix}
+ 1 & 0 & 0 \\
+ 0 & 1 & 0 \\
+ 0 & 0 & s
+\end{pmatrix}
+U^T
+$$
 
 \end{enumerate}
 
 \section{Przekształcenia geometryczne i ich reprezentacje}
-Przekształcenia geometryczne w przestrzeni trójwymiarowej stanowią jedne z elementarnych operacji używanych w niniejszej pracy. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują one na milionach punktów w przestrzeni trójwymiarowej (pikseli), optymalne metody numeryczne które je realizują są priorytetem i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
+Przekształcenia geometryczne w przestrzeni trójwymiarowej są istotnymi operacjami używanymi w niniejszej pracy. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują na milionach punktów w przestrzeni trójwymiarowej (pikseli), \textit{optymalne metody numeryczne} które je realizują są niezmiernie ważne i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
 
-Współpraca bibliotek programistycznych pochodzących od różnych dostawców może wymagać konwersji pomiędzy różnymi formatami opisu transformacji. Szczególną uwagę należy zwrócić na konwersję orientacji wskaźnika urządzenia haptycznego z formatu dostarczonego przez bibliotekę VRPN (kwaterniony) na format akceptowany przez PyMOL (oś i kąt obrotu) i odwrotnie - ten aspekt zostanie omówiony w dalszej części pracy.
+Współpraca bibliotek programistycznych pochodzących od różnych dostawców może wymagać wielu przekształceń pomiędzy różnymi formatami opisu transformacji. Szczególną uwagę należy zwrócić na konwersję orientacji wskaźnika urządzenia haptycznego z kwaternionów (postaci dostarczanej przez bibliotekę VRPN) na \textit{oś i kąt obrotu} (akceptowany przez PyMOL) i odwrotnie.
 
-Z uwagi na konieczność dostosowania transformacji do wykonywania na współczesnych komputerach niezbędne było opracowanie efektywnych obliczeniowo metod numerycznych i reprezentacji tych operacji. Bezpośrednia ich implementacja byłaby dość kłopotliwa gdyż nie dość, że każda z nich musiałaby zostać wykonana oddzielnie, to przede wszystkim nie byłoby to optymalne obliczeniowo rozwiązanie. Do tego celu wybrano ujednolicone narzędzia rozwiązujące powyższe problemy: \textit{elementarne macierze transformacji} i \textit{współrzędne jednorodne}.
+Z uwagi na konieczność dostosowania transformacji do wykonywania na współczesnych komputerach niezbędne było opracowanie efektywnych obliczeniowo metod numerycznych i reprezentacji tych operacji. Bezpośrednia ich implementacja byłaby dość kłopotliwa gdyż nie dość, że każda transformacja musiałaby zostać wykonana oddzielnie (sekwencyjnie), to przede wszystkim nie byłoby to optymalne obliczeniowo rozwiązanie. Do tego celu wybrano ujednolicone narzędzia rozwiązujące powyższe problemy: \textit{elementarne macierze transformacji} i \textit{współrzędne jednorodne}.
 
-\textit{Elementarne macierze transformacji} stanowią łatwy sposób posługiwania się przekształceniami geometrycznymi. Każda z powyższych operacji może zostać opisana jako prosta operacja macierzowa (dodawanie albo mnożenie) modyfikująca zbiór punktów w przestrzeni (który również jest reprezentowany jako macierz). %Macierze przekształceń powstały przede wszystkim z myślą o implementacji na współczesnych komputerach, które bardzo dobrze radzą sobie z obliczeniami macierzowymi. Istnieją dziesiątki rozmaitych bibliotek wspomagających tego typu kalkulacje, ponadto operacje macierzowe można łatwo zrównoleglać i optymalizować.
+\textit{Elementarne macierze transformacji} stanowią łatwe narzędzie matematyczne do operowania przekształceniami geometrycznymi. Każda z transformacji może zostać opisana jako prosta operacja macierzowa (dodawanie albo mnożenie) modyfikująca zbiór punktów w przestrzeni.
 
-
-Często jednak pojawia się sytuacja w której wiele przekształceń geometrycznych jest wykonywanych jednocześnie.Dla przykładu można sobie wyobrazić sytuację w której obiekt należy przesunąć jednocześnie dokonując jego obrotu. Niestety stosowanie samych elementarnych macierzy transformacji uniemożliwia rozwiązanie tej kwestii, dopiero współrzędne jednorodne pozwoliły w pełni wyeliminować ten problem.
+Często pojawia się sytuacja w której kilka przekształceń geometrycznych chcemy wykonać jednocześnie. Można sobie wyobrazić taki przypadek w którym obiekt chcemy jednocześnie przesunąć i dokonać jego obrotu. Niestety stosowanie ,,surowych'' elementarnych macierzy transformacji uniemożliwia rozwiązanie tej kwestii, dopiero \textit{współrzędne jednorodne} pozwoliły w pełni wyeliminować ten problem.
 
 \textit{Współrzędne jednorodne} są sposobem reprezentacji punktów przestrzeni $n$-wymiarowej za pomocą układu $n+1$ współrzędnych. Zostały one wprowadzone przez niemieckiego matematyka Augusta Möbiusa w 1827 roku i opisane w jego pracy \textit{Der barycentrische Calcul}. 
 
 Współrzędne jednorodne to narzędzie matematyczne stanowiące pewne udoskonalenie elementarnych macierzy transformacji. Umożliwiają wykonywanie wielu przekształceń jednocześnie i za pomocą jednej operacji macierzowej - mnożenia. Współrzędne jednorodne dają możliwość skumulowania wszystkich transformacji jakie chcemy wykonać na strukturze przestrzennej w jednej odpowiednio zbudowanej macierzy. W dzisiejszych czasach zostały one docenione w wielu dziedzinach nie tylko bezpośrednio związanych z grafiką komputerową ale także w robotyce czy biofizyce.
 
-Poniżej szczegółowo opisane zostały operacje skalowania, translacji oraz rotacji. Dla każdej z tych operacji zostały podane formuły matematyczne, ich reprezentacja za pomocą elementarnych macierzy transformacji oraz współrzędnych jednorodnych. Dodatkowo dla rotacji została przedstawiona reprezentacja kwaternionów.
-
-\iffalse
-Ogólną postać przekształceń geometrycznych możemy zdefiniować jako:
-$$
-\vec{P'}=S*R*\vec{P}+T
-$$
-\\
-gdzie:
-\\
-
-$\vec{P}$ jest wektorem $\begin{bmatrix} x \\y \\z \\ \end{bmatrix}$ współrzędnych punktu poddanego transformacjom
-
-$\vec{P'}$ jest wektorem $\begin{bmatrix} x'\\ y'\\ z' \end{bmatrix} $ współrzędnych punktu $\vec{P}$ po dokonanych transformacjach
-
-$S$ reprezentuje operację skalowania
-
-$R$ reprezentuje operację rotacji
-
-$T$ reprezentuje operację translacji
-\\
-\\
-\\
-Elementarna rotacja jest rotacją danego punktu wokół jednej z osi układu współrzędnych ($X$, $Y$ lub $Z$).
-$$
-A=\begin{bmatrix}
-s & d & f \\
-u & j & k
-\end{bmatrix}
-$$
-
-
-$$
-T=\begin{bmatrix}
-t_x \\
-t_y \\
-t_z
-\end{bmatrix}
-$$
-
-Przykładowo mając dany wektor współrzędnych $\vec{X}$ opisujący położenie punktu w przestrzeni trójwymiarowej:
-
-$$
-\vec{X}=\begin{bmatrix}
-x \\
-y \\
-z
-\end{bmatrix}
-$$
-możemy zdefiniowac macierz $T(a,b,c)$:
-
-\fi
+Poniżej szczegółowo opisane zostały wykorzystane w pracy transformacje: skalowanie, translacja oraz rotacja. Dla każdej z nich podane zostały ich reprezentacje za pomocą elementarnych macierzy transformacji oraz współrzędnych jednorodnych. Dodatkowo dla rotacji została przedstawiona reprezentacja w kwaternionach.
 
 \subsection{Skalowanie}
-Skalowanie to operacja polegająca na mnożeniu współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez współczynniki skalowania. Współczynniki skalowania są dodatnią liczbę rzeczywistą $S$ albo dodatnio określony wektor liczb rzeczywistych $\vec{S}$. W ogólności możemy proporcjonalnie skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach jednak dla potrzeb niniejszej pracy wystarczy, że wykonywane skalowanie będzie operacją mnożenia wektora współrzędnych przez skalar $S$.
+Skalowanie to operacja polegająca na mnożeniu współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez współczynniki skalowania. Współczynniki skalowania są dodatnią liczbą rzeczywistą $S$ albo dodatnio określonym wektorem liczb rzeczywistych $\vec{S}$. 
 
-Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynników skalujących może on zostać: 
+W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach $\vec{S}$, jednak dla potrzeb niniejszej pracy ograniczymy się do mnożenia wektora współrzędnych wyłącznie przez skalar $S$.
 
+Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynnika skalującego może on zostać: 
+\\
 - niezmieniony, gdy $S=1$
-
+\\
 - pomniejszony proporcjonalnie do $S$, gdy $0<S<1$
-
+\\
 - powiekszony proporcjonalnie do $S$, gdy $S>1$
 \\
 \\
-Współrzędne punktu $P=(x,y,z)$ po operacji skalowania o wektor współczynników $\vec{S}=[s_x,s_y,s_z]^T$ są równe:
+Współrzędne dowolnego punktu $P=(x,y,z)$ po operacji skalowania o współczynnik $S$ są równe $P'=(x',y',z')$, gdzie:
 
 $$
 \begin{array}{lr}
-x'=x*s_x \\
-y'=y*s_y \\
-z'=z*s_z
+x'=x*S \\
+y'=y*S \\
+z'=z*S
 \end{array}
 $$
 
-Reprezentacja skalowania za pomocą elementarnych macierzy transformacji polega na stworzeniu takiej macierzy $\hat{S}$, że wartości wektora skalującego $\vec{S}$ zostaną wpisane do niej w następujący sposób:
+Reprezentacja skalowania za pomocą elementarnych macierzy transformacji polega na stworzeniu takiej macierzy $\hat{S}$, że wartość współczynnika $S$ zostanie wpisane do niej w następujący sposób:
 $$
 \hat{S}
 =
 \begin{bmatrix}
-s_x & 0 & 0 \\
-0 & s_y & 0 \\
-0 & 0 & s_z
+S & 0 & 0 \\
+0 & S & 0 \\
+0 & 0 & S
 \end{bmatrix}
 $$
-zatem:
+zatem w zapisie macierzowym otrzymujemy:
 $$
 \vec{P'}=\hat{S}*\vec{P}
 $$
@@ -432,9 +393,9 @@ $$
 \vec{P'}
 =
 \begin{bmatrix}
-s_x & 0 & 0 \\
-0 & s_y & 0 \\
-0 & 0 & s_z
+S & 0 & 0 \\
+0 & S & 0 \\
+0 & 0 & S
 \end{bmatrix}
 *
 \begin{bmatrix} 
@@ -444,23 +405,23 @@ z
 \end{bmatrix} 
 =
 \begin{bmatrix} 
-x*s_x \\ 
-y*s_y \\ 
-z*s_z 
+x*S \\ 
+y*S \\ 
+z*S 
 \end{bmatrix}
 $$
 \\
-Aby przedstawić operację skalowania we współrzędnych jednorodnych należy stworzyć nową macierz $\bar{S}$ o rozmiarze o 1 większym, niż macierz elementarna $\hat{S}$ oraz nowy wektor $\dot{\vec{P}}$ o długości o 1 większej niż $\vec{P}$:
+Aby przedstawić operację skalowania we współrzędnych jednorodnych należy stworzyć nową macierz $\bar{S}$ o rozmiarze o 1 większym niż macierz elementarna $\hat{S}$ oraz nowy wektor $\dot{\vec{P}}$ o długości o 1 większej niż $\vec{P}$, taki że:
 $$
 \bar{S} 
 = 
 \begin{bmatrix}
-s_x & 0 & 0 & 0 \\
-0 & s_y & 0 & 0 \\
-0 & 0 & s_z & 0 \\
+S & 0 & 0 & 0 \\
+0 & S & 0 & 0 \\
+0 & 0 & S & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
-, 
+,  
 \dot{\vec{P}}
 =
 \begin{bmatrix} 
@@ -475,11 +436,11 @@ $$
 \dot{\vec{P'}}=\bar{S}*\dot{\vec{P}}
 $$
 $$
-\vec{P_2'} = 
+\dot{\vec{P'}} = 
 \begin{bmatrix}
-s_x & 0 & 0 & 0 \\
-0 & s_y & 0 & 0 \\
-0 & 0 & s_z & 0 \\
+S & 0 & 0 & 0 \\
+0 & S & 0 & 0 \\
+0 & 0 & S & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 *
@@ -491,17 +452,17 @@ z \\
 \end{bmatrix} 
 =
 \begin{bmatrix} 
-x*s_x \\ 
-y*s_y \\ 
-z*s_z \\
+x*S \\ 
+y*S \\ 
+z*S \\
 1
 \end{bmatrix}
 $$
 
 \subsection{Translacje}
-W geometrii euklidesowej translacją nazywamy takie przekształcenie geometryczne, które przenosi każdy punkt określony w przestrzeni o dowolny wektor $\vec{T}$. Translacje (przesunięcia) to kolejna elementarna operacja przekształcenia geometrycznego. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$.
+Translacje to kolejna elementarna operacja przekształcenia geometrycznego. Translacją nazywamy takie przekształcenie, które przesuwa każdy punkt zbioru określony w przestrzeni o dowolny wektor $\vec{T}$. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$. W niniejszej pracy operacja przesunięcia wykonywana jest przy każdej zmianie położenia wskaźnika urządzenia haptycznego oraz podczas wykonywania operacji nałożenia i dopasowania struktur. 
 
-Operacja przesunięcia wykorzystana jest w pracy w każdym przypadku zmiany położenia wskaźnika urządzenia haptycznego czy podczas wykonywania operacji superpozycji i dopasowania struktur. Dla punktu $P=(x,y,z)$ operacja przesunięcia o wektor $\vec{T}=[t_x, t_y, t_z]^T$ wygląda następująco:
+Dla zadanego punktu $P=(x,y,z)$ efektem operacji przesunięcia o wektor $\vec{T}=[t_x, t_y, t_z]^T$ są współrzędne $\vec{P'}=(x',y',z')$:
 
 $$
 \begin{array}{lr}
@@ -524,26 +485,26 @@ z
 \end{bmatrix}
 +
 \begin{bmatrix}
-T_x \\
-T_y \\
-T_z 
+t_x \\
+t_y \\
+t_z 
 \end{bmatrix}
 =
 \begin{bmatrix}
-x+T_x \\
-y+T_y \\
-z+T_z 
+x+t_x \\
+y+t_y \\
+z+t_z 
 \end{bmatrix}
 $$
 
-Reprezentacja przy pomocy współrzędnych jednorodnych ponownie wymaga skonstruowania w odpowiedni sposób macierzy translacji $\bar{T}$ poprzez wpisanie do niej w odpowiednim miejscu wektora translacji $\vec{T}$ oraz wektora współrzędnych $\dot{\vec{P}}$ analogicznie jak w przypadku skalowania:
+Translacje można przedstawić także za pomocą współrzędnych jednorodnych. Wymaga to stworzenia macierzy $\bar{T}$ oraz wektora $\dot{\vec{P}}$, takich że:
 $$
 \bar{T}
 =
 \begin{bmatrix}
-1 & 0 & 0 & T_x \\
-0 & 1 & 0 & T_y \\
-0 & 0 & 1 & T_z \\
+1 & 0 & 0 & t_x \\
+0 & 1 & 0 & t_y \\
+0 & 0 & 1 & t_z \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 ,
@@ -563,9 +524,9 @@ $$
 $$
 \vec{P'}=
 \begin{bmatrix}
-1 & 0 & 0 & T_x \\
-0 & 1 & 0 & T_y \\
-0 & 0 & 1 & T_z \\
+1 & 0 & 0 & t_x \\
+0 & 1 & 0 & t_y \\
+0 & 0 & 1 & t_z \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 *
@@ -577,14 +538,14 @@ z \\
 \end{bmatrix}
 =
 \begin{bmatrix}
-x+T_x \\
-y+T_y \\
-z+T_z \\
+x+t_x \\
+y+t_y \\
+z+t_z \\
 1
 \end{bmatrix}
 $$
 \subsection{Rotacje i kwaterniony}
-Trzecią elementarną transformacją jest rotacja. W odróżnieniu od skalowania czy translacji jest operacją bardziej złożoną. Po pierwsze kolejność wykonywania rotacji ma znaczenie ($R_xR_y\neq R_yR_x$), po drugie samych reprezentacji rotacji jest co najmniej kilka. Najpopularniejszym z nich są obroty o zadany kąt wokół jednej z osi układu współrzędnych lub arbitralnej osi obrotu i na tym typie skupiono się w tej pracy.
+Trzecią elementarną transformacją jest rotacja, która w odróżnieniu od skalowania czy translacji jest operacją bardziej złożoną. Należy zwrócić uwagę, że kolejność wykonywania rotacji ma znaczenie ($R_xR_y\neq R_yR_x$), po drugie samych reprezentacji rotacji jest co najmniej kilka. Najpopularniejszym z nich są obroty o zadany kąt wokół jednej z osi układu współrzędnych lub arbitralnej osi obrotu.
 
 Współrzędne punktu $P'=(x',y',z')$ będącego wynikiem rotacji punktu $P=(x,y,z)$ wokół poszczególnych osi ($OX$, $OY$, $OZ$) układu współrzędnych o zadany kąt (odpowiednio $\alpha$, $\beta$ i $\gamma$) wyrażają się następująco:
 \\
@@ -644,15 +605,15 @@ sin(\gamma) & cos(\gamma) & 0 \\
 \end{bmatrix}
 $$
 gdzie:
-
+\\
 $\hat{Rx}(\alpha)$ obrót wokół osi $OX$ o kąt $\alpha$
-
+\\
 $\hat{Ry}(\beta)$ obrót wokół osi $OY$ o kąt $\beta$
-
+\\
 $\hat{Rz}(\gamma)$ obrót wokół osi $OZ$ o kąt $\gamma$
 \\
 \\
-Jak wszystkie inne transformacje, rotacje równiez można przedstawić we współrzędnych jednorodnych. Mają one wówczas następującą postać:
+Jak wszystkie inne transformacje, rotacje równiez można przedstawić we współrzędnych jednorodnych. Odpowiednie macierze mają wówczas następującą postać:
 $$
 \bar{Rx}(\alpha) = 
 \begin{bmatrix}
@@ -681,26 +642,27 @@ sin(\gamma) & cos(\gamma) & 0 & 0 \\
 \end{bmatrix}
 $$
 
-Poza powyższymi reprezentacjami, rotacje posiadają jeszcze jedną być może najważniejszą z punktu widzenia programisty reprezentację: \textit{kwaterniony}.
-
-Kwaterniony są strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Hamiltona, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
+Rotacje reprezentowane przez współrzędne jednorodne można dowolnie ze sobą łączyć poprzez mnożenie odpowiednich macierzy, należy jednak mieć na uwadze fakt (jak już wcześniej wspomniano), że rotacje nie są przemienne - kolejność wykonywanych operacji ma znaczenie.
+\\
+\\
+Rotacje posiadają jeszcze jedną być może najważniejszą z punktu widzenia programisty reprezentację: \textit{kwaterniony}. Są one strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Williama Hamiltona, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
 
 Kwaternion $q$ to taka czwórka liczb rzeczywistych $x$, $y$, $z$ i $w$ spełniająca równanie:
 $$
 q=w+xi+yj+zk
 $$
 gdzie:
-
+\\
 $i$, $j$, $k$ - współczynniki urojone takie, że $i^2=j^2=k^2=ijk=-1$
-
+\\
 $w$ - część skalarna kwaterniona
-
+\\
 $x$, $y$, $z$ - część wektorowa kwaterniona
 \\
 \\
-Kwaterniony mogą stanowic alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Dzięki temu możemy z powodzeniem przeprowadzać konwersję pomiędzy nimi a kwaternionami. Dzięki kwaternionom z powodzeniem można przedstawić rotację wokół arbitralnie wybranej osi obrotu. 
+Kwaterniony mogą stanowic alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Dzięki temu możemy z powodzeniem przeprowadzać konwersję pomiędzy nimi a kwaternionami. 
 
-Załóżmy, że chcemy stworzyć kwaternion $q$ reprezentujący obrót o kąt $\alpha$ wokół wektora $\vec{v}=[v_x,v_y,v_z]$. Kwaternion taki tworzymy w następujący sposób
+Dzięki kwaternionom z powodzeniem można przedstawić rotację wokół arbitralnie wybranej osi obrotu. Załóżmy, że chcemy stworzyć kwaternion $q$ reprezentujący obrót o kąt $\alpha$ wokół wektora $\vec{v}=[v_x,v_y,v_z]$. Kwaternion taki tworzymy w następujący sposób
 
 $$
 \begin{array}{lr}
@@ -716,6 +678,7 @@ $$
 q=cos(\alpha/2)+v_xsin(\alpha/2)i+v_ysin(\alpha/2)j+v_zsin(\alpha/2)k
 $$
 
+Kwaterniony mogą reprezentować nie tylko rotację (operację obrotu) ale także orientację. Wykorzystana w niniejszej pracy biblioteka VRPN wydaje informację na orientacji wskaźnika właśnie za pomocą kwaternionu. Pakiet PyMOL natomiast akceptuje jedynie \textit{zmiany orientacji} wobec swoich obiektów, czyli rotację. Aby prawidłowo przekonwertować ...
 
 \section{Pole siłowe}
 todo
