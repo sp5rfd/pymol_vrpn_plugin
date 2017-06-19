@@ -660,9 +660,9 @@ $w$ - część skalarna kwaterniona
 $x$, $y$, $z$ - część wektorowa kwaterniona
 \\
 \\
-Kwaterniony mogą stanowic alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Dzięki temu możemy z powodzeniem przeprowadzać konwersję pomiędzy nimi a kwaternionami. 
+Kwaterniony mogą stanowić alternatywną wobec współrzędnych jednorodnych lub macierzy transformacji formę opisu rotacji. Możemy z powodzeniem przeprowadzać konwersję pomiędzy różnymi reprezentacjami rotacji.
 
-Dzięki kwaternionom z powodzeniem można przedstawić rotację wokół arbitralnie wybranej osi obrotu. Załóżmy, że chcemy stworzyć kwaternion $q$ reprezentujący obrót o kąt $\alpha$ wokół wektora $\vec{v}=[v_x,v_y,v_z]$. Kwaternion taki tworzymy w następujący sposób
+Dzięki kwaternionom z można przedstawić rotację wokół arbitralnie wybranej osi (wektora) obrotu. Załóżmy, że chcemy stworzyć kwaternion $q$ reprezentujący obrót o kąt $\alpha$ wokół wektora $\vec{v}=[v_x,v_y,v_z]$. Kwaternion taki tworzymy w następujący sposób
 
 $$
 \begin{array}{lr}
@@ -678,10 +678,41 @@ $$
 q=cos(\alpha/2)+v_xsin(\alpha/2)i+v_ysin(\alpha/2)j+v_zsin(\alpha/2)k
 $$
 
-Kwaterniony mogą reprezentować nie tylko rotację (operację obrotu) ale także orientację. Wykorzystana w niniejszej pracy biblioteka VRPN wydaje informację na orientacji wskaźnika właśnie za pomocą kwaternionu. Pakiet PyMOL natomiast akceptuje jedynie \textit{zmiany orientacji} wobec swoich obiektów, czyli rotację. Aby prawidłowo przekonwertować ...
+Kwaterniony mogą reprezentować nie tylko rotację (obrót bryły) ale także orientację (stan bryły). Biblioteka VRPN (wykorzystana w niniejszej pracy) wydaje informację o bieżącej orientacji wskaźnika, natomiast pakiet PyMOL akceptuje jedynie \textit{zmiany orientacji} (rotacje). 
+
+Prawidłowe wykonanie rotacji z dwóch kolejnych kwaternionów $q_n$ i $q_{n+1}$ niosących informację o orientacji polega na zastosowaniu odwrotnego kwaterniona $q_n^{-1}$ (powracającego strukturę do orientacji początkowej, \textit{zerowej}) i dopiero później kwaterniona $q_{n+1}$. Taki ciąg operacji należy wykonywać cyklicznie w miarę odbierania kolejnych informacji o orientacji wskaźnika. Kwaternion odwrotny jest zdefiniowany następująco:
+
+$$
+q^{-1}=\frac{w-xi-yj-zk}{w^2+x^2+y^2+z^2}
+$$
+
 
 \section{Pole siłowe}
-todo
+Biblioteka VRPN dostarcza kilku metod sterowania zwrotną projekcją sił (szerszy opis w dalszej części). W tej części pracy wykorzystano tzw. metodę pola siłowego. Podobnie jak w pozostałych metodach (np. powierzchnia lub bryła) dokonywana jest lokalna aproksymacja Polega ona na dostarczeniu funkcji trzech parametrów: punkt zaczepienia, wektor siły oraz macierzy Jacobiego.
+
+Punktem zaczepienia wektora siły jest w tym przypadku środek geometryczny wzorcowej struktury chemicznej obliczany jako średnia arytmetyczna wartości poszczególnych współrzędnych.
+
+Wektor siły to wektor wskazujący kierunek i zwrot siły działającej na wskaźnik. W tym przypadku jest on rozpięty pomiędzy środkami geometrycznymi struktury wzorcowej, a najbliższym \textit{podobnym} regionem - wyznaczonym przez algorytm dopasowania strukturalnego. Zwrot siły jest skierowany w stronę owego regionu. Do dalszych rozważań możemy traktować wektor $\vec{F}$ jako iloczyn wektora jednostkowego (wersora) $\dot{F}$ oraz skalarnej wartości siły force:
+$$
+\vec{F}=\dot{F}*force=[\vec{F_x}*force,\vec{F_y}*force,\vec{F_z}*force]
+$$
+
+Macierz Jacobiego $J_{\vec{F}}$ jest macierzą zbudowaną z pochodnych cząstkowych pierwszego rzędu funkcji definiującej pole siłowe. Tutaj różniczkowaniu poddawane są poszczególne składowe wektora siły $\vec{F}$:
+
+$$
+J_{\vec{F}}=
+\begin{bmatrix}
+\frac{\delta \vec{F_x}}{\delta x} & \frac{\delta \vec{F_y}}{\delta x} & \frac{\delta \vec{F_z}}{\delta x} \\
+\frac{\delta \vec{F_x}}{\delta y} & \frac{\delta \vec{F_y}}{\delta y} & \frac{\delta \vec{F_z}}{\delta y} \\
+\frac{\delta \vec{F_x}}{\delta z} & \frac{\delta \vec{F_y}}{\delta z} & \frac{\delta \vec{F_z}}{\delta z}
+\end{bmatrix}
+=
+\begin{bmatrix}
+force & 0 & 0 \\
+0 & force & 0 \\
+0 & 0 & force
+\end{bmatrix}
+$$
 	
 \chapter{Urządzenie haptyczne Sensable Phantom Omni}
 Nadrzędnym celem wirtualnej rzeczywistości jest możliwie wierne odtworzenie świata rzeczywistego lub fikcyjnego w formie programu komputerowego czy multimedialnej prezentacji. Ponadto metody i narzędzia wirtualnej rzeczywistości umozliwiają użytkownikowi wchodzenie w czynna interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń klasy HCI (ang. human computer interface) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę SensAble (obecnie Geomagic). 
