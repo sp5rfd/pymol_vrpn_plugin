@@ -18,7 +18,7 @@
 
 
 % Dane magistranta:
-\autor{Imię Nazwisko}{123456}
+\autor{Paweł Tomaszewski}{292647}
 
 
 % Dane magistrantów:
@@ -57,8 +57,9 @@
 % (podać tytuł/stopień imię i nazwisko opiekuna
 % Instytut
 % ew. Wydział ew. Uczelnia (jeżeli nie MIM UW))
-\opiekun{dr. hab. Filigrana Fifaka\\
-  Instytut Blabalii Fetorycznej\\
+\opiekun{dr. Pawła Daniluka\\
+  Instytut Fizyki Doświadczalnej\\
+  Zakład Biofizyki
   }
 
 % miesiąc i~rok:
@@ -68,8 +69,10 @@
 \dziedzina{ 
 %11.0 Matematyka, Informatyka:\\ 
 %11.1 Matematyka\\ 
-11.2 Statystyka\\ 
-%11.3 Informatyka\\ 
+%11.2 Statystyka\\ 
+11.3 Informatyka\\ 
+13.1 Biologia\\
+13.2 Fizyka
 %11.4 Sztuczna inteligencja\\ 
 %11.5 Nauki aktuarialne\\
 %11.9 Inne nauki matematyczne i informatyczne
@@ -81,7 +84,7 @@
   D.127.6. Numerical blabalysis}
 
 % Słowa kluczowe:
-\keywords{bioinformatyka, wirtualna rzeczywistość, podobieństwo strukturalne, RNA, DNA, białka, biopolimery, uliniowienie }
+\keywords{bioinformatyka, wirtualna rzeczywistość, podobieństwo strukturalne, RNA, DNA, białka, biopolimery, dopasowanie strukturalne }
 
 % Tu jest dobre miejsce na Twoje własne makra i~środowiska:
 \newtheorem{defi}{Definicja}[section]
@@ -109,7 +112,7 @@
 
 %tu idzie streszczenie na strone poczatkowa
 \begin{abstract}
-W pracy przedstawiono implementację programu narzędziowego służącego do interaktywnej eksploracji cząsteczek biopolimerów (polinukleotydów i polipeptydów) w poszukiwaniu miejsc optymalnych ze względu na lokalne podobieństwo strukturalne. W pracy szeroko zastosowano metody wirtualnej rzeczywistości wraz z obsługą urządzenia haptycznego Sensable Phantom Omni.
+W pracy przedstawiono implementację programu narzędziowego służącego do interaktywnej eksploracji cząsteczek biopolimerów (polinukleotydów i polipeptydów) w poszukiwaniu miejsc optymalnych ze względu na lokalne podobieństwo do zadanych struktur. W pracy szeroko zastosowano metody wirtualnej rzeczywistości wraz z obsługą urządzenia haptycznego Sensable Phantom Omni.
 \end{abstract}
 
 \tableofcontents
@@ -120,13 +123,13 @@ W pracy przedstawiono implementację programu narzędziowego służącego do int
 \addcontentsline{toc}{chapter}{Wprowadzenie}
 Biopolimery, a w szczególności kwasy nukleinowe i polipeptydy stanowią fundamenty życia. W każdej komórce oraz w całym organizmie są one odpowiedzialne za najważniejsze funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej, biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Polipeptydy zaś są składnikami budulcowymi wielu organów, pełnią funkcje hormonalne czy regulatorowe.
 
-Pomimo odmiennych składników budulcowych – nukleotydów i aminokwasów – w obu przypadkach wymienionych biopolimerów ich funkcja wynika bezpośrednio ze struktury przestrzennej, która to za hipotezą Anfinsena [1] jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
+Pomimo odmiennych składników budulcowych – nukleotydów i aminokwasów – w obu przypadkach wymienionych biopolimerów ich funkcja wynika bezpośrednio ze struktury przestrzennej, która to za hipotezą Anfinsena \cite{anfinsen73} jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
 
 Struktura przestrzenna biopolimerów stanowi obecnie przedmiot niezwykle intensywnych badań na całym świecie. Jest to bardzo ważne zagadnienie integrujące ze sobą grupy naukowców z dziedzin, które jeszcze na przełomie wieków miały ze sobą niewiele wspólnego. Do grona biologów i chemików dołączyli matematycy, fizycy oraz informatycy wspólnie tworząc bardzo nowatorskie narzędzia ułatwiające modelowanie i tworzenie symulacji zachodzących w skali molekularnej. W badania nad strukturami przestrzennymi biopolimerów zaangażowane są największe na świecie ośrodki naukowe, korporacje farmaceutyczne czy agencje rządowe. Badanie interakcji receptorów z ligandami, projektowanie nowych leków czy terapie celowane to tylko wąski wycinek zagadnień związanych z tymi pracami.
 
 Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Obecnie najwydajniejsze komputery bez przerwy prowadzą obliczenia optymalnie pofałdowanych białek, kwasów nukleinowych czy prowadzą symulacje dynamiki molekularnej. Jest to dziedzina w której niemalże każdego roku dokonuje się znaczących odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego konkursu CASP na najwierniejsze przewidywanie struktury białka, który za każdym razem przynosi wyniki coraz bardziej zbieżne z konformacjami natywnymi.
 
-Nie mniej ważnym aspektem od przeprowadzania samych badań jest prezentacja ich wyników jak najszerszemu gronu odbiorców. Same efektowne wizualizacje nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego dostępu nie mieliśmy nigdy wcześniej. W związku z tym w ostatnim czasie coraz częściej sięga się do rozwiązań z zakresu \textit{wirtualnej rzeczywistości}. 
+Ważnym aspektem tych badań jest prezentacja wyników szerokiemu gronu odbiorców. Same efektowne wizualizacje nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego dostępu nie mieliśmy nigdy wcześniej. W związku z tym w ostatnim czasie coraz częściej sięga się do rozwiązań z zakresu \textit{wirtualnej rzeczywistości}. 
 
 Mianem wirtualnej rzeczywistości (ang. virtual reality, VR) określamy sztuczne, wykreowane przy pomocy technologii informatycznych, multimedialne projekcje przestrzeni, przedmiotów czy zdarzeń. Na obecnym poziomie rozwoju technologii wirtualna rzeczywistość umożliwia człowiekowi wchodzenie w interakcję z tym środowiskiem przede wszystkim za pośrednictwem zmysłów wzorku, słuchu czy dotyku wykorzystując urządzenia klasy HCI (ang. human computer interface). 
 
@@ -147,16 +150,16 @@ Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego d
 \chapter*{Cel i zakres pracy}
 \addcontentsline{toc}{chapter}{Cel i zakres pracy}
 
-W ramach niniejszej pracy została przedstawiona implementacja aplikacji narzędziowej z pogranicza biofizyki molekularnej i wirtualnej rzeczywistości. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość lokalnego dopasowania strukturalnego pomiędzy wzorcem (ang. template) i fragmentami cząsteczki celu (ang. target). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił do urządzenia haptycznego. 
+W ramach niniejszej pracy została przedstawiona implementacja aplikacji narzędziowej z pogranicza biofizyki molekularnej i wirtualnej rzeczywistości. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość lokalnego dopasowania strukturalnego pomiędzy wzorcem (ang. template structure) i fragmentami cząsteczki celu (ang. target structure). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił w urządzeniu haptycznym. 
 	
 Program został zrealizowany w formie wtyczki rozszerzającej możliwości pakietu PyMOL. Do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości - urządzenie haptyczne Phantom Omni oraz bibliotekę Virtual Reality Peripheral Network - a także bioinformatyczne algorytmy pomiaru jakości dopasowania struktur (RMSD), algorytmy wyszukujące optymalne dopasowanie (ang. alignment) strukturalne oraz algorytmy maksymalizujące stopień dopasowania struktur (algorytm Kabsch'a).
 
 W pracy zostały także przedstawione podstawy teoretyczne leżące u jej podstaw, szczegółowe opisy wykorzystanego urządzenia i metod VR, a także perspektywy dalszego rozwoju i wykorzystania praktycznego opracowanego oprogramowania.
 
-Kod źródłowy opatrzony komentarzami stanowi integralny załącznik do niniejszej pracy.
+Kod źródłowy stworzonego oprogramowania stanowi integralny załącznik do niniejszej pracy.
 
 \chapter{Podstawy teoretyczne}
-W tym rozdziale zaprezentowano podstawowe twierdzenia oraz teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur chemicznych, algorytmach oceny podobieństwa strukturalnego (RMSD), sposobach ich minimalizacji (algorytm Kabsch'a) oraz zagadnieniach związanych z przekształceniami geometrycznymi.
+W tym rozdziale zaprezentowano podstawową teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur chemicznych, algorytmach oceny podobieństwa strukturalnego (RMSD), sposobach ich minimalizacji (algorytm Kabsch'a) oraz zagadnieniach związanych z przekształceniami geometrycznymi.
 
 \section{Metody dopasowania struktur chemicznych}
 Celem poszukiwania optymalnych metod dopasowania strukturalnego (ang. structural alignment) jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu i bez znajomości sekwencji. 
@@ -189,12 +192,12 @@ Globalne dopasowanie jest najskuteczniejsze gdy podobieństwo porównywanych str
 Jak już wspomniano, lokalne dopasowanie polega na przeszukiwaniu części lub całości cząsteczki celu (ang. target) w poszukiwaniu takich regionów, które \textit{są podobne} do wybranych struktur zwanych wzorcami (ang. template). Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące lub inne dowolnie wybrane fragmenty cząsteczek. Z grupy odpowiednio wybranych lokalnych dopasowań próbuje się budować uliniowienie globalne.
 \\
 \\
-\textbf{TODO: skąd dokładnie pochodzą dane wejściowe (plik mapujący) do tego programu? czy to program pydesk? czy jego podstawą są lokalne deskryptory struktury? }
+\textbf{TODO: skąd dokładnie pochodzą dane wejściowe (plik mapujący) do tego programu? czy jego podstawą są lokalne deskryptory struktury? }
 \\
 \textbf{UWAGA: uzupełnić i poprawić błędy w dalszej części podrozdziału}
 \\
 \\
-Spośród wielu opracowanych metod realizacji lokalnego dopasowania, warto wspomnieć przede wszystkim o metodzie opartej o \textit{lokalne deskryptory struktury}. Stanowi ona (?? czy napewno tak jest??) podstawę implementacji oprogramowania dostarczającego dane wejściowe do programu będącego przedmiotem niniejszej pracy. 
+Spośród wielu opracowanych metod realizacji lokalnego dopasowania, warto wspomnieć przede wszystkim o metodzie opartej o \textit{lokalne deskryptory struktury} \cite{daniluk11}. Stanowi ona (?? czy napewno tak jest??) podstawę implementacji oprogramowania dostarczającego dane wejściowe do programu będącego przedmiotem niniejszej pracy. 
 
 \textit{Lokalne deskryptory struktury białek} stanowią pewną abstrakcję opisującą otoczenie każdego aminokwasu... 
 
@@ -688,7 +691,7 @@ $$
 
 
 \section{Pole siłowe}
-Biblioteka VRPN dostarcza kilku metod sterowania zwrotną projekcją sił (szerszy opis w dalszej części). W tej części pracy wykorzystano tzw. metodę pola siłowego. Podobnie jak w pozostałych metodach (np. powierzchnia lub bryła) dokonywana jest lokalna aproksymacja Polega ona na dostarczeniu funkcji trzech parametrów: punkt zaczepienia, wektor siły oraz macierzy Jacobiego.
+Biblioteka VRPN dostarcza kilku metod sterowania zwrotną projekcją sił (szerszy opis w dalszej części). W tej pracy wykorzystano tzw. metodę pola siłowego (ang. force field), która podobnie jak w pozostałych metodach (np. powierzchnia lub bryła) realizowana jest przez lokalną aproksymację. Jej wywołanie polega na dostarczeniu funkcji trzech parametrów: punktu zaczepienia (ang. origin), wektora siły oraz macierzy Jacobiego.
 
 Punktem zaczepienia wektora siły jest w tym przypadku środek geometryczny wzorcowej struktury chemicznej obliczany jako średnia arytmetyczna wartości poszczególnych współrzędnych.
 
@@ -1241,6 +1244,10 @@ utajnieniu.
 
 \begin{thebibliography}{99}
 \addcontentsline{toc}{chapter}{Bibliografia}
+
+\bibitem{anfinsen73} Christian B. Anfinsen, \textit{Principles that govern the folding of protein chains}, Science, 1973
+
+\bibitem{daniluk11} Paweł Daniluk, \textit{Analiza podobieństwa struktur przestrzennych białek przy użyciu deskryptorów lokalnej struktury}, Uniwersytet Warszawski, 2011
 
 \bibitem[Bea65]{beaman} Juliusz Beaman, \textit{Morbidity of the Jolly
     function}, Mathematica Absurdica, 117 (1965) 338--9.
