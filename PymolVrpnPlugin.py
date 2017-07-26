@@ -182,10 +182,10 @@ def draw_molecule(molecule_pdb_file):
     
 
 """
-    Funkcja oblicza wartość RMSD.
-    Na wejściu dostaje wektor (listę) współrzędnych struktury wzorcowej oraz
-    wektor/listę (tego samego rozmiaru) współrzędnych regionu optymalnego dopasowania,
-    zwraca wartość RMDS
+    Funkcja oblicza wartosc RMSD.
+    Na wejsciu dostaje wektor (liste) wspolrzednych struktury wzorcowej oraz
+    wektor/liste (tego samego rozmiaru) wspolrzednych regionu optymalnego dopasowania,
+    zwraca wartosc RMDS
 """
 def rmsd_compute():
     
@@ -336,7 +336,7 @@ def vrpn_client():
     global x,y,z
     global templeCOM
     
-    sleep(1)    # czekam aż się wszystko połączy i narysuje
+    sleep(1)    # czekam az sie wszystko polaczy i narysuje
     
     while IS_RUNNING:
         if(not AUTO_ZOOMING):
@@ -348,9 +348,9 @@ def vrpn_client():
         
         templeCOM=cmd.centerofmass("template")
         
-        # znajduje nablizszy region/atom w czasteczce do ktorego przyciagam wzorzec/wzkaźnik
-#        region=find_closest_region(x,y,z)   # znajduję najbliższy region do aktualnej pozycji wskaźnika
-        region=find_closest_region(templeCOM[0],templeCOM[1],templeCOM[2])   # znajduję najbliższy region do aktualnej pozycji wskaźnika
+        # znajduje nablizszy region/atom w czasteczce do ktorego przyciagam wzorzec/wzkaznik
+#        region=find_closest_region(x,y,z)   # znajduje najblizszy region do aktualnej pozycji wskaznika
+        region=find_closest_region(templeCOM[0],templeCOM[1],templeCOM[2])   # znajduje najblizszy region do aktualnej pozycji wskaznika
         
         # aktualizacja interfejsu
         regionX.delete(0,'end')
@@ -379,7 +379,7 @@ def vrpn_client():
         forceDevice.setFF_Radius(0.1)
         forceDevice.sendForceField()
 
-        # rysuje linię łączącą wzorzec/wskaźnik z najblizszym regionem/atomem
+        # rysuje linie laczaca wzorzec/wskaznik z najblizszym regionem/atomem
         cmd.delete('link')
         cmd.load_cgo([CYLINDER, templeCOM[0],templeCOM[1],templeCOM[2], (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
          
@@ -412,7 +412,7 @@ def statsWindow():
     w=640
     h=480
     currentWindow=Tk()
-    currentWindow.title("Interaktywny eksplorator lokalnych uliniowień strukturalnych")
+    currentWindow.title("Interaktywny eksplorator lokalnych uliniowien strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -422,7 +422,7 @@ def statsWindow():
     currentWindow.grid_columnconfigure(1, weight=1)
     
     global regionId, regionX, regionY, regionZ, regionTemplateDistance, rmsdEntry
-    group=LabelFrame(currentWindow, text="Współrzędne")
+    group=LabelFrame(currentWindow, text="Wspolrzedne")
     group.grid(column=0,padx=5,pady=5,sticky='WE')
     Label(group, text="ID regionu:",anchor=W).grid(row=0,column=0,sticky='WE')
     regionId=Entry(group, width=30, justify=CENTER)
@@ -436,7 +436,7 @@ def statsWindow():
     Label(group, text="COM Z regionu:",anchor=W).grid(row=3,column=0,sticky='WE')
     regionZ=Entry(group, width=20, justify=CENTER)  # todo: jw.
     regionZ.grid(row=3,column=1,sticky='W')
-    Label(group,text="Odległość wzorca i regionu:",anchor=W).grid(row=4,column=0,sticky="WE")
+    Label(group,text="Odleglosc wzorca i regionu:",anchor=W).grid(row=4,column=0,sticky="WE")
     regionTemplateDistance=Entry(group, width=20, justify=CENTER)  # todo: jw.
     regionTemplateDistance.grid(row=4,column=1,sticky='W')
     
@@ -484,30 +484,30 @@ def configWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interaktywny eksplorator lokalnych uliniowień strukturalnych")
+    currentWindow.title("Interaktywny eksplorator lokalnych uliniowien strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
     currentWindow.attributes('-topmost', 1)
     currentWindow.resizable(False, False)
 
-#    Wybór wzorca
-    message="Wzorzec jest strukturą, którą będziemy próbowali dopasować do cząsteczki bazowej.\
-    \nWzorzec może stanowić wycinek cząsteczki bazowej, np. jakaś struktura drugorzędowa"
+#    Wybor wzorca
+    message="Wzorzec jest struktura, ktora bedziemy probowali dopasowac do czasteczki bazowej.\
+    \nWzorzec moze stanowic wycinek czasteczki bazowej, np. jakas struktura drugorzedowa"
     group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     Label(group,text=message,anchor=W).pack(fill=BOTH)
     Entry(group,textvariable=templateFile,width=50,state="readonly").pack(pady=5,side=LEFT)
     Button(group,text="Wybierz plik",command=chooseTemplateFile).pack(side=LEFT)
     
-#    Wybór pliku mapowania
+#    Wybor pliku mapowania
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     Label(group,text="Tutaj wybierz plik mapowania",anchor=W).pack(fill=BOTH)
     Entry(group,textvariable=mappingFile,width=50,state="readonly").pack(pady=5,side=LEFT)
     Button(group,text="Wybierz plik",command=chooseMappingFile).pack(side=LEFT)
     
-#    Wybór identyfikatora PDB
+#    Wybor identyfikatora PDB
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     Label(group,text="Tutaj wybierz plik ",anchor=W).pack(fill=BOTH)
@@ -536,7 +536,7 @@ def helloWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interaktywny eksplorator lokalnych uliniowień strukturalnych")
+    currentWindow.title("Interaktywny eksplorator lokalnych uliniowien strukturalnych")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -544,9 +544,9 @@ def helloWindow():
     currentWindow.resizable(False, False)
     
     helloMsg="\
-Witaj użytkowniku.\
-\nW tej aplikacji masz możliwość dopasowania lokalnie optymalnych struktur\
-\ncząsteczek chemicznych takich jak kwasy nukleinowe"
+Witaj uzytkowniku.\
+\nW tej aplikacji masz mozliwosc dopasowania lokalnie optymalnych struktur\
+\nczasteczek chemicznych takich jak kwasy nukleinowe"
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
     Label(group,text=helloMsg).pack(fill=BOTH,side=LEFT)
