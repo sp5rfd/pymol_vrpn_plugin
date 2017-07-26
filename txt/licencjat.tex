@@ -127,7 +127,7 @@ Pomimo odmiennych składników budulcowych – nukleotydów i aminokwasów – w
 
 Struktura przestrzenna biopolimerów stanowi obecnie przedmiot niezwykle intensywnych badań na całym świecie. Jest to bardzo ważne zagadnienie integrujące ze sobą grupy naukowców z dziedzin, które jeszcze na przełomie wieków miały ze sobą niewiele wspólnego. Do grona biologów i chemików dołączyli matematycy, fizycy oraz informatycy wspólnie tworząc bardzo nowatorskie narzędzia ułatwiające modelowanie i tworzenie symulacji zachodzących w skali molekularnej. W badania nad strukturami przestrzennymi biopolimerów zaangażowane są największe na świecie ośrodki naukowe, korporacje farmaceutyczne czy agencje rządowe. Badanie interakcji receptorów z ligandami, projektowanie nowych leków czy terapie celowane to tylko wąski wycinek zagadnień związanych z tymi pracami.
 
-Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Obecnie najwydajniejsze komputery bez przerwy prowadzą obliczenia optymalnie pofałdowanych białek, kwasów nukleinowych czy prowadzą symulacje dynamiki molekularnej. Jest to dziedzina w której niemalże każdego roku dokonuje się znaczących odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego konkursu CASP na najwierniejsze przewidywanie struktury białka, który za każdym razem przynosi wyniki coraz bardziej zbieżne z konformacjami natywnymi.
+Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Obecnie najwydajniejsze komputery bez przerwy prowadzą obliczenia optymalnie pofałdowanych białek, kwasów nukleinowych czy prowadzą symulacje dynamiki molekularnej. Jest to dziedzina w której niemalże każdego roku dokonuje się znaczących odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego konkursu CASP na najwierniejsze przewidywanie struktury białka, który za każdym razem przynosi wyniki coraz bardziej zbieżne z konformacjami natywnymi \cite{casp}.
 
 Ważnym aspektem tych badań jest prezentacja wyników szerokiemu gronu odbiorców. Same efektowne wizualizacje nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego dostępu nie mieliśmy nigdy wcześniej. W związku z tym w ostatnim czasie coraz częściej sięga się do rozwiązań z zakresu \textit{wirtualnej rzeczywistości}. 
 
@@ -145,7 +145,7 @@ Elementami niezbędnymi do prawidłowego wykreowania wirtualnego środowiska jes
 
 Jak już wspomniano wirtualna rzeczywistość może znajdować zastosowanie także w nauce w szczególności w dziedzinach w których obiekty zainteresowań są zbyt małe aby być widoczne gołym okiem, takie jak cząsteczki chemiczne lub pojedyncze atomy. Istnieje cały szereg programów przeprowadzających np. symulacje oddziaływań międzycząsteczkowych, zwijania białek (ang. protein folding) czy przeprowadzających obliczenia dynamiki molekularnej (ang. molecular dynamics), a także umożliwiających wizualizację tych symulacji. Stosunkowo niewiele jednak jest rozwiązań dedykowanych wirtualnej rzeczywistości, które mogłyby umożliwić interakcję z użytkownikiem za pośrednictwem zmysłu dotyku. 
 	
-Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego dysponują sprzętem niezbędnym do realizacji takich zadań. Urządzenie haptyczne Sensable Phantom Omni jest przykładem trójwymiarowego wskaźnika ze zwrotną projekcją momentów sił, którego wykorzystanie otwiera całe spektrum nowych możliwości związanych z realizacją projektów wirtualnej rzeczywiści w biofizyce, biologii molekularnej czy chemii. 
+Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego dysponują sprzętem niezbędnym do realizacji takich zadań. Urządzenie haptyczne Sensable Phantom Omni jest przykładem trójwymiarowego wskaźnika ze zwrotną projekcją momentów sił, którego wykorzystanie otwiera całe spektrum nowych możliwości związanych z realizacją projektów wirtualnej rzeczywiści w biofizyce, biologii molekularnej czy chemii  \cite{vrLecture2011}. 
 
 \chapter*{Cel i zakres pracy}
 \addcontentsline{toc}{chapter}{Cel i zakres pracy}
@@ -209,7 +209,7 @@ Rezultatem działania ww. programu jest plik mapujący, który zawiera informacj
 
 
 \section{RMSD}
-Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów procesu dopasowania strukturalnego. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation). 
+Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów procesu dopasowania strukturalnego. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (ang. global distance test) i TM-score (ang. template modeling score) \cite{zhangSkolnick2005} najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (ang. root-mean-squared deviation) \cite{kufarevaAbagyan2012}. 
 
 Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi odpowiadających sobie atomów (lub innych punktów charakterystycznych) zawartych w strukturze wzorca (ang. template) i cząsteczce celu (ang. target). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
 
@@ -248,7 +248,7 @@ W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedu
 \end{figure}
 
 \section{Algorytm Kabsch'a}
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jej wartości (maksymalizacji dopasowania) jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy [2] Wolfgang Kabsch.
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jej wartości (maksymalizacji dopasowania) jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy Wolfgang Kabsch \cite{kabsch1976} i \cite{kabsch1978}.
 
 Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$:
 $$
@@ -337,7 +337,7 @@ $$
 \end{enumerate}
 
 \section{Przekształcenia geometryczne i ich reprezentacje}
-Przekształcenia geometryczne w przestrzeni trójwymiarowej są istotnymi operacjami używanymi w niniejszej pracy. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują na milionach punktów w przestrzeni trójwymiarowej (pikseli), \textit{optymalne metody numeryczne} które je realizują są niezmiernie ważne i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
+Przekształcenia geometryczne w przestrzeni trójwymiarowej są istotnymi operacjami używanymi w niniejszej pracy \cite{vanDam2000}. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że operują na milionach punktów w przestrzeni trójwymiarowej (pikseli), \textit{optymalne metody numeryczne} które je realizują są niezmiernie ważne i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
 
 Współpraca bibliotek programistycznych pochodzących od różnych dostawców może wymagać wielu przekształceń pomiędzy różnymi formatami opisu transformacji. Szczególną uwagę należy zwrócić na konwersję orientacji wskaźnika urządzenia haptycznego z kwaternionów (postaci dostarczanej przez bibliotekę VRPN) na \textit{oś i kąt obrotu} (akceptowany przez PyMOL) i odwrotnie.
 
@@ -648,7 +648,7 @@ $$
 Rotacje reprezentowane przez współrzędne jednorodne można dowolnie ze sobą łączyć poprzez mnożenie odpowiednich macierzy, należy jednak mieć na uwadze fakt (jak już wcześniej wspomniano), że rotacje nie są przemienne - kolejność wykonywanych operacji ma znaczenie.
 \\
 \\
-Rotacje posiadają jeszcze jedną być może najważniejszą z punktu widzenia programisty reprezentację: \textit{kwaterniony}. Są one strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Williama Hamiltona, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
+Rotacje posiadają jeszcze jedną być może najważniejszą z punktu widzenia programisty reprezentację: \textit{kwaterniony} \cite{magarshak1992}. Są one strukturą algebraiczną stanowiącą rozszerzenie liczb zespolonych. Kwaterniony zostały wprowadzone przez Williama Hamiltona \cite{hamilton1843}, który poszukiwał wygodnego sposobu opisu mechaniki w przestrzeni trójwymiarowej. 
 
 Kwaternion $q$ to taka czwórka liczb rzeczywistych $x$, $y$, $z$ i $w$ spełniająca równanie:
 $$
@@ -733,7 +733,7 @@ Urządzenie haptyczne (ang. haptic device) Sensable Phantom Omni jest trójwymia
 
 Phantom Omni jest urządzeniem znajdującym zastosowanie w różnego rodzaju aplikacjach działających na styku świata wirtualnego z rzeczywistym. Umożliwia ono użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą \textit{zmysłu dotyku}. Dzięki dostarczonym przez producenta sterownikom i bogatemu zestawowi bibliotek i narzędzi programistycznych OpenHaptics możliwe jest tworzenie oprogramowania w pełni wykorzystującego możliwości oferowane przez urządzenie.
 
-Specyfikację techniczną urządzenia prezentuje poniższa tabela:
+Specyfikację techniczną urządzenia prezentuje poniższa tabela \cite{geomagicTouchBrochure}:
 
 \begin{center}
 	\begin{tabular}{|l|p{4cm}|}
@@ -764,7 +764,7 @@ Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był prze
 
 \section{OpenHaptics Toolkit v3.0}
 
-OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego przez producenta urządzenia. Zawiera on zestaw sterowników, bibliotek, narzędzi i przykładowych kodów źródłowych ułatwiających programiście wdrożenie rozwiązań haptycznych w dowolnym programie komputerowym. Biblioteki programistyczne dają dostęp do szerokiego zakresu niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty warstwę abstrakcji. 
+OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego przez producenta urządzenia. Zawiera on zestaw sterowników, bibliotek, narzędzi i przykładowych kodów źródłowych ułatwiających programiście wdrożenie rozwiązań haptycznych w dowolnym programie komputerowym. Biblioteki programistyczne dają dostęp do szerokiego zakresu niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty warstwę abstrakcji \cite{openHapticsBrochure} \cite{openHapticsProgrammersGuide}. 
 
 \begin{figure}[H]
 \centering
@@ -833,7 +833,7 @@ Wszystkie elementy składające się na OpenHaptics Toolkit mogą być ze sobą 
 Zapewnienie stabilnego i realistycznego odwzorowania efektów sprzężenia zwrotnego jest tutaj najwyższym priorytetem. Wymagane jest aby pętla \textit{Servo Loop} była wykonywana z częstotliwością co najmniej 1kHz.
 
 \chapter{Virtual Reality Peripheral Network}
-Virtual Reality Peripheral Network (w skrócie VRPN) jest rozbudowaną biblioteką, szkieletem aplikacji (ang. application framework) i zbiorem narzędzi ułatwiających tworzenie programów komputerowych wykorzystujących urządzenia używane w systemach wirtualnej rzeczywistości. VRPN dostarcza abstrakcyjnych interfejsów programistycznych i serwerów uniezależniających programistę konkretnych rozwiązań sprzętowych. Umożliwia stosunkowo proste budowanie aplikacji obsługujących urządzenia HCI w wielu popularnych językach programowania (np. C++, Python czy Java).
+Virtual Reality Peripheral Network (w skrócie VRPN) jest rozbudowaną biblioteką, szkieletem aplikacji (ang. application framework) i zbiorem narzędzi ułatwiających tworzenie programów komputerowych wykorzystujących urządzenia używane w systemach wirtualnej rzeczywistości. VRPN dostarcza abstrakcyjnych interfejsów programistycznych i serwerów uniezależniających programistę konkretnych rozwiązań sprzętowych. Umożliwia stosunkowo proste budowanie aplikacji obsługujących urządzenia HCI w wielu popularnych językach programowania (np. C++, Python czy Java) \cite{taylorHudsonSeegerWeber}.
 
 \section{Opis pakietu}
 Pakiet VRPN jest od podstaw zaprojektowany jako oprogramowanie sieciocentryczne, tzn. takie w którym sieć komputerowa odgrywa kluczową rolę.
@@ -849,7 +849,7 @@ VRPN definiuje kilka abstrakcyjnych klas wspieranych urządzeń: Analog, Button,
 Domyślnie VRPN jest napisany w języku C++, jednak posiada wbudowane mechanizmy generujące kod w języku Python czy Java. W trakcie kompilacji biblioteki z zamiarem jej użycia po stronie klienckiej należy zwrócic szczególną uwagę na docelowy język którego będziemy używać i podać odpowiednie parametry kompilacji. 
 
 \section{Opis użycia VRPN}
-W niniejszej pracy wykorzystuje się integrację pakietu VRPN z urządzeniem Phantom Omni do otrzymywania danych statusowych o pozycji, orientacji i wciśniętych przyciskach oraz sterowania sprzężeniem zwrotnym.
+W niniejszej pracy wykorzystuje się integrację pakietu VRPN z urządzeniem Phantom Omni do otrzymywania danych statusowych o pozycji, orientacji i wciśniętych przyciskach oraz sterowania sprzężeniem zwrotnym \cite{rodriguezGonzalez2015}.
 
 Stacja robocza obsługująca urządzenie haptyczne posiada skonfigurowany do jego obsługi proces \textit{vrpn\_server} będący serwerem TCP/IP oczekującym na przychodzące połączenia od zainteresowanych aplikacji klienckich. Konfiguracja serwera jest przechowywana w tekstowym pliku konfiguracyjnym \textit{vrpn.cfg}, który jest ładowany każdorazowo podczas uruchamiania. 
 
@@ -1247,47 +1247,36 @@ utajnieniu.
 
 \bibitem{anfinsen73} Christian B. Anfinsen, \textit{Principles that govern the folding of protein chains}, Science, 1973
 
+\bibitem{casp} \textit{Critical Assessment of protein Structure Prediction}, http://predictioncenter.org/casproll/results.cgi
+
+\bibitem{vrLecture2011} Paweł Daniluk, \textit{Metody wirtualnej rzeczywistości. Urządzenia haptyczne.}, Uniwersytet Warszawski, 2011 
+
 \bibitem{daniluk11} Paweł Daniluk, \textit{Analiza podobieństwa struktur przestrzennych białek przy użyciu deskryptorów lokalnej struktury}, Uniwersytet Warszawski, 2011
 
-\bibitem[Bea65]{beaman} Juliusz Beaman, \textit{Morbidity of the Jolly
-    function}, Mathematica Absurdica, 117 (1965) 338--9.
+\bibitem{kufarevaAbagyan2012} Irina Kufareva, Ruben Abagyan, \textit{Methods of protein structure comparison}, Methods in Molecular Biology, 2012
 
-\bibitem[Blar16]{eb1} Elizjusz Blarbarucki, \textit{O pewnych
-    aspektach pewnych aspektów}, Astrolog Polski, Zeszyt 16, Warszawa
-  1916.
+\bibitem{zhangSkolnick2005} Yang Zhang, Jeffrey Skolnick, \textit{TM-align: a protein structure alignment algorithm based on the TM-score}, Nucleic Acids Research, 2005
 
-\bibitem[Fif00]{ffgg} Filigran Fifak, Gizbert Gryzogrzechotalski,
-  \textit{O blabalii fetorycznej}, Materiały Konferencji Euroblabal
-  2000.
+\bibitem{kabsch1976} Wolfgang Kabsch, \textit{A solution for the best rotation to relate two sets of vectors}, Acta Crystallographica, 1976
 
-\bibitem[Fif01]{ff-sr} Filigran Fifak, \textit{O fetorach
-    $\sigma$-$\rho$}, Acta Fetorica, 2001.
+\bibitem{kabsch1978} Wolfgang Kabsch, \textit{A discussion of the solution for the best rotation to relate two sets of vectors}, Acta Crystallographica, 1978
 
-\bibitem[Głomb04]{grglo} Gryzybór Głombaski, \textit{Parazytonikacja
-    blabiczna fetorów --- nowa teoria wszystkiego}, Warszawa 1904.
+\bibitem{vanDam2000} Andries van Dam, \textit{How Are Geometric
+Transformations (T,R,S) Used in Computer Graphics?}, Introduction to computer graphics, 2000
 
-\bibitem[Hopp96]{hopp} Claude Hopper, \textit{On some $\Pi$-hedral
-    surfaces in quasi-quasi space}, Omnius University Press, 1996.
+\bibitem{magarshak1992} Y. Magarshak, \textit{Quaternion representation of RNA sequences and tertiary structures}, BioSystems, 1993
 
-\bibitem[Leuk00]{leuk} Lechoslav Leukocyt, \textit{Oval mappings ab ovo},
-  Materiały Białostockiej Konferencji Hodowców Drobiu, 2000.
+\bibitem{hamilton1843} William Hamilton, \textit{On Quaternions; or on a new System of Imaginaries in Algebra}, list do Johna T. Graves'a, 1843
 
-\bibitem[Rozk93]{JR} Josip A.~Rozkosza, \textit{O pewnych własnościach
-    pewnych funkcji}, Północnopomorski Dziennik Matematyczny 63491
-  (1993).
+\bibitem{geomagicTouchBrochure} 3D Systems, \textit{Haptic Devices. Haptic devices that add the sense of Touch to your digital world}
 
-\bibitem[Spy59]{spyrpt} Mrowclaw Spyrpt, \textit{A matrix is a matrix
-    is a matrix}, Mat. Zburp., 91 (1959) 28--35.
+\bibitem{openHapticsBrochure} 3D Systems, \textit{OpenHaptics Developer Edition}, Broszura informacyjna producenta
 
-\bibitem[Sri64]{srinis} Rajagopalachari Sriniswamiramanathan,
-  \textit{Some expansions on the Flausgloten Theorem on locally
-    congested lutches}, J. Math.  Soc., North Bombay, 13 (1964) 72--6.
+\bibitem{openHapticsProgrammersGuide} 3D Systems, \textit{OpenHaptics Toolkit version 3.0 Programmers Guide}, przewodnik programisty, 2015
 
-\bibitem[Whi25]{russell} Alfred N. Whitehead, Bertrand Russell,
-  \textit{Principia Mathematica}, Cambridge University Press, 1925.
+\bibitem{taylorHudsonSeegerWeber} Russell M. Taylor II, Thomas C. Hudson, Adam Seeger, Hans Weber, Jeffrey Juliano, Aron T. Helser, \textit{VRPN: A Device-Independent, Network-Transparent VR Peripheral System}, University of North Carolina, 2001
 
-\bibitem[Zen69]{heu} Zenon Zenon, \textit{Użyteczne heurystyki
-    w~blabalizie}, Młody Technik, nr~11, 1969.
+\bibitem{rodriguezGonzalez2015} M. Cuevas-Rodriguez, D. Gonzalez-Toledo, L. Molina-Tanco, A. Reyes-Lecuona, \textit{Contributing to VRPN with a new server for haptic devices}, University of Malaga, 2015
 
 \end{thebibliography}
 

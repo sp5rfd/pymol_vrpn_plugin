@@ -569,6 +569,6 @@ Witaj użytkowniku.\
     
 def __init__(self):
     print "__init__"
-    self.menuBar.addmenuitem('Plugin', 'command', 'VRPN', label = 'VRPN Plugin', 
-                             command = lambda s=self: helloWindow())
+    self.menuBar.addmenuitem('Plugin', 'command', 'VRPN',
+	label = 'VRPN Plugin', command = lambda s=self: helloWindow())
                              
