@@ -90,9 +90,11 @@
 \newtheorem{defi}{Definicja}[section]
 
 \usepackage{graphicx}
+\usepackage{pythonhighlight}
 \usepackage[export]{adjustbox}
 \usepackage{float}
 \usepackage{amsmath}
+
 \usepackage{listings}
 \lstset{
 	language=python,
@@ -100,6 +102,7 @@
 			 {ł}{{\l{}}}1 {ń}{{\'{n}}}1 {ó}{{\'{o}}}1
 			 {ś}{{\'{s}}}1 {ź}{{\'{z}}}1 {ż}{{\.{z}}}1
 }
+
 %\usepackage{polski}
 % koniec definicji
 
@@ -1283,7 +1286,7 @@ Transformations (T,R,S) Used in Computer Graphics?}, Introduction to computer gr
 \chapter*{Kod źródłowy}
 \addcontentsline{toc}{chapter}{Kod źródłowy}
 
-todo: tu będzie kod źródłowy
+\inputpython{../PymolVrpnPlugin.py}{0}{1000}
 
 \end{document}
 
