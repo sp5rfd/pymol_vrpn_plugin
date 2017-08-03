@@ -212,10 +212,13 @@ Wynikiem przeprowadzonych operacji lokalnego dopasowania jest indeks miejsc do k
 Rezultatem działania ww. programu jest plik mapujący, który zawiera informacje o wszystkich miejscach dla których został przekroczony zadany próg podobieństwa do struktury wzorca \textbf{CZY napewno tam jest jakiś próg??}. Innymi słowy uzyskujemy kompletną mapę cząsteczki celu z wyróżnionymi regionami, których superpozycja ze strukturą wzorca daje stopień podobieństwa nie gorszy niż zadany próg.
 
 
-\section{RMSD}
-Efektywna ocena podobieństwa struktur chemicznych jest jednym z kluczowych elementów procesu dopasowania strukturalnego. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (\textit{ang. global distance test}) i TM-score (\textit{ang. template modeling score}) \cite{zhangSkolnick2005} najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (\textit{ang. root-mean-squared deviation}) \cite{kufarevaAbagyan2012}. 
+ zewnetrzna aplikacja, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu oraz odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (\textit{ang. threshold}). Wynikiem takiej procedury są dane mapujące (\textit{ang. mapping file}) zawierające informację o lokalizacji regionów podobnych do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
 
-Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi odpowiadających sobie atomów (lub innych punktów charakterystycznych) zawartych w strukturze wzorca (\textit{ang. template}) i cząsteczce celu (\textit{ang. target}). W tym przypadku jednostką najczęściej jest \AA (angstrom). Dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD.
+\section{RMSD i algorytm Kabsch'a}
+
+Efektywna ocena podobieństwa strukturalnego jest jednym z kluczowych elementów procesu dopasowania. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (\textit{ang. global distance test}) i TM-score (\textit{ang. template modeling score}) \cite{zhangSkolnick2005} najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (\textit{ang. root-mean-squared deviation}) \cite{kufarevaAbagyan2012}. 
+
+Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi odpowiadających sobie atomów (lub innych punktów charakterystycznych) zawartych w strukturze wzorca (\textit{ang. template}) i cząsteczce celu (\textit{ang. target}). W tym przypadku jednostką najczęściej jest \AA (angstrom). 
 
 $$
 \begin{array}{lr}
@@ -232,27 +235,16 @@ $q$ - wektor punktów wybranego regionu w strukturze celu
 $N$ - długość wektorów współrzędnych $p$ i $q$
 \\
 \\
-O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. 
+O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. Tutaj pochodzą one z zewnętrznej aplikacji i są wynikiem przeprowadzonej wcześniej procedury lokalnego dopasowania wzorca do struktury celu.
 
-W tym przypadku dane pochodzą z zewnętrznej aplikacji, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu oraz odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (\textit{ang. threshold}). Wynikiem takiej procedury są dane mapujące (\textit{ang. mapping file}) zawierające informację o lokalizacji regionów podobnych do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
+RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Sama w sobie ma dla nas jednak jedynie wartość informacyjną. Wiadomym jest, że dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD. Nie oznacza to jednak, że wysoka wartość RMSD implikuje brak lub niskie podobieństwo pomiędzy strukturami. Może być dokładnie odwrotnie: dwie identyczne struktury są względem siebie przesunięte i obrócone, co znacznie zwiększa wartość metryki.
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.2]{rmsd3}
-\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=3.985}
-\end{figure}
+Jednym ze znanych sposobów minimalizacji jej wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem ze struktury celu w taki sposób aby zostały one jak najlepiej na siebie nałożone.
 
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.2]{rmsd0}
-\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=0}
-\end{figure}
-
-\section{Algorytm Kabsch'a}
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Jednym ze znanych sposobów minimalizacji jej wartości (maksymalizacji dopasowania) jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem ze struktury celu w taki sposób aby obie struktury zostały jak najlepiej na siebie nałożone. Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy Wolfgang Kabsch \cite{kabsch1976}, \cite{kabsch1978}.
-
-Algorytm startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$:
+Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy Wolfgang Kabsch \cite{kabsch1976}\cite{kabsch1978}. Celem działanie algorytmu Kabsch'a jest wyznaczenie macierzy translacji i rotacji takich, aby możliwie najlepiej nałożyć na siebie dwa obiekty przestrzenne, tutaj dwa fragmenty struktur chemicznych.
+\\
+\\
+Algorytm Kabsch'a startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$:
 $$
 p=
 \begin{pmatrix}
@@ -274,9 +266,9 @@ $$
 \\
 gdzie:
 \\
-$p$ wektor punktów struktury wzorcowej
+$p$ wektor punktów struktury wzorcowej o długości $N$
 \\
-$q$ wektor punktów wybranego regionu ze struktury celu
+$q$ wektor punktów wybranego regionu ze struktury celu o długości $N$
 \\
 \\
 Algorytm Kabsch'a składa się z 3 kroków (http://cnx.org/contents/HV-RsdwL@23/Molecular-Distance-Measures):
@@ -328,15 +320,30 @@ upewniamy się, że operujemy w ramach prawoskrętnego układu współrzędnych.
 
 $$
 R=V
-\begin{pmatrix}
+\begin{bmatrix}
  1 & 0 & 0 \\
  0 & 1 & 0 \\
  0 & 0 & s
-\end{pmatrix}
+\end{bmatrix}
 U^T
 $$
 
 \end{enumerate}
+
+Zastosowanie translacji i rotacji wyznaczonych zgodnie z algotyrmem Kabsch'a prezentują poniższe wizualizacje. Prezentują one różne wartości RMSD dla superpozycji tych samych struktur przed i po zastosowaniu algorytmu:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{rmsd3}
+\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=3.985}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{rmsd0}
+\caption{Przykładowe dopasowanie struktury wzorca (czerwona) do podobnego regionu struktury celu (zielona), RMSD=0}
+\end{figure}
 
 \section{Przekształcenia geometryczne i ich reprezentacje}
 Przekształcenia geometryczne w przestrzeni trójwymiarowej są elementarnymi operacjami używanymi w niniejszej pracy \cite{vanDam2000}. Zaliczamy do nich przede wszystkim skalowanie, translacje i rotacje. Wszystkie te operacje można praktycznie zrealizować na kilka sposobów. Ze względu na to, że mogą operować na milionach punktów w przestrzeni trójwymiarowej (pikseli), optymalne metody numeryczne które je realizują są niezmiernie ważne i muszą w maksymalnym stopniu wykorzystywać możliwości oferowane przez komputerowe jednostki obliczeniowe i procesory graficzne. 
@@ -765,7 +772,7 @@ Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był prze
 
 \section{OpenHaptics Toolkit v3.0}
 
-OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego przez producenta urządzenia. Zawiera on zestaw sterowników, bibliotek, narzędzi i przykładowych kodów źródłowych ułatwiających programiście wdrożenie rozwiązań haptycznych w dowolnym programie komputerowym. Biblioteki programistyczne dają dostęp do szerokiego zakresu niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty warstwę abstrakcji \cite{openHapticsBrochure}, \cite{openHapticsProgrammersGuide}. 
+OpenHaptics Toolkit v3.0 jest bogatym pakietem oprogramowania dostarczanego przez producenta urządzenia. Zawiera on zestaw sterowników, bibliotek, narzędzi i przykładowych kodów źródłowych ułatwiających programiście wdrożenie rozwiązań haptycznych w dowolnym programie komputerowym. Biblioteki programistyczne dają dostęp do szerokiego zakresu niskopoziomowych funkcji urządzenia Phantom Omni tworząc przyjazną dla programisty warstwę abstrakcji \cite{openHapticsBrochure}\cite{openHapticsProgrammersGuide}. 
 
 \begin{figure}[H]
 \centering
@@ -958,22 +965,22 @@ Na ekranie widać wzorcową strukturę poruszającą się zgodnie z ruchami urz�
 \end{figure}
 
 \chapter{Podsumowanie}
-Obecny poziom rozwoju stworzonego w ramach pracy oprogramowania pozwala na stosunkowo proste przeglądanie i dopasowywanie struktur chemicznych za pomocą wskaźnika haptycznego Phantom Omni. Wykorzystuje do tego dane wejściowe pochodzące z innych źródeł.
+W ramach niniejszej pracy została przedstawiona implementacja oprogramowania, którego funkcjonalność obejmuje interaktywne przeglądanie struktur biopolimerów w poszukiwaniu regionów podobnych do wybranej struktury wzorcowej oraz zwrotną projekcję momentów sił wskazującą na jakość dopasowania. Wykorzystuje do tego dane wejściowe pochodzące z zewnętrznych źródeł - plik mapujący oraz pliki z opisem struktur w formacie PDB.
 
-W obecnej formie oprogramowanie może mieć dość ograniczone zastosowanie praktyczne - np. w przemyśle - dość dobrze może jednak nadawać się do celów naukowo-edukacyjnych demonstrujących możliwości wykorzystania metod wirtualnej rzeczywistości w takich dziedzinach nauki jak biofizyka, biologia molekularna czy chemia.
+Oprogramowanie wykorzystuje metody i urządzenia wirtualnej rzeczywistości w szczególności pakiet VRPN, urządzenie haptyczne Phantom Omni. Powstało ono w formie wtyczki rozszerzającej funkcjonalność pakietu PyMOL, wykorzystując jego możliwości wizualizacji struktur chemicznych.
 
-Wykorzystanie integracji urządzenia Phantom Omni z pakietem VRPN i PyMOL w połączeniu z różnymi metodami bioinformatycznymi tworzy cały szereg nowych i być może nieznanych dotąd (lub niemających praktycznego wykorzystania) możliwości. Ławtość wchodzenia w interakcję z wykreowanym, wirtualnym, molekularnym światem i odzwierciedlanie sił obecnych na tym poziomie może znacznie ułatwić i rozszerzyć proces edukacji przyszłych adeptów ww. nauk. 
+Ostateczna forma oprogramowania może mieć dość ograniczone wykorzystanie praktyczne, dość dobrze może jednak nadawać się do celów naukowo-edukacyjnych np. demonstrujących możliwości zastosowania metod wirtualnej rzeczywistości w takich dziedzinach nauki jak biofizyka, biologia molekularna czy chemia.
 
-Dalszy rozwój niniejszego oprogramowania może polegać na dodaniu funkcjonalności, które w chwili obecnej realizuje oprogramowanie zewnętrzne. Wymagałoby to rozbudowy obecnego programu o część realizującą obliczenia dopasowań strukturalnych implementując różne ich metody. 
+Wykorzystanie integracji urządzenia Phantom Omni z pakietem VRPN i PyMOL w połączeniu z różnymi metodami bioinformatycznymi tworzy cały szereg nowych i być może nieznanych dotąd (lub niemających praktycznego wykorzystania) możliwości. Ławtość wchodzenia w interakcję z wykreowanym, wirtualnym, molekularnym światem i odzwierciedlanie sił obecnych na tym poziomie może znacznie ułatwić i rozszerzyć proces edukacji przyszłych adeptów różnych nauk przyrodniczych.
 
-Kolejnym etapem rozszerzania funkcjonalności niniejszego oprogramowania mogłoby być dodanie metod bioinformatycznych związanych z dokowaniem molekularnym i projektowaniem leków.
+Dalszy rozwój niniejszego oprogramowania mógłby polegać na dodaniu funkcjonalności, które w chwili obecnej realizuje oprogramowanie zewnętrzne. Wymagałoby to rozbudowy obecnego programu o część realizującą obliczenia dopasowań strukturalnych implementując przykładowe metody opisane we wcześniejszch rozdziałach. 
 
-W przypadku dalszego rozwoju funkcjonalności oprogramowania zgodnie z powyższymi lub innymi propozycjami możliwe jest wyobrażenie sobie wykorzystania tego oprogramowania na szerszą skalę w ośrodkach naukowo-badawczych uczelni lub przemysłu.
+Kolejnym krokiem mogłoby być dodanie bardziej zaawansowanych metod bioinformatycznych związanych z dokowaniem molekularnym czy projektowaniem leków.
+
+W przypadku dalszego znacznego rozwoju funkcjonalności oprogramowania zgodnie z powyższymi lub innymi propozycjami możliwe jest wyobrażenie sobie wykorzystania go na szerszą skalę w ośrodkach naukowo-badawczych uczelni lub przemysłu.
 \\
 \\
-W ramach niniejszej pracy została przedstawiona implementacja oprogramowania, którego funkcjonalność obejmuje interaktywne przeglądanie struktur biopolimerów w poszukiwaniu regionów podobnych (z dokładnością do zadanego progu) do wybranej struktury wzorcowej. Oprogramowanie wykorzystuje metody i urządzenia wirtualnej rzeczywistości, w szczególności urządzenie haptyczne Phantom Omni oraz pakiet VRPN. Oprogramowanie powstało w formie wtyczki rozszerzającej funkcjonalność pakietu PyMOL, wykorzystując jego możliwości wizualizacji struktur chemicznych.
-
-Zostały także przedstawione podstawy teoretyczne pracy, na które składały się globalne i lokalne metody dopasowania (uliniowienia) strukturalnego, algorytm RMSD służący do oceny ww. dopasowań oraz Kabsch'a - metoda minimalizująca wartość RMSD, maksymalizująca stopień dopasowania. Opisane także zostały elementarne przekształcenia geometryczne wykorzystywane w pracy oraz sposób konwersji kwaternionów na macierze rotacji (wykorzystywane przez pakiet PyMOL).
+Poza oprogramowaniem w pracy zostały także przedstawione podstawy teoretyczne na które składały się globalne i lokalne metody dopasowania (uliniowienia) strukturalnego oraz algorytm Kabsch'a maksymalizujący stopień tego dopasowania. Opisane także zostały elementarne przekształcenia geometryczne wykorzystywane w pracy oraz sposób konwersji kwaternionów na macierze rotacji (wykorzystywane przez pakiety VRPN i PyMOL).
 
 Szczegółowo zostało opisane urządzenie haptyczne Phantom Omni i jego integracja z pakietem Virtual Reality Peripheral Network.
 
