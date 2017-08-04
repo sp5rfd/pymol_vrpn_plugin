@@ -163,18 +163,18 @@ W pracy zostały także przedstawione podstawy teoretyczne leżące u jej podsta
 Kod źródłowy stworzonego oprogramowania stanowi integralny załącznik do niniejszej pracy.
 
 \chapter{Podstawy teoretyczne}
-W tym rozdziale zaprezentowano teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur chemicznych, algorytmach oceny podobieństwa strukturalnego (RMSD), sposobach ich minimalizacji (algorytm Kabsch'a) oraz zagadnieniach związanych z przekształceniami geometrycznymi.
+W tym rozdziale zaprezentowano teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur chemicznych, sposobach optymalnego nakładania struktur i oceny jego jakości (algorytm Kabsch'a i RMSD) oraz zagadnieniach związanych z przekształceniami geometrycznymi (skalowanie, translacje i rotacje).
 
 \section{Metody dopasowania struktur chemicznych}
-Celem poszukiwania optymalnych metod dopasowania strukturalnego (\textit{ang. structural alignment}) jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu i bez znajomości sekwencji. 
+Celem poszukiwania optymalnych metod dopasowania strukturalnego (\textit{ang. structural alignment}) jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu, bez znajomości sekwencji. 
 
 Metody dopasowań strukturalnych pierwotnie odnosiły się do cząsteczek polipeptydów i białek jako podstawowych biopolimerów. Szybko jednak ich zastosowanie zostało rozszerzone także na kwasy nukleinowe, w szczególności niekodujący RNA gdyż posiada on ważne funkcje biologiczne (np. enzymatyczne) oraz analogiczne do polipeptydów formy drugo- i trzeciorzędowe. 
 
 Z uwagi na znacznie wyższą ewolucyjną trwałość struktury przestrzennej w porównaniu do sekwencji (zarówno aminokwasowej jak i nukleotydowej) poszukiwanie dopasowań strukturalnych często bywa dużo skuteczniejszą metodą znajdowania związków ewolucyjnych pomiędzy organizmami niż klasyczne uliniowienie sekwencji. 
 
-Kluczowym aspektem tych metod jest efektywna ocena ich jakości. Niestety nie ma jednej uniwersalnej miary podobieństwa struktur,  istnieje jednak kilka dobrze opisanych algorytmów służących do szacowania jakości dopasowań strukturalnych. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (\textit{ang. root-mean-squared deviation}), która zostanie szczegółowo opisana w dalszej części pracy.
+Istotnym aspektem tych metod jest efektywna ocena jakości dopasowań. Niestety nie ma jednej uniwersalnej miary podobieństwa struktur,  istnieje jednak kilka dobrze opisanych algorytmów służących do ich szacowania. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (\textit{ang. root-mean-squared deviation}), szczegółowo opisana w dalszej części pracy.
 
-Obliczenie dopasowania strukturalnego ponadto implikuje powstanie dopasowania sekwencyjnego pomiędzy przyrównywanymi merami w każdym z łańcuchów. Ocena takiego jednowymiarowego uliniowienia sekwencji również może dać nam wiedzę o tym jak bliska relacja występuje pomiędzy strukturami.
+Obliczenie dopasowania strukturalnego ponadto implikuje powstanie dopasowania sekwencyjnego pomiędzy przyrównywanymi merami w każdym z łańcuchów. Ocena takiego jednowymiarowego uliniowienia sekwencji również może dać nam wiedzę o bliskości ewolucyjnej występującej pomiędzy strukturami.
 
 Z powodu dużej złożoności biopolimerów zostało opracowanych wiele metod upraszczających ich reprezentacje do celów obliczeniowych. Przede wszystkim dąży się do rezygnacji z bezpośredniego rozpatrywania lokalizacji wszystkich atomów pochodzących z każdego meru na rzeczy jedynie tych należących do szkieletu (\textit{ang. backbone}) cząsteczki (np. $\alpha$-węgle aminokwasów czy pentozy kwasów nukleinowych), z pominięciem lub daleko idącym ograniczeniem roli łańcuchów bocznych.
 
@@ -182,7 +182,7 @@ Metody dopasowania możemy podzielić na globalne, których celem jest porównyw
 
 \subsection{Globalne dopasowanie struktur} 
 
-\textit{Globalne dopasowanie} polega na obliczaniu optymalnego nałożenia na siebie (superpozycji) dwóch lub więcej struktur. Jest to iteracyjne podejście, które dąży do minimalizowania odległości pomiędzy atomami (lub wybranymi punktami charakteryzującymi dany mer cząsteczki) w każdym kolejnym kroku poprzez dokonywanie odpowiednich przesunięć i obrotów struktur względem siebie. 
+\textit{Globalne dopasowanie} polega na obliczaniu najlepszego nałożenia na siebie dwóch lub więcej struktur i ich superpozycji. Jest to iteracyjne podejście, które dąży do minimalizowania odległości pomiędzy atomami (lub wybranymi punktami charakteryzującymi dany mer cząsteczki) w każdym kolejnym kroku poprzez dokonywanie odpowiednich przesunięć i obrotów struktur względem siebie. 
 
 Globalne dopasowanie jest najskuteczniejsze gdy podobieństwo porównywanych struktur jest ma tyle wysokie aby obliczenia dążyły do optymalnego globalnie rezultatu. Jest to często stosowana metoda służąca do porównywania różnych konformacji tego samego polimeru, na przykład do oceny jakości algorytmów przewidujących strukturę białek lub porównywanie struktur analogicznych białek pochodzących z różnych organizmów. 
 
@@ -192,25 +192,22 @@ Globalne dopasowanie jest najskuteczniejsze gdy podobieństwo porównywanych str
 \caption{Superpozycja dwóch struktur tioredoksyny (białko o długości 105 aminokwasów) ludzkiej (kolor czerwony) i pochodzącej z muszki owocowej \textit{Drosophila melanogaster} (kolor żółty), RMSD=1.244\AA }
 \end{figure}
 
+Wadą podejścia globalnego jest to, że jego wykorzystanie dla zróżnicowanych cząsteczek może być bezcelowe z powodu niemożności obliczenia miarodajnej wartości podobieństwa pomiędzy takimi strukturami. Innymi słowy obliczona wartość RMSD pomiędzy takimi cząsteczkami może być pozbawiona sensownej interpretacji. Wówczas należy rozważyć podejście lokalne.
+
 \subsection{Lokalne dopasowanie struktur} 
-Jak już wspomniano, lokalne dopasowanie polega na przeszukiwaniu części lub całości cząsteczki celu (\textit{ang. target}) w poszukiwaniu takich regionów, które są ,,podobne'' do wybranych struktur zwanych wzorcami (\textit{ang. template}). Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące lub inne dowolnie wybrane fragmenty cząsteczek. Z grupy odpowiednio wybranych lokalnych dopasowań próbuje się budować uliniowienie globalne.
-\\
-\\
-\textbf{TODO: skąd dokładnie pochodzą dane wejściowe (plik mapujący) do tego programu? czy jego podstawą są lokalne deskryptory struktury? }
-\\
-\textbf{UWAGA: uzupełnić i poprawić błędy w dalszej części podrozdziału}
-\\
-\\
-Spośród wielu opracowanych metod realizacji lokalnego dopasowania, warto wspomnieć przede wszystkim o metodzie opartej o \textit{lokalne deskryptory struktury} \cite{daniluk11}. Stanowi ona (?? czy napewno tak jest??) podstawę implementacji oprogramowania dostarczającego dane wejściowe do programu będącego przedmiotem niniejszej pracy. 
+Jak już wspomniano, lokalne dopasowanie polega na poszukiwaniu w części lub całości cząsteczki celu (\textit{ang. target}) występowania takich regionów, które ,,są podobne'' do wybranych struktur zwanych wzorcami lub szablonami (\textit{ang. template}). Przez podobieństwo należy tutaj rozumieć taką odpowiedniość pomiędzy ww. strukturami, że wyznaczona dla ich superpozycji wartość RMSD nie przekracza zadanego progu. Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące, całe domeny białkowe lub inne wybrane fragmenty cząsteczek których występowań poszukujemy.
 
-\textit{Lokalne deskryptory struktury białek} stanowią pewną abstrakcję opisującą otoczenie każdego aminokwasu... 
+Istnieje wiele opracowanych metod i algorytmów realizujących takie obliczenia. Do najpopularniejszych należy zaliczyć DALI\cite{x}, SSAP\cite{x}, CE\cite{x}, VAST\cite{x}, MATRAS\cite{x}, GANGSTA\cite{x} i inne. Każda z nich ma inne podejście do dekompozycji struktury i sposobów poszukiwania lokalnych podobieństw. 
 
-\textbf{<czy tą metodę wykorzystuje się jedynie do białek? czy można do RNA? >}
+Szczególną uwagę musimy jednak zwrócić na metodę lokalnych deskryptorów, opracowanyą przez Krzysztofa Fidelisa \cite{fidelis2003}. Stanowi ona podstawę programu generującego dane wejściowe dla oprogramowania będącego przedmiotem niniejszej pracy. Metoda lokalnych deskryptorów w przeciwieństwie do metod liniowych, bazuje na lokalnym przestrzennym otoczeniu każdego aminokwasu. Deskryptor budowany jest w kilku krokach:
 
-Wynikiem przeprowadzonych operacji lokalnego dopasowania jest indeks miejsc do których wzorzec jest ,,podobny'' wraz z ich miarą dopasowania. Należy pamiętać, że jeden wzorzec może być podobny do wielu regionów w obrębie tej samej cząsteczki celu, przez co może występować w wielu miejscach w ramach indeksu mapującego.
+1)..
 
-Rezultatem działania ww. programu jest plik mapujący, który zawiera informacje o wszystkich miejscach dla których został przekroczony zadany próg podobieństwa do struktury wzorca \textbf{CZY napewno tam jest jakiś próg??}. Innymi słowy uzyskujemy kompletną mapę cząsteczki celu z wyróżnionymi regionami, których superpozycja ze strukturą wzorca daje stopień podobieństwa nie gorszy niż zadany próg.
+2)..
 
+3)..
+
+Wynikiem przeprowadzonych obliczeń jest indeks miejsc (wraz z ich miarą dopasowania) analizowanej struktury do których wzorzec jest podobny. Należy pamiętać, że jeden wzorzec może pasować do wielu regionów w obrębie tej samej cząsteczki, przez co może występować w wielu miejscach indeksu mapującego. Innymi słowy dzieki takiej operacji uzyskujemy kompletną mapę struktury celu z wyróżnionymi regionami, których superpozycja z wzorcem daje stopień podobieństwa nie gorszy od zadanego.
 
  zewnetrzna aplikacja, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu oraz odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (\textit{ang. threshold}). Wynikiem takiej procedury są dane mapujące (\textit{ang. mapping file}) zawierające informację o lokalizacji regionów podobnych do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
 
@@ -998,6 +995,8 @@ Kod źródłowy stworzonego oprogramowania wraz z obszernymi komentarzami stanow
 \bibitem{vrLecture2011} Paweł Daniluk, \textit{Metody wirtualnej rzeczywistości. Urządzenia haptyczne.}, Uniwersytet Warszawski, 2011 
 
 \bibitem{daniluk11} Paweł Daniluk, \textit{Analiza podobieństwa struktur przestrzennych białek przy użyciu deskryptorów lokalnej struktury}, Uniwersytet Warszawski, 2011
+
+\bibitem{fidelis2003} Krzysztof Fidelis, \textit{A novel approach to fold recognition using sequence-derived properties from sets of structurally similar local fragments of proteins}, Bioinformatics, 2003
 
 \bibitem{kufarevaAbagyan2012} Irina Kufareva, Ruben Abagyan, \textit{Methods of protein structure comparison}, Methods in Molecular Biology, 2012
 
