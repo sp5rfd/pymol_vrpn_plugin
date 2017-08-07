@@ -197,19 +197,15 @@ Wadą podejścia globalnego jest to, że jego wykorzystanie dla zróżnicowanych
 \subsection{Lokalne dopasowanie struktur} 
 Jak już wspomniano, lokalne dopasowanie polega na poszukiwaniu w części lub całości cząsteczki celu (\textit{ang. target}) występowania takich regionów, które ,,są podobne'' do wybranych struktur zwanych wzorcami lub szablonami (\textit{ang. template}). Przez podobieństwo należy tutaj rozumieć taką odpowiedniość pomiędzy ww. strukturami, że wyznaczona dla ich superpozycji wartość RMSD nie przekracza zadanego progu. Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące, całe domeny białkowe lub inne wybrane fragmenty cząsteczek których występowań poszukujemy.
 
-Istnieje wiele opracowanych metod i algorytmów realizujących takie obliczenia. Do najpopularniejszych należy zaliczyć DALI\cite{x}, SSAP\cite{x}, CE\cite{x}, VAST\cite{x}, MATRAS\cite{x}, GANGSTA\cite{x} i inne. Każda z nich ma inne podejście do dekompozycji struktury i sposobów poszukiwania lokalnych podobieństw. 
+Istnieje wiele opracowanych metod i algorytmów realizujących takie obliczenia. Do najpopularniejszych należy zaliczyć DALI\cite{holmSander1993}, SSAP\cite{orengoTaylor1996}, CE\cite{shindyalovBourne1998}, VAST\cite{madejGibratBryant1995}, MATRAS\cite{kawabataNishikawa2000}, GANGSTA\cite{guerlerKnapp2008} i inne. Każda z nich ma inne podejście do dekompozycji struktury i sposobów poszukiwania lokalnych podobieństw. 
+\\
+\\
+Szczególną uwagę musimy jednak zwrócić na metodę lokalnych deskryptorów, zaproponowaną przez Krzysztofa Fidelisa \cite{daniluk11}\cite{fidelis2003} (jednego z twórców i organizatorów eksperymentu CASP). Stanowi ona podstawowy algorytm generujący dane wejściowe dla oprogramowania będącego przedmiotem niniejszej pracy. Metoda lokalnych deskryptorów w przeciwieństwie do metod liniowych, bazuje na lokalnym przestrzennym otoczeniu każdego aminokwasu. Metoda szczegółowo została opisana w cytowanych wyżej publikacjach. 
+\\
+\\
+Wynikiem przeprowadzonych uliniowień i superpozycji struktur jest indeks miejsc (wraz z ich miarą dopasowania) analizowanej struktury do których wzorzec jest podobny. Należy pamiętać, że jeden wzorzec może pasować do wielu regionów w obrębie tej samej cząsteczki, przez co może występować w wielu miejscach indeksu mapującego. Innymi słowy dzieki takiej operacji uzyskujemy kompletną mapę struktury celu z wyróżnionymi regionami, których superpozycja z wzorcem daje stopień podobieństwa nie gorszy od zadanego.
 
-Szczególną uwagę musimy jednak zwrócić na metodę lokalnych deskryptorów, opracowanyą przez Krzysztofa Fidelisa \cite{fidelis2003}. Stanowi ona podstawę programu generującego dane wejściowe dla oprogramowania będącego przedmiotem niniejszej pracy. Metoda lokalnych deskryptorów w przeciwieństwie do metod liniowych, bazuje na lokalnym przestrzennym otoczeniu każdego aminokwasu. Deskryptor budowany jest w kilku krokach:
-
-1)..
-
-2)..
-
-3)..
-
-Wynikiem przeprowadzonych obliczeń jest indeks miejsc (wraz z ich miarą dopasowania) analizowanej struktury do których wzorzec jest podobny. Należy pamiętać, że jeden wzorzec może pasować do wielu regionów w obrębie tej samej cząsteczki, przez co może występować w wielu miejscach indeksu mapującego. Innymi słowy dzieki takiej operacji uzyskujemy kompletną mapę struktury celu z wyróżnionymi regionami, których superpozycja z wzorcem daje stopień podobieństwa nie gorszy od zadanego.
-
- zewnetrzna aplikacja, która wykonuje procedurę dopasowania (uliniowienia) struktur wzorca i celu oraz odnajduje takie regiony, których miara podobieństwa nie przekracza zadanego progu (\textit{ang. threshold}). Wynikiem takiej procedury są dane mapujące (\textit{ang. mapping file}) zawierające informację o lokalizacji regionów podobnych do struktury wzorca w cząsteczce celu. Takimi regionami mogą być dowolne struktury drugorzędowe (w szczególności alfa-helisy czy beta-harmonijki) lub trzeciorzędowe.
+Indeks miejsc jest esportowany do formatu akceptowanego przez opisane dalej oprogramowanie w formie pliku mapującego (\textit{ang. mapping file}).
 
 \section{RMSD i algorytm Kabsch'a}
 
@@ -993,6 +989,23 @@ Kod źródłowy stworzonego oprogramowania wraz z obszernymi komentarzami stanow
 \bibitem{casp} \textit{Critical Assessment of protein Structure Prediction}, http://predictioncenter.org/casproll/results.cgi
 
 \bibitem{vrLecture2011} Paweł Daniluk, \textit{Metody wirtualnej rzeczywistości. Urządzenia haptyczne.}, Uniwersytet Warszawski, 2011 
+
+\bibitem{holmSander1993} L. Holm, C. Sander, \textit{Protein structure comparison by alignment of distance matrices}, J Mol Biol, 233(1):123–38, 1993
+
+\bibitem{orengoTaylor1996} C. A. Orengo, W. R. Taylor, \textit{SSAP: sequential structure alignment program
+for protein structure comparison}, Methods Enzymol, 266:617–35, 1996
+
+\bibitem{shindyalovBourne1998} I. N. Shindyalov, P. E. Bourne, \textit{Protein structure alignment by incremental
+combinatorial extension (CE) of the optimal path}, Protein Eng, 11(9):739–47, 1998
+
+\bibitem{madejGibratBryant1995} T. Madej, J. F. Gibrat, S. H. Bryant, \textit{Threading a database of protein cores},
+Proteins, 23(3):356–69, 1995
+
+\bibitem{kawabataNishikawa2000} T. Kawabata, K. Nishikawa, \textit{Protein structure comparison using the markov
+transition model of evolution}, Proteins, 41(1):108–22, 2000
+ 
+\bibitem{guerlerKnapp2008} A. Guerler, E. W. Knapp, \textit{Novel protein folds and their nonsequential struc-
+tural analogs}, Protein Sci, 17(8):1374–82, 2008
 
 \bibitem{daniluk11} Paweł Daniluk, \textit{Analiza podobieństwa struktur przestrzennych białek przy użyciu deskryptorów lokalnej struktury}, Uniwersytet Warszawski, 2011
 
