@@ -26,8 +26,8 @@ from math import *
 """
 IS_RUNNING = False
 AUTO_ZOOMING = False
-AUTO_DOCK=False
-REGION_COLOR=False
+REGION_COLORING=True
+FORCES_ENABLED=False
 
 """
     Global variables for translations. 
@@ -38,7 +38,10 @@ REGION_COLOR=False
 trackerX = trackerY = trackerZ = 0
 x = y = z = 0 
 scale=750
-templeCOM=(0,0,0)
+
+# srodki ciezkosci wzorca i regionu
+templateCOM=(0,0,0)
+regionCOM=(0,0,0)
 
 """
     Global variables for rotations
@@ -54,10 +57,13 @@ mapping=[]
 regions={}
 
 currentWindow=0
-mappingFile=0
 phantomIp=0
-structureFile=0
-templateFile=0
+
+# input data files (target,template,mapping):
+targetStructureFile=0
+templateStructureFile=0
+structureMappingFile=0
+
 # zmienne do wyswietlania danych w UI
 regionId=regionX=regionY=regionZ=regionTemplateDistance=rmsdEntry=0
 
@@ -78,6 +84,8 @@ def tracker_handler(u, tracker):
     trackerX = tracker[1]
     trackerY = tracker[2]
     trackerZ = tracker[3]
+    
+#    print trackerX,trackerY,trackerZ
     
 #   TRANSLACJE:
     x0 = trackerX*scale
@@ -105,47 +113,35 @@ def tracker_handler(u, tracker):
     rotation_matrix = quaternion_matrix(rotation_quaternion) # Return homogeneous rotation matrix from quaternion.
     (rotation_angle,rotation_axis,point) = rotation_from_matrix(rotation_matrix)
 
-
     cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
-            angle=(rotation_angle*180/math.pi), origin=[templeCOM[0],templeCOM[1],templeCOM[2]], object="template", camera=1)
-
-
-#    cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
-#            angle=(rotation_angle*180/math.pi), origin=[x,y,z], object="template", camera=1)
+            angle=(rotation_angle*180/math.pi), origin=[templateCOM[0],templateCOM[1],templateCOM[2]], object="template", camera=1)
 
 
 def button_handler(u, button):
     # button[0] - numer przycisku (0-gorny,1-dolny)
     # button[1] - status przycisku (0-puszczony,1-wcisniety)
     
-    global AUTO_ZOOMING, AUTO_DOCK
+    global AUTO_ZOOMING
     if(button[0]==0 and button[1]==0):
         AUTO_ZOOMING = False
     elif(button[0]==0 and button[1]==1):
         AUTO_ZOOMING = True
+            
+    # wykonuje dopasowanie i translacje wzorca nad regionem
+    if(button[0]==1 and button[1]==1):
         
-    if(button[0]==1 and button[1]==0):
-        print "<< Puszczony przycisk 2 >>"
+        cmd.align("template","region")
         
-    elif(button[0]==1 and button[1]==1):
-        print "ALIGN: ",cmd.align("template","region")
-        com=cmd.centerofmass("template")
-        cmd.translate(object="template",vector=[x-com[0],y-com[1],z-com[2]],camera=0)
-#        print "COM TEMPLATE:", cmd.centerofmass("template"), x, y, z
+        reg_com=cmd.centerofmass("region")
+        temp_com=cmd.centerofmass("template")
+        
+        cmd.translate(object="template", vector=[reg_com[0]-temp_com[0],
+            reg_com[1]-temp_com[1],reg_com[2]-temp_com[2]], camera=0)
+        
         
 def force_handler(u, force):
 #    print "force",force
     abc='test'
-    
-def draw_template_structure(template_pdb_file):
-    cmd.load(template_pdb_file,"template")
-    cmd.hide("lines","template")
-    cmd.show("cartoon","template")
-    cmd.color("green","template")
-    
-    template_com=cmd.centerofmass("template")
-    # centruje wskaxnik (przenosze go do zera)
-    cmd.translate(vector=[-template_com[0], -template_com[1], -template_com[2]], object="template", camera=0)
     
 def draw_xyz_axes(x0, y0, z0):
     w = 0.5 # cylinder width
@@ -163,35 +159,33 @@ def draw_xyz_axes(x0, y0, z0):
 
     cmd.load_cgo(axes, "axes")
     
-def draw_molecule(molecule_pdb_file):
+def draw_template_structure(template_pdb_file):
+    cmd.load(template_pdb_file,"template")
+    cmd.hide("lines","template")
+    cmd.show("cartoon","template")
+    cmd.color("green","template")
+    
+    template_com=cmd.centerofmass("template")
+    # centruje wskaxnik (przenosze go do zera)
+    cmd.translate(vector=[-template_com[0], -template_com[1], -template_com[2]], object="template", camera=0)
+    
+def draw_target_structure(target_pdb_file):
     # laduje czasteczke
-    cmd.load(molecule_pdb_file,"molecule")
-    cmd.hide("lines","molecule")
-    cmd.show("cartoon","molecule")
-    cmd.color("red","molecule")
+    cmd.load(target_pdb_file,"target")
+    cmd.hide("lines","target")
+    cmd.show("cartoon","target")
+    cmd.color("red","target")
     
     # licze jej centrum masy
     global molecule_com
-    molecule_com=cmd.centerofmass("molecule")
+    molecule_com=cmd.centerofmass("target")
     # przesuwam ja na srodek ekranu, srodek ciezkosci na (x,y,z)=(0,0,0)
-    cmd.translate(vector=[-molecule_com[0], -molecule_com[1], -molecule_com[2]], object="molecule", camera=0)
+    cmd.translate(vector=[-molecule_com[0], -molecule_com[1], -molecule_com[2]], object="target", camera=0)
     
     # pobieram liste pozycji 3D atomow w czasteczce
     stored.pos = []                                                                                                                
-    cmd.iterate_state(1, "molecule", "stored.pos.append((x,y,z,elem,chain,resi))")
+    cmd.iterate_state(1, "target", "stored.pos.append((x,y,z,elem,chain,resi))")
     
-
-"""
-    Funkcja oblicza wartosc RMSD.
-    Na wejsciu dostaje wektor (liste) wspolrzednych struktury wzorcowej oraz
-    wektor/liste (tego samego rozmiaru) wspolrzednych regionu optymalnego dopasowania,
-    zwraca wartosc RMDS
-"""
-def rmsd_compute():
-    
-    
-    
-    return 0.0
 
 def load_mapping_file(mapping_file):
     file=open(mapping_file,"r")
@@ -237,6 +231,35 @@ def calculate_regions_com():
             region_coords.append(mapping[m+n][3])
             if n==(N-1):
                 #znaleziono region w badanej czasteczke pasujacy do czasteczki wzorcowej
+#                print "JEST REGION: ", m, region, region_coords
+                # dodaje znaleziony region do tablicy regions
+                regions[region]=simple_com(region_coords)
+            
+#    print regions
+
+def new_calculate_regions_com():
+    # zliczam ilosc nukleotydow w helisie wzorcowej
+    # UWAGA: tutaj zakladam, ze wzorcowa helisa (czy struktura) sklada sie z dwoch lancuchow o 
+    # tej samej dlugosci (ilosci nukleotydow). To oznacza, ze szukam regionow 
+    # o dlugosci jednego lancucha helisy, czyli polowy wszystkich nukleotydow
+    # z tej helisy.
+    
+    unique_nucl=set()
+    cmd.iterate_state(1,"template","unique_nucl.add((chain,resi))",space={'unique_nucl':unique_nucl})
+    M=len(mapping)        # ilosc nukleotydow z czasteczki celu
+    N=len(unique_nucl)  # wszystkie nukleotydy z WZORCOWEJ czasteczki
+    
+    # wyszukiwanie regionow
+    for m in range(0,M-N+1): # -1 jesli blad
+        region=()   # inicjuje pusty tuple
+        region_coords=[]
+        for n in range(0,N): # -1 jesli blad
+            if mapping[m+n][0]=='0':
+                break
+            region=region+(mapping[m+n][2],)
+            region_coords.append(mapping[m+n][3])
+            if n==(N-1):
+                # znaleziono region w badanej czasteczke pasujacy do czasteczki wzorcowej
 #                print "JEST REGION: ", m, region, region_coords
                 # dodaje znaleziony region do tablicy regions
                 regions[region]=simple_com(region_coords)
@@ -294,8 +317,16 @@ def find_closest_region(x0,y0,z0):
     # tworze nowy selection do najblizszego regionu
     selectCommand="resi "
     for resi in closestRegionId: 
-        selectCommand+=resi+","    
-    cmd.select("region",selectCommand)
+        selectCommand+=resi+","
+        
+    if REGION_COLORING:
+        cmd.color("red","target")    
+        cmd.select("region",selectCommand)
+        cmd.color("yellow","region")
+    else:
+        cmd.color("red","target")
+        cmd.select("region",selectCommand)
+    
     
     # robie alter dla funkcji rms_cur
 #    resiList=set()
@@ -307,12 +338,11 @@ def find_closest_region(x0,y0,z0):
 #        expression="resi="+str(closestRegionId[i])
 #        cmd.alter(selection,expression)
 ##        print "sel= "+ selection + "exp= "+ expression
-#    print "RMSD: ", cmd.rms_cur("template","region")
     
     return [closestRegionId,(closestX/scale),(closestY/scale),(closestZ/scale),min_distance]
     
 def vrpn_client():
-    global mappingFile,templateFile,phantomIp
+    global structureMappingFile,templateStructureFile,phantomIp
     
     tracker = vrpn_Tracker.vrpn_Tracker_Remote(phantomIp.get())
     vrpn_Tracker.register_tracker_change_handler(tracker_handler)
@@ -327,14 +357,16 @@ def vrpn_client():
     vrpn_ForceDevice.vrpn_ForceDevice_Remote.register_force_change_handler(forceDevice, None, vrpn_ForceDevice.get_force_change_handler())
     
     draw_xyz_axes(0,0,0)
-    draw_template_structure(templateFile.get())
-    draw_molecule(structureFile.get())
-    load_mapping_file(mappingFile.get())
-    calculate_regions_com()
     
-    global regionId, regionX, regionY, regionZ, AUTO_DOCK
+    draw_template_structure(templateStructureFile.get())
+    draw_target_structure(targetStructureFile.get())
+    load_mapping_file(structureMappingFile.get())
+    
+    new_calculate_regions_com()
+    
+    global regionId, regionX, regionY, regionZ
     global x,y,z
-    global templeCOM
+    global templateCOM,regionCOM
     
     sleep(1)    # czekam az sie wszystko polaczy i narysuje
     
@@ -346,44 +378,50 @@ def vrpn_client():
         forceDevice.mainloop()
         button.mainloop()
         
-        templeCOM=cmd.centerofmass("template")
+        # obliczam aktualny srodek ciezkosci wzorca
+        templateCOM=cmd.centerofmass("template")
         
-        # znajduje nablizszy region/atom w czasteczce do ktorego przyciagam wzorzec/wzkaznik
-#        region=find_closest_region(x,y,z)   # znajduje najblizszy region do aktualnej pozycji wskaznika
-        region=find_closest_region(templeCOM[0],templeCOM[1],templeCOM[2])   # znajduje najblizszy region do aktualnej pozycji wskaznika
+        # znajduje nablizszy dla wzorca region w czasteczce celu 
+        # do ktorego bede przyciagac wzorzec/wzkaznik
+        region=find_closest_region(templateCOM[0],templateCOM[1],templateCOM[2]) 
+        
+        regionCOM=cmd.centerofmass("region")
+        
+        print "RMSD: ", cmd.rms_cur("template","region")
         
         # aktualizacja interfejsu
+        regionId.delete(0,'end')    #todo: zmienic na zmienna textvariable
+        regionId.insert(0,region[0])
         regionX.delete(0,'end')
         regionX.insert(0,region[1])
         regionY.delete(0,'end')
         regionY.insert(0,region[2])
-        regionId.delete(0,'end')    #todo: zmienic na zmienna textvariable
-        regionId.insert(0,region[0])
         regionZ.delete(0,'end')
         regionZ.insert(0,region[3])
         regionTemplateDistance.delete(0,'end')
         regionTemplateDistance.insert(0,region[4])
         
-        force=100   # wielkosc sily |F|
-#        forceX = (region[1]*scale-templeCOM[0])    # wektor sily X
-#        forceY = (region[2]*scale-templeCOM[1])    # j.w. Y
-#        forceZ = (region[3]*scale-templeCOM[2])    # j.w. Z
-#        forceDevice.setFF_Origin(templeCOM[0], templeCOM[1], templeCOM[2])
-        
-        forceX = (region[1]-trackerX)    # wektor sily X
-        forceY = (region[2]-trackerY)    # j.w. Y
-        forceZ = (region[3]-trackerZ)    # j.w. Z
-        forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
-        forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
-        forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
-        forceDevice.setFF_Radius(0.1)
-        forceDevice.sendForceField()
+        if FORCES_ENABLED:
+            force=100   # skalarna wartosc sily |F|       
+            forceX = (region[1]-trackerX)    # wersor X sily
+            forceY = (region[2]-trackerY)    # wersor Y sily
+            forceZ = (region[3]-trackerZ)    # wersor Z sily
+            forceDevice.setFF_Origin(trackerX, trackerY, trackerZ)
+            forceDevice.setFF_Force(force*forceX, force*forceY, force*forceZ)
+            forceDevice.setFF_Jacobian(force,0,0, 0,force,0, 0,0,force)
+            forceDevice.setFF_Radius(0.1)
+            forceDevice.sendForceField()
+        else:
+            forceDevice.setFF_Origin(0,0,0)
+            forceDevice.setFF_Force(0,0,0)
+            forceDevice.setFF_Jacobian(0,0,0, 0,0,0, 0,0,0)
+            forceDevice.setFF_Radius(0.0)
+            forceDevice.sendForceField()
 
         # rysuje linie laczaca wzorzec/wskaznik z najblizszym regionem/atomem
         cmd.delete('link')
-        cmd.load_cgo([CYLINDER, templeCOM[0],templeCOM[1],templeCOM[2], (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
-         
-#        cmd.load_cgo([CYLINDER, x, y, z, (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
+        cmd.load_cgo([CYLINDER, templateCOM[0],templateCOM[1],templateCOM[2], (regionCOM[0]), (regionCOM[1]), (regionCOM[2]), 0.1, 255, 255, 255, 255, 255, 255], 'link')
+#        cmd.load_cgo([CYLINDER, templateCOM[0],templateCOM[1],templateCOM[2], (region[1]*scale), (region[2]*scale), (region[3]*scale), 0.1, 255, 255, 255, 255, 255, 255], 'link')
             
     cmd.delete("*")
     x=y=z=0
@@ -395,12 +433,20 @@ def stop():
     configWindow()
     
 def doColorRegion():
-    global REGION_COLOR
+    global REGION_COLORING
     
-    if REGION_COLOR:
-        REGION_COLOR=0
+    if REGION_COLORING:
+        REGION_COLORING=False
     else:
-        REGION_COLOR=1
+        REGION_COLORING=True
+    
+def doEnableForces():
+    global FORCES_ENABLED
+    
+    if FORCES_ENABLED:
+        FORCES_ENABLED=False
+    else:
+        FORCES_ENABLED=True
     
 def statsWindow():    
     global currentWindow,IS_RUNNING
@@ -412,7 +458,7 @@ def statsWindow():
     w=640
     h=480
     currentWindow=Tk()
-    currentWindow.title("Interaktywny eksplorator lokalnych uliniowien strukturalnych")
+    currentWindow.title("Interactive local structure alignment explorer")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -442,7 +488,11 @@ def statsWindow():
     
     group=LabelFrame(currentWindow,text="Opcje")
     group.grid(column=1,row=0,sticky='NSWE',pady=5,padx=5)
-    Checkbutton(group,text="Koloruj region",command=doColorRegion).grid(row=0,sticky="W")
+    colors=Checkbutton(group,text="Koloruj region",command=doColorRegion)
+    colors.select()
+    colors.grid(row=0,sticky="W")
+    Checkbutton(group,text="Projekcja sił",command=doEnableForces).grid(row=1,sticky="W")
+    
     
     # RMSD
     group=LabelFrame(currentWindow,text="Wykres RMSD (Root-mean-square diviation)")
@@ -461,30 +511,30 @@ def statsWindow():
     
     currentWindow.mainloop()
 
-def chooseTemplateFile():
-    global templateFile
-    templateFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
-    print templateFile.get()
+def chooseTemplateStructureFile():
+    global templateStructureFile
+    templateStructureFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
+    print templateStructureFile.get()
 
-def chooseMappingFile():
-    global mappingFile
-    mappingFile.set(askopenfilename( filetypes=(("MAP", "*.map"), ("All files", "*.*")) ))
-    print mappingFile.get()
+def chooseStructureMappingFile():
+    global structureMappingFile
+    structureMappingFile.set(askopenfilename( filetypes=(("MAP", "*.map"), ("All files", "*.*")) ))
+    print structureMappingFile.get()
     
-def chooseStructureFile():
-    global structureFile
-    structureFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
-    print structureFile.get()
+def chooseTargetStructureFile():
+    global targetStructureFile
+    targetStructureFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
+    print targetStructureFile.get()
     
 def configWindow():
-    global currentWindow,templateFile,mappingFile,phantomIp,structureFile
+    global currentWindow,templateStructureFile,structureMappingFile,phantomIp,targetStructureFile
 
     currentWindow.destroy()
 
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interaktywny eksplorator lokalnych uliniowien strukturalnych")
+    currentWindow.title("Interactive local structure alignment explorer")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -497,22 +547,22 @@ def configWindow():
     group=LabelFrame(currentWindow,text="Wzorzec",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     Label(group,text=message,anchor=W).pack(fill=BOTH)
-    Entry(group,textvariable=templateFile,width=50,state="readonly").pack(pady=5,side=LEFT)
-    Button(group,text="Wybierz plik",command=chooseTemplateFile).pack(side=LEFT)
+    Entry(group,textvariable=templateStructureFile,width=50,state="readonly").pack(pady=5,side=LEFT)
+    Button(group,text="Wybierz plik",command=chooseTemplateStructureFile).pack(side=LEFT)
     
 #    Wybor pliku mapowania
     group=LabelFrame(currentWindow,text="Plik mapowania",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     Label(group,text="Tutaj wybierz plik mapowania",anchor=W).pack(fill=BOTH)
-    Entry(group,textvariable=mappingFile,width=50,state="readonly").pack(pady=5,side=LEFT)
-    Button(group,text="Wybierz plik",command=chooseMappingFile).pack(side=LEFT)
+    Entry(group,textvariable=structureMappingFile,width=50,state="readonly").pack(pady=5,side=LEFT)
+    Button(group,text="Wybierz plik",command=chooseStructureMappingFile).pack(side=LEFT)
     
 #    Wybor identyfikatora PDB
     group=LabelFrame(currentWindow,text="Identyfikator PDB",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5)
     Label(group,text="Tutaj wybierz plik ",anchor=W).pack(fill=BOTH)
-    Entry(group,textvariable=structureFile,width=50,state="readonly").pack(pady=5,side=LEFT)
-    Button(group,text="Wybierz plik",command=chooseStructureFile).pack(side=LEFT)
+    Entry(group,textvariable=targetStructureFile,width=50,state="readonly").pack(pady=5,side=LEFT)
+    Button(group,text="Wybierz plik",command=chooseTargetStructureFile).pack(side=LEFT)
     
     #    ustawianie adresu IP serwera VRPN
     group=LabelFrame(currentWindow,text="Adres IP serwera VRPN",padx=5,pady=5)
@@ -531,12 +581,12 @@ def configWindow():
     currentWindow.mainloop();
     
 def helloWindow():
-    global currentWindow,templateFile,mappingFile,phantomIp,structureFile
+    global currentWindow,templateStructureFile,structureMappingFile,phantomIp,targetStructureFile
     
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interaktywny eksplorator lokalnych uliniowien strukturalnych")
+    currentWindow.title("Interactive local structure alignment explorer")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -559,9 +609,9 @@ Witaj uzytkowniku.\
     Button(group,text="Dalej",command=configWindow).pack()
     
 #    inicjalizacja zmiennych globalnych    
-    templateFile=StringVar(value=os.getcwd()+"/helix.pdb")
-    mappingFile=StringVar(value=os.getcwd()+"/1fg0_helix.txt")
-    structureFile=StringVar(value=os.getcwd()+"/1fg0.pdb")
+    templateStructureFile=StringVar(value=os.getcwd()+"/helix_chain_a.pdb")
+    structureMappingFile=StringVar(value=os.getcwd()+"/1fg0_helix.txt")
+    targetStructureFile=StringVar(value=os.getcwd()+"/1fg0.pdb")
     phantomIp=StringVar(value="phantom0@10.21.2.136")
     
     currentWindow.mainloop();
