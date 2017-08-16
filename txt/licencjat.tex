@@ -892,19 +892,15 @@ Podczas tworzenia niniejszego oprogramowania wykorzystano zarówno API wbudowane
 Proces tworzenia wtyczek do pakietu PyMOL został szczegółowo opisany w jego dokumentacji. 
 
 \section{Dane wejściowe}
-Oprogramowanie do poprawnego uruchomienia wymaga podania dwóch plików w formacie PDB (\textit{ang. Protein Data Bank}) oraz pliku mapującego. Pierwszy z nich zawiera główną strukturę biopolimeru (\textit{ang. target}), drugi natomiast reprezentuje fragment wzorcowy (\textit{ang. template}). \textit{Plik mapujący} z kolei jest generowany przez zewnętrzne oprogramowanie.
+Oprogramowanie do poprawnego uruchomienia wymaga podania dwóch plików w formacie PDB (\textit{ang. Protein Data Bank}) oraz pliku mapującego. 
 
-\textit{Struktura celu} to najczęściej cała, duża cząsteczka białka lub kwasu nukleinowego, składająca się z setek lub tysięcy merów. W programie zostaje ona umieszczona w początku układu współrzędnych i jest nieruchoma względem wskaźnika urządzenia haptycznego.
+Pierwszy plik wejściowy definiuje \textit{strukturę celu}. To najczęściej cała, duża cząsteczka białka lub kwasu nukleinowego. W programie zostaje ona umieszczona w początku układu współrzędnych i jest nieruchoma względem wskaźnika urządzenia haptycznego. Stanowi bazową strukturę na której mapowane są regiony podobne do struktury wzorcowej.
 
 \textit{Wzorcowy fragment} może stanowić krótki (najczęściej kilkanaście lub kilkadziesiąt merów) wycinek struktury celu lub dowolną inną podjednostkę czy fragment struktury drugorzędowej (np. $\alpha$-helisa). Zostaje on na stałe związany z ruchem wskaźnika urządzenia haptycznego. Każde jego przesunięcie czy zmiana orientacji zostaje w czasie rzeczywistym odwzorowana na ekranie. 
 
-\textit{Plikiem mapującym} nazywamy dane uzyskane z obliczeń przeprowadzonych przez zewnętrzne oprogramowanie, zawierających informacje o takich regionach struktury celu, których stopień podobieństwa (dopasowania) do struktury wzorcowej nie przekracza zadanego progu. Dane te są kluczowe do działania niniejszego oprogramowania, gdyż na ich podstwie wyliczane są odległości i momenty sił projektowane do urządzenia Phantom Omni. Poza ozwierciedleniem odległości w urządzeniu haptycznym, na ekranie PyMOL wyświeltany jest odcinek łączący wzorcową strukturę z najbliższym optymalnie pasującym regionem struktury głównej.
+\textit{Plikiem mapującym} nazywamy dane uzyskane z obliczeń przeprowadzonych przez zewnętrzne oprogramowanie, zawierających informacje o takich regionach struktury celu, których stopień podobieństwa (dopasowania) do struktury wzorcowej nie przekracza zadanego progu. Dane te są kluczowe do działania niniejszego oprogramowania, gdyż na ich podstwie wyliczane są odległości i momenty sił projektowane do urządzenia Phantom Omni. Szczegóły generowania pliku mapującego zostały opisane we wcześniejszym rozdziale. 
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.6,center]{explorer_files_pl}
-\caption{Okno ładowania plików i danych wejściowych}
-\end{figure}
+Poza ozwierciedleniem odległości w urządzeniu haptycznym, na ekranie PyMOL wyświeltany jest wektor łączący wzorcową strukturę z najbliższym optymalnie pasującym regionem struktury głównej.
 
 \section{Opis oprogramowania}
 Po zestawieniu i skonfigurowaniu stanowiska laboratoryjnego zgodnie z wcześniejszym opisem na komputerze będącym hostem urządzenia Phantom Omni należy uruchomić proces \texttt{vrpn\_server}:
