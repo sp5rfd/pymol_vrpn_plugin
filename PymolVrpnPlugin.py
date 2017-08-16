@@ -237,13 +237,7 @@ def calculate_regions_com():
             
 #    print regions
 
-def new_calculate_regions_com():
-    # zliczam ilosc nukleotydow w helisie wzorcowej
-    # UWAGA: tutaj zakladam, ze wzorcowa helisa (czy struktura) sklada sie z dwoch lancuchow o 
-    # tej samej dlugosci (ilosci nukleotydow). To oznacza, ze szukam regionow 
-    # o dlugosci jednego lancucha helisy, czyli polowy wszystkich nukleotydow
-    # z tej helisy.
-    
+def new_calculate_regions_com():    
     unique_nucl=set()
     cmd.iterate_state(1,"template","unique_nucl.add((chain,resi))",space={'unique_nucl':unique_nucl})
     M=len(mapping)        # ilosc nukleotydow z czasteczki celu
@@ -456,7 +450,7 @@ def statsWindow():
     currentWindow.destroy()
     
     w=640
-    h=480
+    h=400
     currentWindow=Tk()
     currentWindow.title("Interactive local structure alignment explorer")
     x=currentWindow.winfo_screenwidth()/2 - w/2
@@ -491,17 +485,17 @@ def statsWindow():
     colors=Checkbutton(group,text="Koloruj region",command=doColorRegion)
     colors.select()
     colors.grid(row=0,sticky="W")
-    Checkbutton(group,text="Projekcja sił",command=doEnableForces).grid(row=1,sticky="W")
+    Checkbutton(group,text="Projekcja sil",command=doEnableForces).grid(row=1,sticky="W")
     
     
     # RMSD
-    group=LabelFrame(currentWindow,text="Wykres RMSD (Root-mean-square diviation)")
-    group.grid(row=1,columnspan=2,sticky="NSWE",padx=5,pady=5)
-    rmsdEntry=Entry(group,width=20,justify=CENTER)
-    Label(group,text="\n\ntu bedzie wykres...\n\n").grid(sticky="WE")
+#    group=LabelFrame(currentWindow,text="Wykres RMSD (Root-mean-square diviation)")
+#    group.grid(row=1,columnspan=2,sticky="NSWE",padx=5,pady=5)
+#    rmsdEntry=Entry(group,width=20,justify=CENTER)
+#    Label(group,text="\n\ntu bedzie wykres...\n\n").grid(sticky="WE")
     
 #    spacer
-    Frame(currentWindow).grid(sticky='NS')
+    Frame(currentWindow).grid(sticky="NSWE")
     
 #    przyciski
     group=Frame(currentWindow)
@@ -594,9 +588,14 @@ def helloWindow():
     currentWindow.resizable(False, False)
     
     helloMsg="\
-Witaj uzytkowniku.\
-\nW tej aplikacji masz mozliwosc dopasowania lokalnie optymalnych struktur\
-\nczasteczek chemicznych takich jak kwasy nukleinowe"
+Dear user.\
+\nThis application allows you to interactively explore \
+\nprotein and nucleic acids structures. \
+\nYou can use this application with Sensable Phantom Omni \
+\ndevice and VRPN library.\
+\nApplication performs local structure alignment with force \
+\nfeedback indicating quality of alignment.\
+"
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
     Label(group,text=helloMsg).pack(fill=BOTH,side=LEFT)
@@ -605,12 +604,12 @@ Witaj uzytkowniku.\
     
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    Button(group,text="Anuluj",command=currentWindow.destroy).pack(side=RIGHT)
-    Button(group,text="Dalej",command=configWindow).pack()
+    Button(group,text="Cancel",command=currentWindow.destroy).pack(side=RIGHT)
+    Button(group,text="NEXT",command=configWindow).pack()
     
 #    inicjalizacja zmiennych globalnych    
     templateStructureFile=StringVar(value=os.getcwd()+"/helix_chain_a.pdb")
-    structureMappingFile=StringVar(value=os.getcwd()+"/1fg0_helix.txt")
+    structureMappingFile=StringVar(value=os.getcwd()+"/1fg0_helix.map")
     targetStructureFile=StringVar(value=os.getcwd()+"/1fg0.pdb")
     phantomIp=StringVar(value="phantom0@10.21.2.136")
     
@@ -620,5 +619,5 @@ Witaj uzytkowniku.\
 def __init__(self):
     print "__init__"
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN',
-	label = 'VRPN Plugin', command = lambda s=self: helloWindow())
+	label = 'Interactive structure explorer', command = lambda s=self: helloWindow())
                              
