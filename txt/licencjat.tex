@@ -865,7 +865,7 @@ Integracja oraz przetwarzanie danych dostarczanych przez pakiet VRPN były znacz
 Oprogramowanie będące przedmiotem niniejszej pracy zostało stworzone jako rozszerzenie (\textit{ang. plugin}) popularnego pakietu PyMOL. Wykorzystano w nim możliwości wizualizacyjne pakietu w połączeniu z danymi o pozycji i orientacji urządzenia Phantom Omni odbieranymi dzięki bibliotece VRPN. Dane wejściowe do programu - plik mapujący struktury biopolimerów - został dostarczony przez zewnętrzne oprogramowanie (opisane w części teoretycznej pracy).
 
 \section{Opis stanowiska laboratoryjnego}
-Jak wspomniano we wstępie do pracy prawidłowe uruchomienie oprogramowania będącego jej przedmiotem wymaga wcześniejszego zestwienia odpowiednio skonfigurowanego stanowiska laboratoryjnego. 
+Jak już wspomniano prawidłowe uruchomienie oprogramowania wymaga wcześniejszego zestwienia odpowiednio skonfigurowanego stanowiska laboratoryjnego zgodnie z poniższym diagramem: 
 
 \begin{figure}[H]
 \centering
@@ -875,9 +875,9 @@ Jak wspomniano we wstępie do pracy prawidłowe uruchomienie oprogramowania będ
 
 Stanowisko składa się z połączonych siecią komputerową stacji roboczych, gdzie jedna stanowi host urządzenia Phantom Omni, druga natomiast to łączący się z nią klient ze stworzonym oprogramowaniem. 
 
-Komputer-host musi posiadać kompatybilną z urządzeniem Phantom Omni kartę rozszerzeń z portem IEEE-1394 (FireWire), sterowniki wraz z pakietem OpenHaptics oraz VRPN ze skonfigurowanym procesem \texttt{vrpn\_server} nasłuchującym połączeń przychodzących na wybranym porcie TCP. 
+Komputer-host musi posiadać kompatybilną z urządzeniem Phantom Omni kartę rozszerzeń z portem IEEE-1394 (FireWire), sterowniki wraz z pakietem OpenHaptics oraz VRPN ze skonfigurowanym procesem \texttt{vrpn\_server} nasłuchującym połączeń przychodzących na wybranym porcie TCP. Urządzenie powinno być skonfigurowane zgodnie z zaleceniami producenta oraz dokumentacją pakietu VRPN.
 
-Druga stacja robocza stanowiska laboratoryjnego posiada zainstalowany pakiet PyMOL z oprogramowaniem rozszerzającym jego funkcjonalność - przedmiotem niniejszej pracy. Po jego uruchomieniu, załadowaniu danych wejściowych oraz wprowadzeniu adresu sieciowego hosta urządzenia Phantom Omni, program próbuję nawiązać z nim połączenie i rozpocząć pracę.
+Kliencka stacja robocza jest wyposażona w pakiet PyMOL rozszerzony o oprogramowanie - przedmiot niniejszej pracy. Po jego uruchomieniu, załadowaniu danych wejściowych oraz wprowadzeniu adresu sieciowego hosta urządzenia Phantom Omni, program próbuję nawiązać z nim połączenie i rozpocząć pracę.
 
 W szczególności host urządzenia Phantom Omni oraz pakiet PyMOL mogą być uruchomione na jednej maszynie i wykorzystywać interfejs \texttt{localhost}.
 
@@ -896,28 +896,28 @@ Oprogramowanie do poprawnego uruchomienia wymaga podania dwóch plików w formac
 
 Pierwszy plik wejściowy definiuje \textit{strukturę celu}. To najczęściej cała, duża cząsteczka białka lub kwasu nukleinowego. W programie zostaje ona umieszczona w początku układu współrzędnych i jest nieruchoma względem wskaźnika urządzenia haptycznego. Stanowi bazową strukturę na której mapowane są regiony podobne do struktury wzorcowej.
 
-\textit{Wzorcowy fragment} może stanowić krótki (najczęściej kilkanaście lub kilkadziesiąt merów) wycinek struktury celu lub dowolną inną podjednostkę czy fragment struktury drugorzędowej (np. $\alpha$-helisa). Zostaje on na stałe związany z ruchem wskaźnika urządzenia haptycznego. Każde jego przesunięcie czy zmiana orientacji zostaje w czasie rzeczywistym odwzorowana na ekranie. 
+Drugi plik - \textit{wzorzec} - może stanowić krótki (najczęściej kilkanaście lub kilkadziesiąt merów) wycinek cząsteczki celu lub dowolną inną podjednostkę czy fragment struktury drugorzędowej (np. $\alpha$-helisa). Zostaje on na stałe związany z ruchem wskaźnika urządzenia haptycznego. Każde jego przesunięcie czy zmiana orientacji zostaje w czasie rzeczywistym odwzorowana na ekranie. 
 
-\textit{Plikiem mapującym} nazywamy dane uzyskane z obliczeń przeprowadzonych przez zewnętrzne oprogramowanie, zawierających informacje o takich regionach struktury celu, których stopień podobieństwa (dopasowania) do struktury wzorcowej nie przekracza zadanego progu. Dane te są kluczowe do działania niniejszego oprogramowania, gdyż na ich podstwie wyliczane są odległości i momenty sił projektowane do urządzenia Phantom Omni. Szczegóły generowania pliku mapującego zostały opisane we wcześniejszym rozdziale. 
+\textit{Plikiem mapującym} nazywamy dane uzyskane z obliczeń przeprowadzonych przez zewnętrzne oprogramowanie, zawierających informacje o takich regionach struktury celu, których stopień podobieństwa (dopasowania) do struktury wzorcowej nie przekracza zadanego progu. Dane te są kluczowe do działania niniejszego oprogramowania, gdyż na ich podstwie wyliczane są odległości i momenty sił projektowane do urządzenia Phantom Omni. Szczegóły generowania pliku mapującego zostały opisane we teoretycznej części pracy. 
 
-Poza ozwierciedleniem odległości w urządzeniu haptycznym, na ekranie PyMOL wyświeltany jest wektor łączący wzorcową strukturę z najbliższym optymalnie pasującym regionem struktury głównej.
+Na ekranie PyMOL wyświeltany jest także wektor łączący wzorcową strukturę z najbliższym optymalnie pasującym regionem struktury głównej - zgodnie z danymi mapującymi. Wektor ten odwzorowuje w sposób wprost proporcjonalny wartość i kierunek momentów sił ustawianych w urządzeniu haptycznym.
 
 \section{Opis oprogramowania}
-Po zestawieniu i skonfigurowaniu stanowiska laboratoryjnego zgodnie z wcześniejszym opisem na komputerze będącym hostem urządzenia Phantom Omni należy uruchomić proces \texttt{vrpn\_server}:
+Po zestawieniu i skonfigurowaniu stanowiska laboratoryjnego zgodnie z wcześniejszym opisem, na komputerze będącym hostem urządzenia Phantom Omni należy uruchomić proces \texttt{vrpn\_server}:
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.8,center]{vrpn_start}
+\includegraphics[scale=0.7,center]{vrpn_start}
 \caption{Poprawne uruchomienie procesu \texttt{vrpn\_server}}
 \end{figure}
 
 Powyższy ekran pokazuje komunikat z informacją licencyjną. Gdy proces \texttt{vrpn\_server} uruchomi się pomyślnie, nie powinno być żadnych innych komunikatów.
 
-Na komputerze z oprogramowaniem PyMOL należy uruchomić zainstalowaną wtyczkę przez kliknięcie odpowiedniej pozycji w menu \texttt{Plugin}.
+Na komputerze z oprogramowaniem PyMOL należy uruchomić zainstalowaną wtyczkę przez kliknięcie odpowiedniej pozycji w menu \texttt{Plugin}:
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5,center]{explorer_run}
+\includegraphics[scale=0.4,center]{explorer_run}
 \caption{Uruchamianie oprogramowania}
 \end{figure}
 
@@ -925,11 +925,11 @@ W kolejnym kroku pojawi się ekran powitalny z krótkim opisem możliwości ofer
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.5,center]{explorer_hello_en}
+\includegraphics[scale=0.4,center]{explorer_hello_en}
 \caption{Ekran powitalny}
 \end{figure}
 
-Po kliknięciu na przycisk \texttt{Dalej} przechodzimy do kolejnego okna, które daje nam możliwość przeglądania dysku w poszukiwaniu odpowiednich plików wejściowych. Ponadto należy podać adres komputera, na którym uruchomiony jest proces \texttt{vrpn\_server}. W przypadku pracy na lokalnej maszynie w oknie należy podać adres \texttt{127.0.0.1} lub \texttt{phantom@localhost}.
+Po kliknięciu na przycisk \texttt{DALEJ} przechodzimy do kolejnego okna, które daje nam możliwość przeglądania dysku w poszukiwaniu odpowiednich plików wejściowych. Ponadto należy podać adres komputera, na którym uruchomiony jest proces \texttt{vrpn\_server}. W przypadku pracy na lokalnej maszynie w oknie należy podać adres \texttt{phantom0@127.0.0.1} lub \texttt{phantom0@localhost}:
 
 \begin{figure}[H]
 \centering
@@ -939,7 +939,7 @@ Po kliknięciu na przycisk \texttt{Dalej} przechodzimy do kolejnego okna, które
 
 Program zakłada poprawność wprowadzonych danych, tzn nie jest przeprowadzane sprawdzenie czy załadowane pliki są zgodne z formatem PDB czy prawidłowym formatem pliku mapującego.
 
-W kolejnym kroku program próbuje nawiązać połączenie TCP z hostem i urządzeniem haptycznym. Prawidłowe nawiązanie połączenia rozpoczyna wymianę danych pomiędzy aplikacjami. Proces \texttt{vrpn\_server} wysyła komunikaty o pozycji oraz orientacji wskaźnika, natomiast PyMOL za pośrednictwem sieci wysyła informację o sprzężeniu zwrotnym do urządzenia Phantom Omni. 
+W kolejnym kroku program próbuje nawiązać połączenie TCP z hostem urządzenia haptycznego. Prawidłowe nawiązanie połączenia rozpoczyna wymianę danych pomiędzy aplikacjami. Proces \texttt{vrpn\_server} wysyła komunikaty o pozycji oraz orientacji wskaźnika, natomiast PyMOL za pośrednictwem sieci wysyła informację o sprzężeniu zwrotnym do urządzenia Phantom Omni. 
 
 Na ekranie widać wzorcową strukturę poruszającą się zgodnie z ruchami urządzenia haptycznego, natomiast urządzenie haptyczne dostaje polecenia sterujące momentami sił, przyciągając wskaźnik do najbliższego (wskazywanego na ekranie przez biały odcinek) podobnego regionu w ramach struktury celu.
 
@@ -949,44 +949,66 @@ Na ekranie widać wzorcową strukturę poruszającą się zgodnie z ruchami urz�
 \caption{Ekran główny 1}
 \end{figure}
 
-W trakcie normalnej pracy programu, na jego ekranie głównym wyświetlane jest w czasie rzeczywistym szereg informacji...todo - co się wyświetla takiego ciekawego tutaj?
+W trakcie normalnej pracy programu, na jego ekranie głównym wyświetlane jest w czasie rzeczywistym szereg informacji:
+\begin{enumerate}
+
+\item \texttt{ID regionu} - identyfikator aktualnie wskazywanego regionu będący najczęściej listą identyfikatorów, numerów \texttt{resid} aminokwasów lub nukleotydów pobraną z pliku PDB definiującego strukturę celu.
+
+\item COM (ang. center of mass) - współrzędne \texttt{X}, \texttt{Y}, \texttt{Z} środka ciężkości wskazywanego regionu
+
+\item Odległość pomiędzy aktualną pozycją wzorca i wskazywanego regionu
+
+\item \texttt{Koloruj region} zaznaczenie tej opcji powoduje osobne kolorowanie aktualnie wskazywanego regionu w celu jeszcze lepszego jego uwidocznienia na ekranie
+
+\item \texttt{Projekcja sił} w programie istnieje możliwość wyłączenia projekcji sił. Ta opcja przydaje się podczas problemów z wydajnością podczas pracy na słabszych komputerach lub w wolniejszej sieci.
+
+\end{enumerate}
+
+Poniższe zrzuty ekranu przedstawiają przykładowy przebieg procesu eksploracji oraz lokalnego dopasowywania struktur do siebie. Bazuje on na cząsteczce celu (kolor czerwony) będącej rybosomalną podjednostką RNA o identyfikatorze PDB: \texttt{1fg0}, krótkim pięcionukleotydowym fragmencie helisy (kolor zielony) RNA - będącej strukturą szablonu. 
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.3,center]{todo}
-\caption{Ekran główny 2}
+\includegraphics[scale=0.45,center]{ex1}
+\caption{Podświetlotny region (kolor żółty) wraz z pasującą strukturą wzorcową (kolor zielony)}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.3,center]{todo}
-\caption{Ekran główny 3}
+\includegraphics[scale=0.45,center]{ex1-aligned}
+\caption{Superpozycja wzorca i najbliższego regionu}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.45,center]{ex2}
+\caption{Podświetlotny inny region (kolor żółty) wraz z pasującą strukturą wzorcową (kolor zielony)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.45,center]{ex2-aligned}
+\caption{Superpozycja wzorca i najbliższego regionu}
 \end{figure}
 
 \chapter{Podsumowanie}
-W ramach niniejszej pracy została przedstawiona implementacja oprogramowania, którego funkcjonalność obejmuje interaktywne przeglądanie struktur biopolimerów w poszukiwaniu regionów podobnych do wybranej struktury wzorcowej oraz zwrotną projekcję momentów sił wskazującą na jakość dopasowania. Wykorzystuje do tego dane wejściowe pochodzące z zewnętrznych źródeł - plik mapujący oraz pliki z opisem struktur w formacie PDB.
+W ramach niniejszej pracy została przedstawiona implementacja oprogramowania, którego funkcjonalność obejmuje interaktywne przeglądanie struktur biopolimerów (białek i kwasów nukleinowych) w poszukiwaniu regionów podobnych do wybranej struktury wzorcowej oraz zwrotną projekcję momentów sił pomiędzy tymi elementami. Program wykorzystuje do tego celu dane wejściowe pochodzące z zewnętrznych źródeł - pliki z opisem struktur w formacie PDB oraz plik mapujący.
 
-Oprogramowanie wykorzystuje metody i urządzenia wirtualnej rzeczywistości w szczególności pakiet VRPN, urządzenie haptyczne Phantom Omni. Powstało ono w formie wtyczki rozszerzającej funkcjonalność pakietu PyMOL, wykorzystując jego możliwości wizualizacji struktur chemicznych.
+Oprogramowanie wykorzystuje metody i urządzenia wirtualnej rzeczywistości w szczególności pakiet VRPN oraz urządzenie haptyczne Phantom Omni. Powstało ono w formie wtyczki rozszerzającej funkcjonalność pakietu PyMOL wykorzystując jego możliwości wizualizacji struktur chemicznych.
 
-Ostateczna forma oprogramowania może mieć dość ograniczone wykorzystanie praktyczne, dość dobrze może jednak nadawać się do celów naukowo-edukacyjnych np. demonstrujących możliwości zastosowania metod wirtualnej rzeczywistości w takich dziedzinach nauki jak biofizyka, biologia molekularna czy chemia.
+Poza oprogramowaniem w ramach 4pracy zostały także przedstawione podstawy teoretyczne na które składały się globalne i lokalne metody dopasowania (uliniowienia) strukturalnego oraz algorytm Kabsch'a maksymalizujący stopień tego dopasowania. Opisane także zostały elementarne przekształcenia geometryczne wykorzystywane w pracy oraz sposób konwersji kwaternionów na macierze rotacji (wykorzystywane przez pakiety VRPN i PyMOL). Szczegółowo zostało opisane urządzenie haptyczne Phantom Omni i jego integracja z pakietem Virtual Reality Peripheral Network. W końcowej części została podana bibliografia, z której korzystano w trakcie tworzenia niniejszej pracy. Kod źródłowy stworzonego oprogramowania wraz z obszernymi komentarzami stanowi załącznik do niniejszego opracowania.
+\\
+\\
+Ostateczna forma oprogramowania może mieć dość ograniczone wykorzystanie praktyczne. Dobrze może jednak nadawać się do celów naukowo-edukacyjnych np. demonstrujących możliwości zastosowania metod wirtualnej rzeczywistości w takich dziedzinach nauki jak biofizyka, biologia molekularna czy chemia.
 
-Wykorzystanie integracji urządzenia Phantom Omni z pakietem VRPN i PyMOL w połączeniu z różnymi metodami bioinformatycznymi tworzy cały szereg nowych i być może nieznanych dotąd (lub niemających praktycznego wykorzystania) możliwości. Ławtość wchodzenia w interakcję z wykreowanym, wirtualnym, molekularnym światem i odzwierciedlanie sił obecnych na tym poziomie może znacznie ułatwić i rozszerzyć proces edukacji przyszłych adeptów różnych nauk przyrodniczych.
-
-Dalszy rozwój niniejszego oprogramowania mógłby polegać na dodaniu funkcjonalności, które w chwili obecnej realizuje oprogramowanie zewnętrzne. Wymagałoby to rozbudowy obecnego programu o część realizującą obliczenia dopasowań strukturalnych implementując przykładowe metody opisane we wcześniejszch rozdziałach. 
-
-Kolejnym krokiem mogłoby być dodanie bardziej zaawansowanych metod bioinformatycznych związanych z dokowaniem molekularnym czy projektowaniem leków.
-
+Wykorzystanie integracji urządzenia Phantom Omni z pakietem VRPN i PyMOL w połączeniu z różnymi metodami bioinformatycznymi tworzy cały szereg nowych i być może nieznanych dotąd możliwości. Ławtość wchodzenia w interakcję z wykreowanym, wirtualnym, molekularnym światem i odzwierciedlanie sił obecnych na tym poziomie może znacznie ułatwić i uatrakcyjnić proces edukacji przyszłych adeptów różnych nauk przyrodniczych.
+\\
+\\
+Dalszy rozwój niniejszego oprogramowania mógłby polegać na dodaniu funkcjonalności, które w chwili obecnej realizuje oprogramowanie zewnętrzne. Wymagałoby to rozbudowy obecnego programu o część realizującą obliczenia dopasowań strukturalnych implementując przykładowe metody opisane we wcześniejszch rozdziałach. Ponadto warto rozważyć dodanie bardziej zaawansowanych metod bioinformatycznych związanych z dokowaniem molekularnym czy projektowaniem leków.
+\\
+\\
 W przypadku dalszego znacznego rozwoju funkcjonalności oprogramowania zgodnie z powyższymi lub innymi propozycjami możliwe jest wyobrażenie sobie wykorzystania go na szerszą skalę w ośrodkach naukowo-badawczych uczelni lub przemysłu.
 \\
 \\
-Poza oprogramowaniem w pracy zostały także przedstawione podstawy teoretyczne na które składały się globalne i lokalne metody dopasowania (uliniowienia) strukturalnego oraz algorytm Kabsch'a maksymalizujący stopień tego dopasowania. Opisane także zostały elementarne przekształcenia geometryczne wykorzystywane w pracy oraz sposób konwersji kwaternionów na macierze rotacji (wykorzystywane przez pakiety VRPN i PyMOL).
-
-Szczegółowo zostało opisane urządzenie haptyczne Phantom Omni i jego integracja z pakietem Virtual Reality Peripheral Network.
-
-W końcowej części została podana bibliografia, z której korzystano w trakcie tworzenia niniejszej pracy. 
-
-Kod źródłowy stworzonego oprogramowania wraz z obszernymi komentarzami stanowi załącznik do niniejszego opracowania.
-
 \begin{thebibliography}{99}
 \addcontentsline{toc}{chapter}{Bibliografia}
 
@@ -1047,9 +1069,9 @@ Transformations (T,R,S) Used in Computer Graphics?}, Introduction to computer gr
 \end{thebibliography}
 
 \chapter*{Kod źródłowy}
-\addcontentsline{toc}{chapter}{Kod źródłowy}
-
-\inputpython{../PymolVrpnPlugin.py}{0}{1000}
+%\addcontentsline{toc}{chapter}{Kod źródłowy}
+todo
+%\inputpython{../PymolVrpnPlugin.py}{0}{1000}
 
 \end{document}
 
