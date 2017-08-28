@@ -104,6 +104,9 @@
 }
 
 \DeclareMathOperator{\rmsd}{RMSD}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\sign}{sign}
+
 
 
 %\usepackage{polski}
@@ -116,7 +119,13 @@
 
 %tu idzie streszczenie na strone poczatkowa
 \begin{abstract}
-W pracy przedstawiono implementację programu narzędziowego służącego do interaktywnej eksploracji cząsteczek biopolimerów (polinukleotydów i polipeptydów) w poszukiwaniu miejsc optymalnych ze względu na lokalne podobieństwo do zadanych struktur. W pracy szeroko zastosowano metody wirtualnej rzeczywistości wraz z obsługą urządzenia haptycznego Sensable Phantom Omni.
+W ramach niniejszej pracy została przedstawiona implementacja aplikacji narzędziowej z pogranicza biofizyki molekularnej i wirtualnej rzeczywistości. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość lokalnego dopasowania strukturalnego pomiędzy wzorcem (\textit{ang. template structure}) i wybranymi regionami cząsteczki celu (\textit{ang. target structure}). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił w urządzeniu haptycznym. 
+	
+Program został zrealizowany w formie wtyczki rozszerzającej możliwości pakietu PyMOL. Do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości - urządzenie haptyczne Phantom Omni oraz bibliotekę Virtual Reality Peripheral Network - a także bioinformatyczne algorytmy wyszukujące optymalne lokalne dopasowania strukturalne (\textit{ang. local structure alignment}), algorytm maksymalizujący stopień dopasowania struktur i minimalizujący wartość RMSD (algorytm Kabsch'a).
+
+W pracy zostały także przedstawione podstawy teoretyczne leżące u jej podstaw, szczegółowe opisy wykorzystanego urządzenia i metod wirtualnej rzeczywistości, a także perspektywy dalszego rozwoju i wykorzystania praktycznego opracowanego oprogramowania.
+
+Kod źródłowy stworzonego oprogramowania stanowi integralny załącznik do niniejszej pracy.
 \end{abstract}
 
 \tableofcontents
@@ -125,66 +134,47 @@ W pracy przedstawiono implementację programu narzędziowego służącego do int
 
 \chapter*{Wprowadzenie}
 \addcontentsline{toc}{chapter}{Wprowadzenie}
-Biopolimery, a w szczególności kwasy nukleinowe i polipeptydy stanowią fundamenty życia. W każdej komórce oraz w całym organizmie są one odpowiedzialne za najważniejsze funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej, biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Polipeptydy zaś są składnikami budulcowymi wielu organów, pełnią funkcje hormonalne czy regulatorowe.
+Biopolimery, a w szczególności kwasy nukleinowe i białka są podstawowymi elementami. W każdej komórce oraz całym organizmie są odpowiedzialne za funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej. Biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Białka są zaś składnikami budulcowymi wielu organów, pełnią funkcje hormonalne i regulatorowe.
 
-Pomimo odmiennej budowy tych dwóch klas cząsteczek w obu przypadkach ich funkcja wynika bezpośrednio ze struktury przestrzennej, która to za hipotezą Anfinsena \cite{anfinsen73} jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
+Pomimo odmiennej budowy tych dwóch klas cząsteczek w obu przypadkach ich funkcja wynika bezpośrednio ze struktury przestrzennej, która zgodnie z hipotezą Anfinsena \cite{anfinsen73} jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
 
-Struktura przestrzenna biopolimerów stanowi obecnie przedmiot niezwykle intensywnych badań na całym świecie. Jest to bardzo ważne zagadnienie integrujące ze sobą grupy naukowców z dziedzin, które jeszcze na przełomie wieków miały ze sobą niewiele wspólnego. Do grona biologów i chemików dołączyli matematycy, fizycy oraz informatycy wspólnie tworząc bardzo nowatorskie narzędzia ułatwiające modelowanie i tworzenie symulacji zachodzących w skali molekularnej. W badania nad strukturami przestrzennymi biopolimerów zaangażowane są największe na świecie ośrodki naukowe, korporacje farmaceutyczne czy agencje rządowe. Badanie interakcji receptorów z ligandami, projektowanie nowych leków czy terapie celowane to tylko wąski wycinek zagadnień związanych z tymi pracami.
+Struktura przestrzenna biopolimerów stanowi obecnie przedmiot niezwykle intensywnych badań na całym świecie. Jest to bardzo ważne zagadnienie integrujące ze sobą grupy naukowców z dziedzin, które jeszcze na przełomie wieków miały ze sobą niewiele wspólnego. Do grona biologów i chemików dołączyli matematycy, fizycy oraz informatycy wspólnie tworząc nowatorskie narzędzia ułatwiające modelowanie i tworzenie symulacji zachodzących w skali molekularnej. W badania nad strukturami przestrzennymi biopolimerów zaangażowane są największe na świecie ośrodki naukowe, korporacje farmaceutyczne czy agencje rządowe. Badanie interakcji receptorów z ligandami, projektowanie nowych leków czy terapie celowane to tylko wąski wycinek zagadnień związanych z tymi pracami.
 
-Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Obecnie najwydajniejsze komputery bez przerwy prowadzą obliczenia optymalnie pofałdowanych białek, kwasów nukleinowych czy prowadzą symulacje dynamiki molekularnej. Jest to dziedzina w której niemalże każdego roku dokonuje się znaczących odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego konkursu CASP na najwierniejsze przewidywanie struktury białka, który za każdym razem przynosi wyniki coraz bardziej zbieżne z konformacjami natywnymi \cite{casp}.
+Intensywny rozwój narzędzi bioinformatycznych znacznie ułatwił i przyspieszył te badania. Przy pomocy superkomputerów prowadzi się obliczenia struktur natywnych białek, kwasów nukleinowych czy prowadzi symulacje dynamiki molekularnej. Jest to dziedzina, w której niemalże każdego roku dokonuje się znaczących odkryć i prawdopodobnie jeszcze przez długi czas to się nie zmieni. Wystarczy przytoczyć wyniki odbywającego się co dwa lata międzynarodowego eksperymentu CASP polegającego na przewidywaniu struktur białek, który za każdym razem przynosi wyniki coraz bardziej zbieżne z konformacjami natywnymi \cite{casp}.
 
-Ważnym aspektem tych badań jest prezentacja wyników szerokiemu gronu odbiorców. Same efektowne wizualizacje nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego dostępu nie mieliśmy nigdy wcześniej. W związku z tym w ostatnim czasie coraz częściej sięga się do rozwiązań z zakresu wirtualnej rzeczywistości. 
+Ważnym aspektem tych badań jest prezentacja wyników szerokiemu gronu odbiorców. Same efektowne wizualizacje nie zawsze są wystarczające, coraz częściej chcemy wchodzić w bezpośrednią interakcję ze światem do którego nie mieliśmy nigdy wcześniej dostępu. W związku z tym w ostatnim czasie coraz częściej sięga się do rozwiązań z zakresu wirtualnej rzeczywistości. 
 
-Mianem \textit{wirtualnej rzeczywistości} (\textit{ang. virtual reality}, VR) określamy sztuczne, wykreowane przy pomocy technologii informatycznych, multimedialne projekcje przestrzeni, przedmiotów czy zdarzeń. Na obecnym poziomie rozwoju technologii wirtualna rzeczywistość umożliwia człowiekowi wchodzenie w interakcję z tym środowiskiem przede wszystkim za pośrednictwem zmysłów wzorku, słuchu czy dotyku wykorzystując urządzenia klasy HCI (\textit{ang. human computer interface}). 
+Mianem \textit{wirtualnej rzeczywistości} (\textit{ang. virtual reality}, VR) określamy sztuczne, wykreowane przy pomocy technologii informatycznych, multimedialne projekcje przestrzeni, przedmiotów lub zdarzeń. Na obecnym poziomie rozwoju technologii wirtualna rzeczywistość umożliwia człowiekowi wchodzenie w interakcję z tym środowiskiem przede wszystkim za pośrednictwem zmysłów wzorku, słuchu czy dotyku wykorzystując urządzenia klasy HCI (\textit{ang. human computer interface}). 
 
-Wirtualna rzeczywistość w dzisiejszym świecie zyskuje coraz to większą popularność w wielu dziedzinach życia, od zastosowań czysto rozrywkowych po zaawansowane projekty naukowe, przemysłowe, a także wojskowe. Postępująca od wielu lat miniaturyzacja, rozwój nowych algorytmów czy drastyczne zwiększenie wydajności obliczeniowej sprzętu komputerowego jedynie przyspiesza ten proces.
+Wirtualna rzeczywistość w dzisiejszym świecie zyskuje coraz większą popularność w wielu dziedzinach życia, od zastosowań czysto rozrywkowych po zaawansowane projekty naukowe, przemysłowe, a także wojskowe. Postępująca od wielu lat miniaturyzacja, rozwój nowych algorytmów czy drastyczne zwiększenie wydajności obliczeniowej sprzętu komputerowego jedynie przyspiesza ten proces.
 
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.35,center]{MooresLaw}
-\caption{Prawo Moora}
-\end{figure}
+Elementami niezbędnymi do prawidłowego wykreowania wirtualnego środowiska jest zarówno dedykowane oprogramowanie jak i sprzęt konieczny do przekazywania informacji zwrotnych do użytkownika. Rzeczywistość wirtualna, aby zostać możliwie najlepiej zinterpretowana przez ludzki mózg musi jak najbardziej przypominać rzeczywistość, w której żyjemy na co dzień. Aby sprostać temu zadaniu, najczęściej reprezentuje się ją w postaci trójwymiarowych scen. Już tylko ten jeden czynnik powoduje, że do poprawnej symulacji niezbędne są nowoczesne, wysokowydajne procesory i karty graficzne będące w stanie przeprowadzić niezbędne obliczenia.
 
-Elementami niezbędnymi do prawidłowego wykreowania wirtualnego środowiska jest zarówno dedykowane oprogramowanie jak i sprzęt konieczny do przekazywania informacji zwrotnych do użytkownika. Rzeczywistość wirtualna aby zostać możliwie najlepiej zinterpretowana przez ludzki mózg musi jak najbardziej przypominać rzeczywistość w której żyjemy na co dzień. Aby sprostać temu zadaniu najczęściej reprezentuje się ją w postaci trójwymiarowych scen. Już tylko ten jeden czynnik powoduje, że do poprawnej symulacji niezbędne są nowoczesne, wysokowydajne procesory i karty graficzne będące w stanie przeprowadzić niezbędne obliczenia.
-
-Jak już wspomniano wirtualna rzeczywistość może znajdować zastosowanie także w nauce w szczególności w dziedzinach w których obiekty zainteresowań są zbyt małe aby być widoczne gołym okiem, takie jak cząsteczki chemiczne lub pojedyncze atomy. Istnieje cały szereg programów przeprowadzających np. symulacje oddziaływań międzycząsteczkowych, zwijania białek (\textit{ang. protein folding}) czy przeprowadzających obliczenia dynamiki molekularnej (\textit{ang. molecular dynamics}), a także umożliwiających wizualizację tych symulacji. Stosunkowo niewiele jednak jest rozwiązań dedykowanych wirtualnej rzeczywistości, które mogłyby umożliwić interakcję z użytkownikiem za pośrednictwem zmysłu dotyku. 
+Jak już wspomniano wirtualna rzeczywistość może znajdować zastosowanie także w nauce w szczególności w dziedzinach, w których obiekty zainteresowań są zbyt małe, aby być widoczne gołym okiem, takie jak cząsteczki chemiczne lub pojedyncze atomy. Istnieje cały szereg programów przeprowadzających np. symulacje oddziaływań międzycząsteczkowych, zwijania białek (\textit{ang. protein folding}) czy przeprowadzających obliczenia dynamiki molekularnej (\textit{ang. molecular dynamics}), a także umożliwiających wizualizację tych symulacji. Stosunkowo niewiele jednak jest dedykowanych rozwiązań wirtualnej rzeczywistości, które mogłyby umożliwić interakcję z użytkownikiem za pośrednictwem zmysłu dotyku. 
 	
 Pracownie Laboratorium Biofizyki na Wydziale Fizyki Uniwersytetu Warszawskiego dysponują sprzętem niezbędnym do realizacji takich zadań. Urządzenie haptyczne Sensable Phantom Omni jest przykładem trójwymiarowego wskaźnika ze zwrotną projekcją momentów sił, którego wykorzystanie otwiera całe spektrum nowych możliwości związanych z realizacją projektów wirtualnej rzeczywiści w biofizyce, biologii molekularnej czy chemii  \cite{vrLecture2011}. 
 
-\chapter*{Cel i zakres pracy}
-\addcontentsline{toc}{chapter}{Cel i zakres pracy}
-
-W ramach niniejszej pracy została przedstawiona implementacja aplikacji narzędziowej z pogranicza biofizyki molekularnej i wirtualnej rzeczywistości. Program służący do interaktywnej eksploracji struktur biopolimerów w poszukiwaniu regionów optymalnych ze względu na jakość lokalnego dopasowania strukturalnego pomiędzy wzorcem (\textit{ang. template structure}) i wybranymi regionami cząsteczki celu (\textit{ang. target structure}). Jakość znalezionego dopasowania odwzorowuje zwrotna projekcja momentów sił w urządzeniu haptycznym. 
-	
-Program został zrealizowany w formie wtyczki rozszerzającej możliwości pakietu PyMOL. Do swojego działania wykorzystuje urządzenia i metody wirtualnej rzeczywistości - urządzenie haptyczne Phantom Omni oraz bibliotekę Virtual Reality Peripheral Network - a także bioinformatyczne algorytmy wyszukujące optymalne lokalne dopasowania strukturalne (\textit{ang. local structure alignment}), algorytm maksymalizujący stopień dopasowania struktur i minimalizujący wartość RMSD (algorytm Kabsch'a).
-
-W pracy zostały także przedstawione podstawy teoretyczne leżące u jej podstaw, szczegółowe opisy wykorzystanego urządzenia i metod wirtualnej rzeczywistości, a także perspektywy dalszego rozwoju i wykorzystania praktycznego opracowanego oprogramowania.
-
-Kod źródłowy stworzonego oprogramowania stanowi integralny załącznik do niniejszej pracy.
-
 \chapter{Podstawy teoretyczne}
-W tym rozdziale zaprezentowano teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur chemicznych, sposobach optymalnego nakładania struktur i oceny jego jakości (algorytm Kabsch'a i RMSD) oraz zagadnieniach związanych z przekształceniami geometrycznymi (skalowanie, translacje i rotacje).
+W tym rozdziale zaprezentowano teorię leżącą u podstaw niniejszej pracy. Skupiono się tutaj przede wszystkim na metodach dopasowania (uliniawiania) struktur biopolimerów, sposobach optymalnego nakładania struktur i oceny jego jakości (algorytm Kabsch'a i RMSD) oraz zagadnieniach związanych z przekształceniami geometrycznymi (skalowanie, translacje i rotacje).
 
 \section{Metody dopasowania struktur chemicznych}
 Celem poszukiwania optymalnych metod dopasowania strukturalnego (\textit{ang. structural alignment}) jest znalezienie homologii pomiędzy cząsteczkami polimerów lub ich fragmentami jedynie na podstawie kształtu, bez znajomości sekwencji. 
 
 Metody dopasowań strukturalnych pierwotnie odnosiły się do cząsteczek polipeptydów i białek jako podstawowych biopolimerów. Szybko jednak ich zastosowanie zostało rozszerzone także na kwasy nukleinowe, w szczególności niekodujący RNA gdyż posiada on ważne funkcje biologiczne (np. enzymatyczne) oraz analogiczne do polipeptydów formy drugo- i trzeciorzędowe. 
 
-Z uwagi na znacznie wyższą ewolucyjną trwałość struktury przestrzennej w porównaniu do sekwencji (zarówno aminokwasowej jak i nukleotydowej) poszukiwanie dopasowań strukturalnych często bywa dużo skuteczniejszą metodą znajdowania związków ewolucyjnych pomiędzy organizmami niż klasyczne uliniowienie sekwencji. 
+Z uwagi na znacznie wyższą ewolucyjną trwałość struktury przestrzennej w porównaniu do sekwencji (zarówno aminokwasowej jak i nukleotydowej) poszukiwanie dopasowań strukturalnych często bywa dużo skuteczniejszą metodą znajdowania związków ewolucyjnych pomiędzy organizmami niż klasyczne uliniawianie sekwencji. 
 
-Istotnym aspektem tych metod jest efektywna ocena jakości dopasowań. Niestety nie ma jednej uniwersalnej miary podobieństwa struktur,  istnieje jednak kilka dobrze opisanych algorytmów służących do ich szacowania. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (\textit{ang. root-mean-squared deviation}), szczegółowo opisana w dalszej części pracy.
+Istotnym aspektem tych metod jest efektywna ocena jakości dopasowań. Niestety nie ma jednej uniwersalnej miary podobieństwa struktur. Istnieje jednak kilka dobrze opisanych algorytmów służących do ich szacowania. Najczęściej wykorzystywaną do tego celu metryką jest RMSD (\textit{ang. root-mean-squared deviation}), szczegółowo opisana w dalszej części pracy.
 
 Obliczenie dopasowania strukturalnego ponadto implikuje powstanie dopasowania sekwencyjnego pomiędzy przyrównywanymi merami w każdym z łańcuchów. Ocena takiego jednowymiarowego uliniowienia sekwencji również może dać nam wiedzę o bliskości ewolucyjnej występującej pomiędzy strukturami.
 
-Z powodu dużej złożoności biopolimerów zostało opracowanych wiele metod upraszczających ich reprezentacje do celów obliczeniowych. Przede wszystkim dąży się do rezygnacji z bezpośredniego rozpatrywania lokalizacji wszystkich atomów pochodzących z każdego meru na rzeczy jedynie tych należących do szkieletu (\textit{ang. backbone}) cząsteczki (np. $\alpha$-węgle aminokwasów czy pentozy kwasów nukleinowych), z pominięciem lub daleko idącym ograniczeniem roli łańcuchów bocznych.
+Z powodu dużej złożoności biopolimerów zostało opracowanych wiele metod upraszczających ich reprezentacje do celów obliczeniowych. Przede wszystkim dąży się do rezygnacji z bezpośredniego rozpatrywania lokalizacji wszystkich atomów na rzecz jedynie tych należących do szkieletu (\textit{ang. backbone}) cząsteczki (np. $\alpha$-węgle aminokwasów czy pentozy kwasów nukleinowych), z pominięciem lub daleko idącym ograniczeniem roli łańcuchów bocznych.
 
-Metody dopasowania możemy podzielić na globalne, których celem jest porównywanie całych struktur trzeciorzędowych oraz lokalne polegające na poszukiwaniu najlepszego dopasowania fragmentu cząsteczki wzorca (np. struktury drugorzędowej) do wybranego regionu (miejsca w obrębie cząsteczki celu) i ewentualna późniejsza ich kompozycja do dopasowania globalnego.
+Metody dopasowania możemy podzielić na globalne, których celem jest porównywanie całych struktur trzeciorzędowych oraz lokalne polegające na poszukiwaniu najlepszego dopasowania fragmentu cząsteczki wzorca (np. struktury drugorzędowej) do wybranego regionu (miejsca w obrębie cząsteczki celu).
 
 \subsection{Globalne dopasowanie struktur} 
 
-\textit{Globalne dopasowanie} polega na obliczaniu najlepszego nałożenia na siebie dwóch lub więcej struktur i ich superpozycji. Jest to iteracyjne podejście, które dąży do minimalizowania odległości pomiędzy atomami (lub wybranymi punktami charakteryzującymi dany mer cząsteczki) w każdym kolejnym kroku poprzez dokonywanie odpowiednich przesunięć i obrotów struktur względem siebie. 
-
-Globalne dopasowanie jest najskuteczniejsze gdy podobieństwo porównywanych struktur jest ma tyle wysokie aby obliczenia dążyły do optymalnego globalnie rezultatu. Jest to często stosowana metoda służąca do porównywania różnych konformacji tego samego polimeru, na przykład do oceny jakości algorytmów przewidujących strukturę białek lub porównywanie struktur analogicznych białek pochodzących z różnych organizmów. 
+\textit{Globalne dopasowanie} polega na obliczaniu najlepszego uliniowienia dwóch lub więcej struktur. Jest ono najbardziej użyteczne, gdy podobieństwo porównywanych struktur jest wysokie. Jest to często stosowana metoda służąca do porównywania różnych konformacji tego samego polimeru, na przykład do oceny jakości algorytmów przewidujących strukturę białek lub porównywanie struktur analogicznych białek pochodzących z różnych organizmów. 
 
 \begin{figure}[H]
 \centering
@@ -195,17 +185,15 @@ Globalne dopasowanie jest najskuteczniejsze gdy podobieństwo porównywanych str
 Wadą podejścia globalnego jest to, że jego wykorzystanie dla zróżnicowanych cząsteczek może być bezcelowe z powodu niemożności obliczenia miarodajnej wartości podobieństwa pomiędzy takimi strukturami. Innymi słowy obliczona wartość RMSD pomiędzy takimi cząsteczkami może być pozbawiona sensownej interpretacji. Wówczas należy rozważyć podejście lokalne.
 
 \subsection{Lokalne dopasowanie struktur} 
-Jak już wspomniano, lokalne dopasowanie polega na poszukiwaniu w części lub całości cząsteczki celu (\textit{ang. target}) występowania takich regionów, które ,,są podobne'' do wybranych struktur zwanych wzorcami lub szablonami (\textit{ang. template}). Przez podobieństwo należy tutaj rozumieć taką odpowiedniość pomiędzy ww. strukturami, że wyznaczona dla ich superpozycji wartość RMSD nie przekracza zadanego progu. Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące, całe domeny białkowe lub inne wybrane fragmenty cząsteczek których występowań poszukujemy.
+Jak już wspomniano, lokalne dopasowanie polega na poszukiwaniu w obrębie cząsteczki celu (\textit{ang. target}) regionów, które ,,są podobne'' do wybranych struktur zwanych wzorcami lub szablonami (\textit{ang. template}). Przez podobieństwo należy tutaj rozumieć taką odpowiedniość pomiędzy ww. strukturami, że wyznaczona dla ich superpozycji wartość RMSD nie przekracza zadanego progu. Wzorcami mogą być na przykład struktury drugorzędowe, miejsca wiążące, całe domeny białkowe lub inne wybrane fragmenty cząsteczek.
 
 Istnieje wiele opracowanych metod i algorytmów realizujących takie obliczenia. Do najpopularniejszych należy zaliczyć DALI\cite{holmSander1993}, SSAP\cite{orengoTaylor1996}, CE\cite{shindyalovBourne1998}, VAST\cite{madejGibratBryant1995}, MATRAS\cite{kawabataNishikawa2000}, GANGSTA\cite{guerlerKnapp2008} i inne. Każda z nich ma inne podejście do dekompozycji struktury i sposobów poszukiwania lokalnych podobieństw. 
 \\
 \\
-Szczególną uwagę musimy jednak zwrócić na metodę lokalnych deskryptorów, zaproponowaną przez Krzysztofa Fidelisa \cite{daniluk11}\cite{fidelis2003} (jednego z twórców i organizatorów eksperymentu CASP). Stanowi ona podstawowy algorytm generujący dane wejściowe dla oprogramowania będącego przedmiotem niniejszej pracy. Metoda lokalnych deskryptorów w przeciwieństwie do metod liniowych, bazuje na lokalnym przestrzennym otoczeniu każdego aminokwasu. Metoda szczegółowo została opisana w cytowanych wyżej publikacjach. 
+Szczególną uwagę musimy jednak zwrócić na metodę lokalnych deskryptorów, zaproponowaną przez Krzysztofa Fidelisa \cite{daniluk11}\cite{fidelis2003} (jednego z twórców i organizatorów eksperymentu CASP). Stanowi ona podstawowy algorytm generujący dane wejściowe dla oprogramowania będącego przedmiotem niniejszej pracy. Metoda lokalnych deskryptorów w przeciwieństwie do standardowych metod korzystających z ciągłych segmentów, bazuje na lokalnym przestrzennym otoczeniu aminokwasu. Metoda szczegółowo została opisana w cytowanych wyżej publikacjach.
 \\
 \\
-Wynikiem przeprowadzonych uliniowień i superpozycji struktur jest indeks miejsc (wraz z ich miarą dopasowania) analizowanej struktury do których wzorzec jest podobny. Należy pamiętać, że jeden wzorzec może pasować do wielu regionów w obrębie tej samej cząsteczki, przez co może występować w wielu miejscach indeksu mapującego. Innymi słowy dzieki takiej operacji uzyskujemy kompletną mapę struktury celu z wyróżnionymi regionami, których superpozycja z wzorcem daje stopień podobieństwa nie gorszy od zadanego.
-
-Indeks miejsc jest esportowany do formatu akceptowanego przez opisane dalej oprogramowanie w formie pliku mapującego (\textit{ang. mapping file}).
+Wynikiem przeprowadzonych uliniowień i superpozycji struktur jest indeks miejsc (wraz z ich miarą dopasowania) analizowanej struktury, do których wzorzec jest podobny. Należy pamiętać, że jeden wzorzec może pasować do wielu regionów w obrębie tej samej cząsteczki, przez co może występować w wielu miejscach indeksu mapującego. Innymi słowy dzieki takiej operacji uzyskujemy kompletną mapę struktury celu z wyróżnionymi regionami, których superpozycja z wzorcem daje stopień podobieństwa nie gorszy od zadanego.
 
 \section{RMSD i algorytm Kabsch'a}
 
@@ -286,7 +274,7 @@ $$p'=p+\vec{T}$$
 \item \textbf{Macierz kowariancji} \\
 Po wykonanym przesunięciu należy obliczyć zależność liniową pomiędzy współrzędnymi wektorów $p'$ i $q$. Poprawne wyliczenie macierzy kowariancji $A$ będzie także stanowiło podstawę do ustalenia optymalnej macierzy rotacji (w kolejnym kroku):
 $$ 
-A=cov(p',q)
+A=\cov(p',q)
 $$
 lub równoważnie w zapisie macierzowym:
 $$
@@ -307,18 +295,18 @@ $\Sigma$ macierz diagonalna (taka, że na przekątnej mamy nieujemne liczby rzec
 \\
 Sprawdzając znak wartość wyznacznika:
 $$
-s=sign(det(VW^T))
+s=\sign(\det(UV^T))
 $$
 upewniamy się, że operujemy w ramach prawoskrętnego układu współrzędnych. Ostatecznie uzyskujemy optymalną macierz rotacji $R$:
 
 $$
-R=V
+R=U
 \begin{bmatrix}
  1 & 0 & 0 \\
  0 & 1 & 0 \\
  0 & 0 & s
 \end{bmatrix}
-U^T
+V^T
 $$
 
 \end{enumerate}
@@ -351,20 +339,20 @@ Często pojawia się sytuacja w której kilka przekształceń geometrycznych chc
 
 \textit{Współrzędne jednorodne} są sposobem reprezentacji punktów przestrzeni $n$-wymiarowej za pomocą układu $n+1$ współrzędnych. Zostały one wprowadzone przez niemieckiego matematyka Augusta Möbiusa w 1827 roku i opisane w jego pracy \cite{mobius1827}. 
 
-Współrzędne jednorodne to narzędzie matematyczne stanowiące pewne udoskonalenie elementarnych macierzy transformacji. Umożliwiają wykonywanie wielu przekształceń jednocześnie i za pomocą jednej operacji macierzowej - mnożenia. Współrzędne jednorodne dają możliwość skumulowania wszystkich transformacji jakie chcemy wykonać na strukturze przestrzennej w jednej odpowiednio zbudowanej macierzy. W dzisiejszych czasach zostały one docenione w wielu dziedzinach nie tylko bezpośrednio związanych z grafiką komputerową ale także w robotyce czy biofizyce.
+Współrzędne jednorodne to narzędzie matematyczne stanowiące pewne udoskonalenie elementarnych macierzy transformacji. Umożliwiają wykonywanie wielu przekształceń jednocześnie, za pomocą jednej operacji macierzowej - mnożenia. Współrzędne jednorodne dają możliwość skumulowania wszystkich transformacji jakie chcemy wykonać na strukturze przestrzennej w jednej odpowiednio zbudowanej macierzy. W dzisiejszych czasach zostały one docenione w wielu dziedzinach nie tylko bezpośrednio związanych z grafiką komputerową ale także w robotyce i biofizyce.
 
 Poniżej szczegółowo opisane zostały wykorzystane w pracy transformacje: skalowanie, translacja oraz rotacja. Dla każdej z nich podane zostały ich reprezentacje za pomocą elementarnych macierzy transformacji oraz współrzędnych jednorodnych. Dodatkowo dla rotacji została przedstawiona reprezentacja w kwaternionach.
 
 \subsection{Skalowanie}
-Skalowanie to operacja polegająca na mnożeniu współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez współczynniki skalowania. Współczynniki skalowania są dodatnią liczbą rzeczywistą $S$ albo dodatnio określonym wektorem liczb rzeczywistych $\vec{S}$. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach $\vec{S}$, jednak dla potrzeb niniejszej pracy ograniczymy się do mnożenia wektora współrzędnych wyłącznie przez skalar $S$.
+Skalowanie to operacja polegająca na mnożeniu współrzędnych obiektu określonego w przestrzeni trójwymiarowej przez współczynniki skalowania. Współczynniki skalowania są dodatnią liczbą rzeczywistą albo dodatnio określonym wektorem liczb rzeczywistych. W ogólności możemy skalować wszystkie składowe wektora współrzędnych niezależnie przez stosowanie wektora o różnych współczynnikach, jednak dla potrzeb niniejszej pracy ograniczymy się do mnożenia wektora współrzędnych wyłącznie przez skalar.
 
 Geometryczna intuicja stojąca za operacją skalowania polega na takim przekształceniu współrzędnych danego obiektu, że w zależności od wartości współczynnika skalującego $S$ może on zostać: 
 \\
-- niezmieniony, gdy $S=1$
+- niezmieniony, gdy $S=1$,
 \\
-- pomniejszony proporcjonalnie do $S$, gdy $0<S<1$
+- pomniejszony proporcjonalnie do $S$, gdy $0<S<1$,
 \\
-- powiekszony proporcjonalnie do $S$, gdy $S>1$
+- powiekszony proporcjonalnie do $S$, gdy $S>1$.
 \\
 \\
 Współrzędne dowolnego punktu $P=(x,y,z)$ lub $\vec{P}=[x, y, z]^T$ po operacji skalowania o współczynnik $S$ są równe $P'=(x',y',z')$, gdzie:
@@ -461,7 +449,7 @@ Sz \\
 $$
 
 \subsection{Translacje}
-Translacje to kolejna elementarna operacja przekształcenia geometrycznego. Translacją nazywamy takie przekształcenie, które przesuwa każdy punkt zbioru określony w przestrzeni o dowolny wektor $\vec{T}$. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych) przesunięcia $\vec{T}$. W niniejszej pracy operacja przesunięcia wykonywana jest przy każdej zmianie położenia wskaźnika urządzenia haptycznego oraz podczas wykonywania operacji nałożenia i dopasowania struktur. 
+Translacja jest elementarnym przekształceniem geometrycznym. Translacją nazywamy takie przekształcenie, które przesuwa każdy punkt zbioru określony w przestrzeni o dowolny wektor $\vec{T}$. W odróżnieniu od skalowania, w przypadku przesunięć w przestrzeni do wektora współrzędnych dodajemy wektor współczynników (liczb rzeczywistych). W niniejszej pracy operacja przesunięcia wykonywana jest przy każdej zmianie położenia wskaźnika urządzenia haptycznego oraz podczas wykonywania operacji nałożenia i dopasowania struktur. 
 
 Dla zadanego punktu $P=(x,y,z)$ lub $\vec{P}=[x,y,z]^T$ efektem operacji przesunięcia o wektor $\vec{T}=[t_x, t_y, t_z]^T$ są współrzędne $\vec{P'}=(x',y',z')$:
 
@@ -520,10 +508,10 @@ z \\
 $$
 zatem:
 $$
-\vec{P'}=\bar{T} \dot{\vec{P}}
+\dot{\vec{P'}}=\bar{T} \dot{\vec{P}}
 $$
 $$
-\vec{P'}=
+\dot{\vec{P'}}=
 \begin{bmatrix}
 1 & 0 & 0 & t_x \\
 0 & 1 & 0 & t_y \\
@@ -719,7 +707,7 @@ $$
 Wyznaczenie powyższych wartości jest niezbędne do prawidłowego wysterowania momentów sił wskaźnika haptycznego za pośrednictwem biblioteki VRPN.
 
 \chapter{Urządzenie haptyczne Sensable Phantom Omni}
-Nadrzędnym celem wirtualnej rzeczywistości jest możliwie wierne odtworzenie świata rzeczywistego lub fikcyjnego w formie programu komputerowego czy multimedialnej prezentacji. Ponadto metody i narzędzia wirtualnej rzeczywistości umozliwiają użytkownikowi wchodzenie w czynną interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń klasy HCI (\textit{ang. human computer interface}) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę SensAble (obecnie Geomagic). 
+Nadrzędnym celem wirtualnej rzeczywistości jest możliwie wierne odtworzenie świata rzeczywistego lub fikcyjnego w formie programu komputerowego czy multimedialnej prezentacji. Ponadto metody i narzędzia wirtualnej rzeczywistości umozliwiają użytkownikowi wchodzenie w czynną interakcję z tak wykreowanymi scenami. Obecny stan rozwoju techniki pozwala na tworzenie wydajnych urządzeń klasy HCI (\textit{ang. human computer interface}) będących interfejsami pomiędzy światem realnym a wirtualnym. Przykładem takiego urządzenia jest Phantom Omni, opracowane przez firmę SensAble (obecnie 3D Systems). 
 
 \begin{figure}[H]
 \centering
@@ -730,9 +718,9 @@ Nadrzędnym celem wirtualnej rzeczywistości jest możliwie wierne odtworzenie �
 Niniejsza praca w znacznym stopniu opiera się na wykorzystaniu tych urządzeń do odzworowywania rzeczywistych ruchów ręki użytkownika w świecie wirtualnym. Pracownie Zakładu Biofizyki Wydziału Fizyki Uniwersytetu Warszawskiego są wyposażone w tego typu urządzenia, zostały one udostępnione autorowi celem realizacji niniejszej pracy.
 
 \section{Opis urządzenia}
-Urządzenie haptyczne (\textit{ang. haptic device}) Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji. Urządzenie ma także możliwość programowego sterowania zwrotną projekcją (\textit{ang. force feedback}) momentów sił w trzech stopniach swobody (sterowanie pozycją wskaźnika). Ponadto w urządzeniach dostępne są dwa przyciski monostabilne do dowolnego wykorzystania.
+Urządzenie haptyczne (\textit{ang. haptic device}) Sensable Phantom Omni jest trójwymiarowym wskaźnikiem o 6 stopniach swobody wskazywania pozycji i orientacji. Urządzenie ma także możliwość programowego sterowania zwrotną projekcją (\textit{ang. force feedback}) sił w trzech stopniach swobody (sterowanie pozycją wskaźnika). Ponadto w urządzeniach dostępne są dwa przyciski monostabilne do dowolnego wykorzystania.
 
-Phantom Omni jest urządzeniem znajdującym zastosowanie w różnego rodzaju aplikacjach działających na styku świata wirtualnego z rzeczywistym. Umożliwia ono użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą zmysłu dotyku. Dzięki dostarczonym przez producenta sterownikom i bogatemu zestawowi bibliotek OpenHaptics i narzędzi programistycznych możliwe jest tworzenie oprogramowania w pełni wykorzystującego możliwości oferowane przez urządzenie.
+Phantom Omni jest urządzeniem znajdującym zastosowanie w różnego rodzaju aplikacjach działających na styku świata wirtualnego z rzeczywistym. Umożliwia ono użytkownikowi wchodzenie w interakcję z cyfrowym światem za pomocą zmysłu dotyku. Dzięki dostarczonym przez producenta sterownikom i bibliotece OpenHaptics możliwe jest tworzenie oprogramowania w pełni wykorzystującego możliwości oferowane przez urządzenie.
 
 Specyfikację techniczną urządzenia prezentuje poniższa tabela \cite{geomagicTouchBrochure}:
 
@@ -759,7 +747,7 @@ FireWire jest standardem łącza szeregowego opracowanym w 1995 roku, który umo
 
 Powyższe trudności powodują, że sama instalacja i uruchomienie urządzenia staje się dość kłopotliwa. Stacje robocze korzystające z urządzeń Phantom Omni w Pracowniach Biofizyki FUW działają na systemach operacyjny CentOS w wersji 6.0 ze zmodyfikowanym jądrem GNU/Linux, który pozwalał na stosunkowo stabilne działanie urządzenia. 
 
-Wraz ze sterownikami i pakietem OpenHaptics v3.0 w pracowniach uruchomiony jest framework Virtual Reality Perfipherial Network (opisany w dalszej części pracy), dostarczający uniwersalną i łatwą w użyciu warstwę API nad wieloma rodzajami urządzeń klasy HCI. 
+Wraz ze sterownikami i pakietem OpenHaptics v3.0 w pracowniach uruchomiony jest framework Virtual Reality Peripherial Network (opisany w dalszej części pracy), dostarczający uniwersalną i łatwą w użyciu warstwę API nad wieloma rodzajami urządzeń klasy HCI. 
 
 Proces instalacji i konfiguracji urządzenia SensAble Phantom Omni nie był przedmiotem niniejszej pracy. Autor pracy miał do dyspozycji przygotowane stanowisko pracy, wyposażone w uruchomione urządzenie haptyczne, zainstalowany zestaw sterowników, bibliotek i pakiet VRPN.
 
@@ -843,14 +831,14 @@ Pakiet VRPN jest od podstaw zaprojektowany jako oprogramowanie sieciocentryczne,
 
 VRPN definiuje kilka abstrakcyjnych klas wspieranych urządzeń: Analog, Button, Dial, ForceDevice, Imager, Sound, Text oraz Tracker. Przy czym konkretne urządzenie może należeć jednocześnie do jednej lub kilku klas (np. Phantom Omni to Tracker, Button oraz ForceDevice). Istnienie ww. klas powoduje, że wszystkie urządzenia danego typu zgłaszają zmiany stanów jako asynchroniczne wywołania funkcji (\textit{ang. callback}) przekazując w ten sposób obiekty lub wartości parametrów swoich klas. Zadaniem programisty jest odbiór i interpretacja przychodzących danych. Pozwala to na wygodne i szybkie wdrażanie rozwiązań opartych o urządzenia HCI nawet przez osoby bez wcześniejszego doświadczenia z systemami wirtualnej rzeczywistości.
 
-Domyślnie VRPN jest napisany w języku C++ jednak posiada wbudowane mechanizmy generujące kod dla języków Python i Java. W trakcie kompilacji biblioteki z zamiarem jej użycia po stronie klienckiej należy zwrócic szczególną uwagę na docelowy język którego będziemy używać i podać odpowiednie parametry kompilacji zgodnie z wymogami dokumentacji VRPN. 
+VRPN jest napisany w języku C++, jednak posiada wbudowane mechanizmy generujące kod dla języków Python i Java. W trakcie kompilacji biblioteki z zamiarem jej użycia po stronie klienckiej należy zwrócic szczególną uwagę na docelowy język którego będziemy używać i podać odpowiednie parametry kompilacji zgodnie z wymogami dokumentacji VRPN. 
 
 \section{Opis użycia VRPN}
 W niniejszej pracy wykorzystuje się integrację pakietu VRPN z urządzeniem Phantom Omni do otrzymywania danych statusowych o pozycji, orientacji i wciśniętych przyciskach oraz sterowania sprzężeniem zwrotnym \cite{rodriguezGonzalez2015}.
 
 Stacja robocza obsługująca urządzenie haptyczne posiada skonfigurowany do jego obsługi proces \texttt{vrpn\_server} będący serwerem TCP/IP oczekującym na przychodzące połączenia od zainteresowanych aplikacji klienckich. Konfiguracja serwera jest przechowywana w tekstowym pliku konfiguracyjnym \texttt{vrpn.cfg}, który jest ładowany każdorazowo podczas uruchamiania. 
 
-Stworzona aplikacja, w tym przypadku wtyczka do programu PyMOL, jest klientem TCP/IP próbującym nawiązać połączenie z ww. serwerem. W trakcie jej uruchamiania tworzone są obiekty klas \texttt{vrpn\_Tracker}, \texttt{vrpn\_Button} i \texttt{vrpn\_ForceDevice} posiadające wskaźniki do funkcji-uchwytów (\textit{ang. handler}) odpowiednio przetwarzających odebrane dane.
+Stworzona aplikacja, w tym przypadku wtyczka do programu PyMOL, jest klientem TCP/IP nawiązującym połączenie z serwerem VRPN. W trakcie jej uruchamiania tworzone są obiekty klas \texttt{vrpn\_Tracker}, \texttt{vrpn\_Button} i \texttt{vrpn\_ForceDevice} posiadające wskaźniki do funkcji-uchwytów (\textit{ang. handler}) odpowiednio przetwarzających odebrane dane.
 
 Zarejestrowanie funkcji-uchwytu w obiekcie klasy \texttt{vrpn\_Button} i obsługa przychodzących zdarzeń jest trywialna i sprowadza się do rozpoznania zmiany stanu jednego z dwóch przycisków. W ramach niniejszej pracy przyciski zostały oprogramowane tak, że wciśnięcie pierwszego z nich powoduje wykonanie superpozycji (nałożenia) struktury wzorca z najbliższym możliwym do dopasowania regionem - zgodnie z danymi pochodzącymi z pliku mapującego. Wciśnięcie drugiego przycisku powoduje wykonanie zbliżenia na linię łączącą środki ciężkości ww. struktur.
 
@@ -879,7 +867,7 @@ Komputer-host musi posiadać kompatybilną z urządzeniem Phantom Omni kartę ro
 
 Kliencka stacja robocza jest wyposażona w pakiet PyMOL rozszerzony o oprogramowanie - przedmiot niniejszej pracy. Po jego uruchomieniu, załadowaniu danych wejściowych oraz wprowadzeniu adresu sieciowego hosta urządzenia Phantom Omni, program próbuję nawiązać z nim połączenie i rozpocząć pracę.
 
-W szczególności host urządzenia Phantom Omni oraz pakiet PyMOL mogą być uruchomione na jednej maszynie i wykorzystywać interfejs \texttt{localhost}.
+W szczególności serwer VRPN oraz pakiet PyMOL mogą być uruchomione na jednej maszynie i wykorzystywać interfejs sieciowy \texttt{localhost}.
 
 \section{Rozszerzanie funkcjonalności pakietu PyMOL}
 
@@ -991,19 +979,19 @@ Poniższe zrzuty ekranu przedstawiają przykładowy przebieg procesu eksploracji
 \end{figure}
 
 \chapter{Podsumowanie}
-W ramach niniejszej pracy została przedstawiona implementacja oprogramowania, którego funkcjonalność obejmuje interaktywne przeglądanie struktur biopolimerów (białek i kwasów nukleinowych) w poszukiwaniu regionów podobnych do wybranej struktury wzorcowej oraz zwrotną projekcję momentów sił pomiędzy tymi elementami. Program wykorzystuje do tego celu dane wejściowe pochodzące z zewnętrznych źródeł - pliki z opisem struktur w formacie PDB oraz plik mapujący.
+W niniejszej pracy została przedstawiona implementacja oprogramowania, którego funkcjonalność obejmuje interaktywne przeglądanie struktur biopolimerów (białek i kwasów nukleinowych) w poszukiwaniu regionów podobnych do wybranej struktury wzorcowej oraz zwrotną projekcję momentów sił pomiędzy tymi elementami. Program wykorzystuje do tego celu dane wejściowe pochodzące z zewnętrznych źródeł - pliki z opisem struktur w formacie PDB oraz plik mapujący.
 
 Oprogramowanie wykorzystuje metody i urządzenia wirtualnej rzeczywistości w szczególności pakiet VRPN oraz urządzenie haptyczne Phantom Omni. Powstało ono w formie wtyczki rozszerzającej funkcjonalność pakietu PyMOL wykorzystując jego możliwości wizualizacji struktur chemicznych.
 
-Poza oprogramowaniem w ramach 4pracy zostały także przedstawione podstawy teoretyczne na które składały się globalne i lokalne metody dopasowania (uliniowienia) strukturalnego oraz algorytm Kabsch'a maksymalizujący stopień tego dopasowania. Opisane także zostały elementarne przekształcenia geometryczne wykorzystywane w pracy oraz sposób konwersji kwaternionów na macierze rotacji (wykorzystywane przez pakiety VRPN i PyMOL). Szczegółowo zostało opisane urządzenie haptyczne Phantom Omni i jego integracja z pakietem Virtual Reality Peripheral Network. W końcowej części została podana bibliografia, z której korzystano w trakcie tworzenia niniejszej pracy. Kod źródłowy stworzonego oprogramowania wraz z obszernymi komentarzami stanowi załącznik do niniejszego opracowania.
+Poza oprogramowaniem w pracy zostały także przedstawione podstawy teoretyczne, na które składały się globalne i lokalne metody dopasowania (uliniowienia) strukturalnego oraz algorytm Kabsch'a maksymalizujący stopień tego dopasowania. Opisane także zostały elementarne przekształcenia geometryczne wykorzystywane w pracy oraz sposób konwersji kwaternionów na macierze rotacji (wykorzystywane przez pakiety VRPN i PyMOL). Szczegółowo zostało opisane urządzenie haptyczne Phantom Omni i jego integracja z pakietem Virtual Reality Peripheral Network. Kod źródłowy stworzonego oprogramowania wraz z obszernymi komentarzami stanowi załącznik do niniejszego opracowania.
 \\
 \\
-Ostateczna forma oprogramowania może mieć dość ograniczone wykorzystanie praktyczne. Dobrze może jednak nadawać się do celów naukowo-edukacyjnych np. demonstrujących możliwości zastosowania metod wirtualnej rzeczywistości w takich dziedzinach nauki jak biofizyka, biologia molekularna czy chemia.
+Ostateczna forma oprogramowania jest zaledwie prototypem i może mieć dość ograniczone wykorzystanie praktyczne. Dobrze jednak nadawje się do celów naukowo-edukacyjnych np. demonstrujących możliwości zastosowania metod wirtualnej rzeczywistości w takich dziedzinach nauki jak biofizyka, biologia molekularna czy chemia.
 
-Wykorzystanie integracji urządzenia Phantom Omni z pakietem VRPN i PyMOL w połączeniu z różnymi metodami bioinformatycznymi tworzy cały szereg nowych i być może nieznanych dotąd możliwości. Ławtość wchodzenia w interakcję z wykreowanym, wirtualnym, molekularnym światem i odzwierciedlanie sił obecnych na tym poziomie może znacznie ułatwić i uatrakcyjnić proces edukacji przyszłych adeptów różnych nauk przyrodniczych.
+Wykorzystanie integracji urządzenia Phantom Omni z pakietem VRPN i PyMOL w połączeniu z różnymi metodami bioinformatycznymi tworzy cały szereg nowych i być może nieznanych dotąd możliwości. Łatwość wchodzenia w interakcję z wykreowanym, wirtualnym, molekularnym światem i odzwierciedlanie sił obecnych na tym poziomie może znacznie ułatwić i uatrakcyjnić proces edukacji przyszłych adeptów różnych nauk przyrodniczych.
 \\
 \\
-Dalszy rozwój niniejszego oprogramowania mógłby polegać na dodaniu funkcjonalności, które w chwili obecnej realizuje oprogramowanie zewnętrzne. Wymagałoby to rozbudowy obecnego programu o część realizującą obliczenia dopasowań strukturalnych implementując przykładowe metody opisane we wcześniejszch rozdziałach. Ponadto warto rozważyć dodanie bardziej zaawansowanych metod bioinformatycznych związanych z dokowaniem molekularnym czy projektowaniem leków.
+Dalszy rozwój niniejszego oprogramowania mógłby polegać na dodaniu funkcjonalności, które w chwili obecnej realizuje oprogramowanie zewnętrzne. Wymagałoby to rozbudowy obecnego programu o część realizującą obliczenia dopasowań strukturalnych implementując przykładowe metody opisane we wcześniejszch rozdziałach. Ponadto warto rozważyć dodanie bardziej zaawansowanych metod bioinformatycznych związanych z dokowaniem molekularnym i projektowaniem leków.
 \\
 \\
 W przypadku dalszego znacznego rozwoju funkcjonalności oprogramowania zgodnie z powyższymi lub innymi propozycjami możliwe jest wyobrażenie sobie wykorzystania go na szerszą skalę w ośrodkach naukowo-badawczych uczelni lub przemysłu.
@@ -1068,12 +1056,15 @@ Transformations (T,R,S) Used in Computer Graphics?}, Introduction to computer gr
 
 \end{thebibliography}
 
-\chapter*{Kod źródłowy}
-%\addcontentsline{toc}{chapter}{Kod źródłowy}
-todo
-%\inputpython{../PymolVrpnPlugin.py}{0}{1000}
+\iffalse
+	\chapter*{Kod źródłowy}
+	\addcontentsline{toc}{chapter}{Kod źródłowy}
+	\inputpython{../PymolVrpnPlugin.py}{0}{1000}
+\fi
 
 \end{document}
+\end
+
 
 
 %%% Local Variables:
