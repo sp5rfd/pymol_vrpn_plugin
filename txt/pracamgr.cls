@@ -282,8 +282,7 @@
 		  \vspace{8mm plus .5fill}
 		  {\Huge\textbf{\@title}\par}
 		  \vspace{8mm plus .1fill}
-		  {\large\bf Praca \@rodzajpracy\\[3pt]
-			na kierunku \MakeUppercase{\@kierunek} \\
+		  {\large\bf Praca \@rodzajpracy\ na kierunku\\ 									\MakeUppercase{\@kierunek} \\
 	%----zakres---
 			\@zakres \par}
 		  \vspace{2cm plus 1.5fill}
