@@ -134,7 +134,7 @@ Kod źródłowy stworzonego oprogramowania stanowi integralny załącznik do nin
 
 \chapter*{Wprowadzenie}
 \addcontentsline{toc}{chapter}{Wprowadzenie}
-Biopolimery, a w szczególności kwasy nukleinowe i białka są podstawowymi elementami. W każdej komórce oraz całym organizmie są odpowiedzialne za funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej. Biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Białka są zaś składnikami budulcowymi wielu organów, pełnią funkcje hormonalne i regulatorowe.
+Biopolimery, a w szczególności kwasy nukleinowe i białka są podstawowymi elementami życia. W każdej komórce oraz całym organizmie są odpowiedzialne za funkcje związane z odżywianiem, rozmnażaniem czy obroną przed patogenami. Dzięki kwasom nukleinowym możliwe jest przenoszenie informacji genetycznej. Biorą one udział w syntezie białek, a także mają funkcję enzymatyczne. Białka są zaś składnikami budulcowymi wielu organów, pełnią funkcje hormonalne i regulatorowe.
 
 Pomimo odmiennej budowy tych dwóch klas cząsteczek w obu przypadkach ich funkcja wynika bezpośrednio ze struktury przestrzennej, która zgodnie z hipotezą Anfinsena \cite{anfinsen73} jest ściśle zdeterminowana przez sekwencję nukleotydów czy aminokwasów.
 
@@ -199,7 +199,7 @@ Wynikiem przeprowadzonych uliniowień i superpozycji struktur jest indeks miejsc
 
 Efektywna ocena podobieństwa strukturalnego jest jednym z kluczowych elementów procesu dopasowania. W bioinformatyce istnieje kilka sposobów oszacowania tej wartości: obok GDT (\textit{ang. global distance test}) i TM-score (\textit{ang. template modeling score}) \cite{zhangSkolnick2005} najpopularniejsza i stosunkowo prosta w zastosowaniu jest miara odchylenia średniokwadratowego - RMSD (\textit{ang. root-mean-squared deviation}) \cite{kufarevaAbagyan2012}. 
 
-Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi odpowiadających sobie atomów (lub innych punktów charakterystycznych) zawartych w strukturze wzorca (\textit{ang. template}) i cząsteczce celu (\textit{ang. target}). W tym przypadku jednostką najczęściej jest \AA (angstrom). 
+Ocena podobieństwa metodą RMSD polega na obliczeniu średniokwadratowej odległości pomiędzy współrzędnymi odpowiadających sobie atomów (lub innych punktów charakterystycznych) zawartych w strukturze wzorca (\textit{ang. template}) i cząsteczce celu (\textit{ang. target}). RMSD wyraża się wzorem:
 
 $$
 \begin{array}{lr}
@@ -209,20 +209,18 @@ $$
 \\
 gdzie:
 \\
-$p$ - wektor punktów struktury wzorca
+$p$ - wektor współrzędnych struktury wzorca
 \\
-$q$ - wektor punktów wybranego regionu w strukturze celu
+$q$ - wektor współrzędnych wybranego regionu w strukturze celu
 \\
 $N$ - długość wektorów współrzędnych $p$ i $q$
 \\
+jednostką najczęściej jest \AA (angstrom)
+\\
 \\
 O ile same obliczenia są trywialne, to dobór danych wejściowych do algorytmu RMSD może stanowić poważne wyzwanie. Tutaj pochodzą one z zewnętrznej aplikacji i są wynikiem przeprowadzonej wcześniej procedury lokalnego dopasowania wzorca do struktury celu.
-
-RMSD jest jedną podstawowych miar podobieństwa strukturalnego wykorzystywanych w bioinformatyce. Sama w sobie ma dla nas jednak jedynie wartość informacyjną. Wiadomym jest, że dwie struktury są tym bardziej do siebie podobne im bliższa zeru jest wartość RMSD. Nie oznacza to jednak, że wysoka wartość RMSD implikuje brak lub niskie podobieństwo pomiędzy strukturami. Może być dokładnie odwrotnie: dwie identyczne struktury są względem siebie przesunięte i obrócone, co znacznie zwiększa wartość metryki.
-
-Jednym ze znanych sposobów minimalizacji jej wartości jest optymalna translacja i rotacja struktury wzorca nad wybranym regionem ze struktury celu w taki sposób aby zostały one jak najlepiej na siebie nałożone.
-
-Istnieje kilka metod wyznaczania optymalnych transformacji, jedną z popularniejszych opisał opisał w 1976 roku w swojej pracy Wolfgang Kabsch \cite{kabsch1976}\cite{kabsch1978}. Celem działanie algorytmu Kabsch'a jest wyznaczenie macierzy translacji i rotacji takich, aby możliwie najlepiej nałożyć na siebie dwa obiekty przestrzenne, tutaj dwa fragmenty struktur chemicznych.
+\\
+W 1976 roku w swojej pracy \cite{kabsch1976}\cite{kabsch1978} Wolfgang Kabsch opisał algorytm wyznaczający macierze transformacji (rotacji i translacji) optymalizujące nałożenie struktur przestrzennych. Algorytm ten jest powszechnie wykorzystywany do minimalizacji wartość RMSD.
 \\
 \\
 Algorytm Kabsch'a startuje z dwoma wektorami współrzędnych $p$ i $q$ o długości $N$:
@@ -270,7 +268,8 @@ $$Cq_z = \frac{1}{N}\sum_{i=1}^{N}{z_{qi}}$$
 zatem wektor translacji $\vec{T}$ taki, że:
 $$ \vec{T} = |Cp-Cq| =(|Cp_x-Cq_x|,|Cp_y-Cq_y|,|Cp_z-Cq_z|)$$
 możemy użyć do wykonania przesunięcia wszystkich punktów w $p$ i $q$:
-$$p'=p+\vec{T}$$
+$$p_i'=p_i+\vec{T}$$
+gdzie $p_i$ jest konkretnym punktem w $p$.
 \item \textbf{Macierz kowariancji} \\
 Po wykonanym przesunięciu należy obliczyć zależność liniową pomiędzy współrzędnymi wektorów $p'$ i $q$. Poprawne wyliczenie macierzy kowariancji $A$ będzie także stanowiło podstawę do ustalenia optymalnej macierzy rotacji (w kolejnym kroku):
 $$ 
@@ -295,18 +294,18 @@ $\Sigma$ macierz diagonalna (taka, że na przekątnej mamy nieujemne liczby rzec
 \\
 Sprawdzając znak wartość wyznacznika:
 $$
-s=\sign(\det(UV^T))
+s=\sign(\det(VU^T))
 $$
 upewniamy się, że operujemy w ramach prawoskrętnego układu współrzędnych. Ostatecznie uzyskujemy optymalną macierz rotacji $R$:
 
 $$
-R=U
+R=V
 \begin{bmatrix}
  1 & 0 & 0 \\
  0 & 1 & 0 \\
  0 & 0 & s
 \end{bmatrix}
-V^T
+U^T
 $$
 
 \end{enumerate}
