@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 
 """
-    This program was created in 2015-16 by Pawel Tomaszewski
-    In cooperation with Biophysics Laboratory of Warsaw University
+    Kod źródłowy pracy licencjackiej zatytułowanej:
+    "Interaktywna eksploracja i dopasowanie lokalnie optymalnych struktur biopolimerów
+    z wykorzystaniem metod wirtualnej rzeczywistości.".
+    Praca powstała na kierunku Bioinformatyka i Biologia Systemów 
+    Wydziału Matematyki, Informatyki i Mechaniki Uniwersytetu Warszawskiego.
+
+    Autorem programu jest Paweł Tomaszewski. Praca powstała w pracowni udostępnionej
+    przez Zakład Biofizyki Wydziału Fizyki Uniwersytetu Warszawskiego.
 """
 
 import os
 import sys
-sys.path.append("/home/crooveck/workspace/LICENCJAT/python_vrpn")
+sys.path.append("~/workspace/LICENCJAT/python_vrpn")
 sys.path.append(".")
 from transformations import *
 from Tkinter import *
 from tkFileDialog import *
-#from ttk import *
 from pymol import *
 from pymol.cgo import *
 from time import *
@@ -21,52 +26,44 @@ import vrpn_Button
 import vrpn_ForceDevice
 from math import *
 
-"""
-    Mainloop running flag. This indicates if threads and mainloops are running.
-"""
-IS_RUNNING = False
-AUTO_ZOOMING = False
-REGION_COLORING=True
-FORCES_ENABLED=False
+# Flagi wykorzystywane w pętli głównej programu.
+IS_RUNNING = False          # Flaga sterująca działanie pętli głównej programu
+AUTO_ZOOMING = False        # Flaga sterująca opcją auto-zoom
+REGION_COLORING = True      # Flaga sterująca kolorowaniem regionów
+FORCES_ENABLED = False      # Flaga sterująca sprzężeniem zwrotnym
 
-"""
-    Global variables for translations. 
-    trackerX,trackerY,trackerZ - Phantom native coordinates
-    x,y,z - Pymol coordinates
-    scale - ratio between PYMOL and PHANTOM coordinate
-"""
+# Współrzędne w przestrzeni urządzenia Phantom Omni
 trackerX = trackerY = trackerZ = 0
+# Współrzędne w przestrzeni PyMOL
 x = y = z = 0 
+# Współczynnik skalujący translacje pomiędzy przestrzeniami urządznia Phantom Omni oraz PyMOL
 scale=750
 
-# srodki ciezkosci wzorca i regionu
+# Środek ciężkości całej cząsteczki
+molecule_com=[0,0,0]  
+# Środek ciężkości struktury wzorca
 templateCOM=(0,0,0)
+# Środek ciężkości struktury regionu
 regionCOM=(0,0,0)
 
-"""
-    Global variables for rotations
-    previous_orientation stores a quaternion that represent previous orientation
-"""
+# Kwaterion reprezentujący poprzednią (zachowaną) orientację
 previous_orientation=0
 
-"""
-    center of mass of a loaded molecule
-"""
-molecule_com=[0,0,0]    
 mapping=[]
 regions={}
 
 currentWindow=0
 phantomIp=0
 
-# input data files (target,template,mapping):
+# Zmienne przechowujące dane wejściowe
 targetStructureFile=0
 templateStructureFile=0
 structureMappingFile=0
 
-# zmienne do wyswietlania danych w UI
+# Zmienne pomocnicze do UI
 regionId=regionX=regionY=regionZ=regionTemplateDistance=rmsdEntry=0
 
+# Prosta funkcja obliczająca środek masy (COM) zadanych punktów w przestrzeni
 def simple_com(region_coordinates):
     # pobiera jako parametr liste z krotkami ze wspolrzednymi i zwraca srodek masy
     x, y, z = 0,0,0
@@ -79,6 +76,7 @@ def simple_com(region_coordinates):
         
     return (x/size, y/size, z/size)
 
+# Handler obsługujący zdarzenia dot. trackera (rotacje, translacje)
 def tracker_handler(u, tracker):
     global trackerX, trackerY, trackerZ
     trackerX = tracker[1]
@@ -116,7 +114,7 @@ def tracker_handler(u, tracker):
     cmd.rotate(axis=[rotation_axis[0],rotation_axis[1],rotation_axis[2]], 
             angle=(rotation_angle*180/math.pi), origin=[templateCOM[0],templateCOM[1],templateCOM[2]], object="template", camera=1)
 
-
+# Handler obsługujący zdarzenia dot. przycisków
 def button_handler(u, button):
     # button[0] - numer przycisku (0-gorny,1-dolny)
     # button[1] - status przycisku (0-puszczony,1-wcisniety)
@@ -138,11 +136,12 @@ def button_handler(u, button):
         cmd.translate(object="template", vector=[reg_com[0]-temp_com[0],
             reg_com[1]-temp_com[1],reg_com[2]-temp_com[2]], camera=0)
         
-        
+# Handler obsługujący zdarzenia związane ze sprzężeniem zwrotnym 
+# (brak implementacji, patrz: pętla główna programu)
 def force_handler(u, force):
-#    print "force",force
-    abc='test'
+    return None
     
+# Funkcja rysujca osie układu współrzędnych
 def draw_xyz_axes(x0, y0, z0):
     w = 0.5 # cylinder width
     l = 10 # cylinder length
@@ -158,7 +157,8 @@ def draw_xyz_axes(x0, y0, z0):
         CONE, 0.0, 0.0, l, 0.0, 0.0, (h+l), d, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0]
 
     cmd.load_cgo(axes, "axes")
-    
+
+# Funkcja rysuje strukturę wzorcową (template)
 def draw_template_structure(template_pdb_file):
     cmd.load(template_pdb_file,"template")
     cmd.hide("lines","template")
@@ -168,7 +168,8 @@ def draw_template_structure(template_pdb_file):
     template_com=cmd.centerofmass("template")
     # centruje wskaxnik (przenosze go do zera)
     cmd.translate(vector=[-template_com[0], -template_com[1], -template_com[2]], object="template", camera=0)
-    
+
+# Funkcja rysuje strukturę celu (target)
 def draw_target_structure(target_pdb_file):
     # laduje czasteczke
     cmd.load(target_pdb_file,"target")
@@ -186,7 +187,7 @@ def draw_target_structure(target_pdb_file):
     stored.pos = []                                                                                                                
     cmd.iterate_state(1, "target", "stored.pos.append((x,y,z,elem,chain,resi))")
     
-
+# Funkcja obsługująca ładowanie pliku mapujacego
 def load_mapping_file(mapping_file):
     file=open(mapping_file,"r")
     
@@ -208,6 +209,7 @@ def load_mapping_file(mapping_file):
         
     print "SKONCZYLEM LADOWANIE MAPOWANIA"
     
+# Obliczam środek ciężkości wszystkich wykrytych regionów
 def calculate_regions_com():
     # zliczam ilosc nukleotydow w helisie wzorcowej
     # UWAGA: tutaj zakladam, ze wzorcowa helisa (czy struktura) sklada sie z dwoch lancuchow o 
@@ -237,6 +239,7 @@ def calculate_regions_com():
             
 #    print regions
 
+# Obliczam środek ciężkości wszystkich wykrytych regionów (po nowemu)
 def new_calculate_regions_com():    
     unique_nucl=set()
     cmd.iterate_state(1,"template","unique_nucl.add((chain,resi))",space={'unique_nucl':unique_nucl})
@@ -258,8 +261,8 @@ def new_calculate_regions_com():
                 # dodaje znaleziony region do tablicy regions
                 regions[region]=simple_com(region_coords)
             
-#    print regions
 
+# Funkcja znajdująca najbliższy atom do zadanej pozycji
 def find_closest_atom(x0,y0,z0):
     if(len(stored.pos)==0):
         return [0,0,0]
@@ -284,7 +287,7 @@ def find_closest_atom(x0,y0,z0):
     
     return (closestAtomX/scale, closestAtomY/scale, closestAtomZ/scale)
     
-    
+# Funkcja znajduje najbliższy region do zadanej pozycji
 def find_closest_region(x0,y0,z0):
     # jesli nie ma regionow, to zwroc najblizszy atom
     if len(regions)==0:
@@ -321,20 +324,9 @@ def find_closest_region(x0,y0,z0):
         cmd.color("red","target")
         cmd.select("region",selectCommand)
     
-    
-    # robie alter dla funkcji rms_cur
-#    resiList=set()
-#    cmd.iterate("template","resiList.add(resi)",space={'resiList':resiList})
-#    resiList=sorted(resiList)
-#
-#    for i in range(0,len(closestRegionId)):
-#        selection="template and resi "+str(resiList[i])
-#        expression="resi="+str(closestRegionId[i])
-#        cmd.alter(selection,expression)
-##        print "sel= "+ selection + "exp= "+ expression
-    
     return [closestRegionId,(closestX/scale),(closestY/scale),(closestZ/scale),min_distance]
     
+# Główna funkcja wykonawcza programu
 def vrpn_client():
     global structureMappingFile,templateStructureFile,phantomIp
     
@@ -364,6 +356,7 @@ def vrpn_client():
     
     sleep(1)    # czekam az sie wszystko polaczy i narysuje
     
+    # główna pętl programu
     while IS_RUNNING:
         if(not AUTO_ZOOMING):
             cmd.zoom('all')
