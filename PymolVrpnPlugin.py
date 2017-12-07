@@ -13,7 +13,7 @@
 
 import os
 import sys
-sys.path.append("~/workspace/LICENCJAT/python_vrpn")
+sys.path.append("/home/crooveck/workspace/LICENCJAT/python_vrpn")
 sys.path.append(".")
 from transformations import *
 from Tkinter import *
@@ -413,12 +413,14 @@ def vrpn_client():
     cmd.delete("*")
     x=y=z=0
     
+# Zatrzymuję działanie programu i powracam do okna konfiguracji
 def stop():
     global IS_RUNNING
     IS_RUNNING = False
     sleep(1)
     configWindow()
     
+# Zmieniam flagę kolorowania regionu struktury
 def doColorRegion():
     global REGION_COLORING
     
@@ -427,6 +429,7 @@ def doColorRegion():
     else:
         REGION_COLORING=True
     
+# Zmieniam flagę zwrotnej projekcji sił
 def doEnableForces():
     global FORCES_ENABLED
     
@@ -435,6 +438,7 @@ def doEnableForces():
     else:
         FORCES_ENABLED=True
     
+# Wyświetlam okno ze statystykami
 def statsWindow():    
     global currentWindow,IS_RUNNING
     IS_RUNNING = True
@@ -445,7 +449,7 @@ def statsWindow():
     w=640
     h=400
     currentWindow=Tk()
-    currentWindow.title("Interactive local structure alignment explorer")
+    currentWindow.title("Interaktywna eksploracja oraz lokalne dopasowania strukturalne")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -498,21 +502,25 @@ def statsWindow():
     
     currentWindow.mainloop()
 
+# Otwiera okno wyboru pliku wzorca (*.pdb)
 def chooseTemplateStructureFile():
     global templateStructureFile
     templateStructureFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
     print templateStructureFile.get()
 
+# Otwiera okno wyboru pliku mapującego (*.map)
 def chooseStructureMappingFile():
     global structureMappingFile
     structureMappingFile.set(askopenfilename( filetypes=(("MAP", "*.map"), ("All files", "*.*")) ))
     print structureMappingFile.get()
     
+# Otwiera okno wyboru pliku struktury
 def chooseTargetStructureFile():
     global targetStructureFile
     targetStructureFile.set(askopenfilename( filetypes=(("PDB", "*.pdb"), ("All files", "*.*")) ))
     print targetStructureFile.get()
     
+# Otwiera okno konfiguracji programu
 def configWindow():
     global currentWindow,templateStructureFile,structureMappingFile,phantomIp,targetStructureFile
 
@@ -521,7 +529,7 @@ def configWindow():
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interactive local structure alignment explorer")
+    currentWindow.title("Interaktywna eksploracja oraz lokalne dopasowania strukturalne")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -567,13 +575,14 @@ def configWindow():
     
     currentWindow.mainloop();
     
+# Otwiera okno powitalne programu
 def helloWindow():
     global currentWindow,templateStructureFile,structureMappingFile,phantomIp,targetStructureFile
     
     w=640
     h=480
     currentWindow=Toplevel()
-    currentWindow.title("Interactive local structure alignment explorer")
+    currentWindow.title("Interaktywna eksploracja oraz lokalne dopasowania strukturalne")
     x=currentWindow.winfo_screenwidth()/2 - w/2
     y=currentWindow.winfo_screenheight()/2 - h/2
     currentWindow.geometry("%dx%d+%d+%d" % (w,h,x,y))
@@ -581,13 +590,13 @@ def helloWindow():
     currentWindow.resizable(False, False)
     
     helloMsg="\
-Dear user.\
-\nThis application allows you to interactively explore \
-\nprotein and nucleic acids structures. \
-\nYou can use this application with Sensable Phantom Omni \
-\ndevice and VRPN library.\
-\nApplication performs local structure alignment with force \
-\nfeedback indicating quality of alignment.\
+Użytkowniku \
+\nTa aplikacja umożliwia interaktywne przeglądanie struktur biopolimerów \
+\n(białek oraz kwasów nukleinowych), a także wykonywanie lokalnych \
+\ndopasowań (uliniowień) pomiędzy załadowanymi strukturami. \
+\nProgram wykorzystuje możliwości udostępnione przez urządzenie \
+\nPhantom Omni, pakiet PyMOL oraz bibliotekę VRPN. \
+\nAutor programu: Paweł Tomaszewski\
 "
     group=LabelFrame(currentWindow,text="Witaj",padx=5,pady=5)
     group.pack(fill=BOTH,padx=5,pady=5,expand=True)
@@ -597,8 +606,8 @@ Dear user.\
     
     group=Frame(currentWindow)
     group.pack(padx=5,pady=5)
-    Button(group,text="Cancel",command=currentWindow.destroy).pack(side=RIGHT)
-    Button(group,text="NEXT",command=configWindow).pack()
+    Button(group,text="Anuluj",command=currentWindow.destroy).pack(side=RIGHT)
+    Button(group,text="Dalej",command=configWindow).pack()
     
 #    inicjalizacja zmiennych globalnych    
     templateStructureFile=StringVar(value=os.getcwd()+"/helix_chain_a.pdb")
@@ -608,9 +617,8 @@ Dear user.\
     
     currentWindow.mainloop();
     
-    
+# Dodaje pozycję w menu PyMOL i uruchamia aplikację
 def __init__(self):
-    print "__init__"
     self.menuBar.addmenuitem('Plugin', 'command', 'VRPN',
-	label = 'Interactive structure explorer', command = lambda s=self: helloWindow())
+	label = 'Interactive structure explorer', command = lambda s=self:helloWindow())
                              

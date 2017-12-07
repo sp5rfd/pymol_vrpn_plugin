@@ -89,18 +89,40 @@
 % Tu jest dobre miejsce na Twoje własne makra i~środowiska:
 \newtheorem{defi}{Definicja}[section]
 
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage{pythonhighlight}
+%\usepackage{pythonhighlight}
 \usepackage[export]{adjustbox}
 \usepackage{float}
 \usepackage{amsmath}
+\usepackage{ucs}
+\usepackage{listingsutf8}
 
-\usepackage{listings}
 \lstset{
+%	inputencoding=utf8x,
+%    extendedchars=\true,
 	language=python,
-	literate={ą}{{\k{a}}}1 {ć}{{\'{c}}}1 {ę}{{\k{e}}}1
-			 {ł}{{\l{}}}1 {ń}{{\'{n}}}1 {ó}{{\'{o}}}1
-			 {ś}{{\'{s}}}1 {ź}{{\'{z}}}1 {ż}{{\.{z}}}1
+	numbers=left,
+	frame=none
+    literate={ą}{{\k{a}}}1
+             {Ą}{{\k{A}}}1
+             {ę}{{\k{e}}}1
+             {Ę}{{\k{E}}}1
+             {ó}{{\'o}}1
+             {Ó}{{\'O}}1
+             {ś}{{\'s}}1
+             {Ś}{{\'S}}1
+             {ł}{{\l{}}}1
+             {Ł}{{\L{}}}1
+             {ż}{{\.z}}1
+             {Ż}{{\.Z}}1
+             {ź}{{\'z}}1
+             {Ź}{{\'Z}}1
+             {ć}{{\'c}}1
+             {Ć}{{\'C}}1
+             {ń}{{\'n}}1
+             {Ń}{{\'N}}1
 }
 
 \DeclareMathOperator{\rmsd}{RMSD}
@@ -109,7 +131,7 @@
 
 
 
-%\usepackage{polski}
+
 % koniec definicji
 
 
@@ -894,7 +916,7 @@ Po zestawieniu i skonfigurowaniu stanowiska laboratoryjnego zgodnie z wcześniej
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.7,center]{vrpn_start}
+\includegraphics[scale=0.8,center]{vrpn_start}
 \caption{Poprawne uruchomienie procesu \texttt{vrpn\_server}}
 \end{figure}
 
@@ -904,7 +926,7 @@ Na komputerze z oprogramowaniem PyMOL należy uruchomić zainstalowaną wtyczkę
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.4,center]{explorer_run}
+\includegraphics[scale=0.5,center]{explorer_run}
 \caption{Uruchamianie oprogramowania}
 \end{figure}
 
@@ -912,7 +934,7 @@ W kolejnym kroku pojawi się ekran powitalny z krótkim opisem możliwości ofer
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.4,center]{explorer_hello_en}
+\includegraphics[scale=0.55,center]{explorer_hello_pl}
 \caption{Ekran powitalny}
 \end{figure}
 
@@ -932,7 +954,7 @@ Na ekranie widać wzorcową strukturę poruszającą się zgodnie z ruchami urz�
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.7,center]{explorer_stats}
+\includegraphics[scale=0.7,center]{explorer_stats_pl}
 \caption{Ekran główny 1}
 \end{figure}
 
@@ -1055,11 +1077,15 @@ Transformations (T,R,S) Used in Computer Graphics?}, Introduction to computer gr
 
 \end{thebibliography}
 
-\iffalse
+%\ifftrue
 	\chapter*{Kod źródłowy}
 	\addcontentsline{toc}{chapter}{Kod źródłowy}
-	\inputpython{../PymolVrpnPlugin.py}{0}{1000}
-\fi
+%	\inputpython{../PymolVrpnPlugin.py}{0}{1000}
+	\begin{lstlisting}
+	 ala ma kota
+	 ą
+	\end{lstlisting}
+%\fi
 
 \end{document}
 \end
