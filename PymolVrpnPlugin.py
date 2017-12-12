@@ -13,7 +13,8 @@
 
 import os
 import sys
-sys.path.append("/home/crooveck/workspace/LICENCJAT/python_vrpn")
+# scieżka do katalogu z biblioteką VRPN
+sys.path.append("~/workspace/LICENCJAT/python_vrpn") 
 sys.path.append(".")
 from transformations import *
 from Tkinter import *
